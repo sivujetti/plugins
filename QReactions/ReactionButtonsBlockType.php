@@ -5,6 +5,7 @@ namespace SitePlugins\QReactions;
 use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
 
 final class ReactionButtonsBlockType implements BlockTypeInterface {
+    public const NAME = "QReactionsReactionButtons";
     /**
      * @inheritdoc
      */
