@@ -46,12 +46,14 @@ class QReactions {
      */
     handleReactionButtonClicked(buttonIndex, wrapper) {
         const button = wrapper.buttons[buttonIndex];
-        if (button.userHasAlreadyClicked || this.doesUserHaveReactionsFor(wrapper))
+        if (button.userHasAlreadyClicked || button.isCurrentlySyncingClick ||
+            this.doesUserHaveReactionsFor(wrapper))
             return;
         const newReaction = {
             reactionType: button.reactionType,
             linkedTo: wrapper.linkedTo,
         };
+        button.isCurrentlySyncingClick = true;
         button.el.setAttribute('disabled', true);
         http.post('/plugins/q-reactions/reactions', newReaction)
             .then(resp => {
@@ -64,6 +66,7 @@ class QReactions {
                 showError(wrapper, wrapper.el.getAttribute('data-error-message'));
             })
             .finally(() => {
+                button.isCurrentlySyncingClick = false;
                 button.el.removeAttribute('disabled');
             });
     }
@@ -113,8 +116,10 @@ function extractValidReactionWrappers(candidateEls) {
         out.push({
             buttons,
             linkedTo: {
-                entityType: el.getAttribute('data-linked-to-entity-type'), // todo validate
-                entityId: el.getAttribute('data-linked-to-entity-id'), // todo validate
+                entityType: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-type'),
+                                                     'Entity type'),
+                entityId: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-id'),
+                                                   'Entity id'),
             },
             el,
             errorEl: null,
@@ -131,8 +136,10 @@ function extractValidReactionButtons(buttonElements) {
     for (let i = 0; i < buttonElements.length; ++i) {
         const el = buttonElements[i];
         out.push({
-            reactionType: el.getAttribute('data-button-type'), // todo validate
+            reactionType: getValidAttrValueOrThrow(el.getAttribute('data-button-type'),
+                                                   'Button type'),
             userHasAlreadyClicked: false,
+            isCurrentlySyncingClick: false,
             el,
         });
     }
@@ -163,6 +170,18 @@ function showError(wrapper, message) {
 }
 
 /**
+ * @param {String} candidate
+ * @param {String} explain = ''
+ * @returns {String}
+ * @throws {Error} If candidate contains forbidden characters
+ */
+function getValidAttrValueOrThrow(candidate, explain = '') {
+    if (!/^[\w-]+$/.test(candidate))
+        throw new Error(`${explain} (${candidate}) contains forbidden characters.`);
+    return candidate;
+}
+
+/**
  * @typedef ReactionWrapperElement
  * @prop {Array<ReactionButton>} buttons
  * @prop {ReactionLinkedTo} linkedTo
@@ -172,6 +191,7 @@ function showError(wrapper, message) {
  * @typedef ReactionButton
  * @prop {String} reactionType
  * @prop {Boolean} userHasAlreadyClicked
+ * @prop {Boolean} isCurrentlySyncingClick
  * @prop {HTMLButtonElement} el
  *
  * @typedef ReactionLinkedTo
