@@ -16,16 +16,29 @@ class ContactFormEditForm extends preact.Component {
 
 const initialData = {
     fields: JSON.stringify([
-        {name: "name", label : __('Name'), type: "text", isRequired: true},
-        {name: "email", label : __('Email'), type: "email", isRequired: true},
-        {name: "message", label : __('Message'), type: "textarea", isRequired: false},
+        {name: 'name', label: __('Name'), type: 'text', isRequired: true},
+        {name: 'email', label: __('Email'), type: 'email', isRequired: true},
+        {name: 'message', label: __('Message'), type: 'textarea', isRequired: false},
     ]),
     behaviours: JSON.stringify([
         {name: 'SendMail', data: {
             subjectTemplate: __('Uusi yhteydenotto sivustolta [siteName]'),
             toAddress: 'sivuston-omistaja@mail.com',
             fromAddress: 'no-reply@sivuston-nimi.com',
-            bodyTemplate: `${__('Uusi yhteydenotto sivustolta')} [siteName].\n\n${__('Lähettäjä')}:\n[name]\n${__('Email')}:\n[email]\n${__('Viesti')}:\n[message]\n\n------------\n${__('(Tämä viesti lähetettiin JetForms-lisäosalla)')}\n`
+            bodyTemplate: [
+                `${__('Uusi yhteydenotto sivustolta')} [siteName].`,
+                ``,
+                `${__('Lähettäjä')}:`,
+                `[name]`,
+                `${__('Email')}:`,
+                `[email]`,
+                `${__('Viesti')}:`,
+                `[message]`,
+                ``,
+                `------------`,
+                `${__('(Tämä viesti lähetettiin JetForms-lisäosalla)')}`,
+                ``,
+            ].join('\n')
         }}
     ])
 };

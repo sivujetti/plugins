@@ -13,7 +13,7 @@ final class JetForms implements UserPluginInterface {
      */
     public function __construct(UserPluginAPI $api) {
         $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
-        $api->registerBlockRenderer("sivujetti:jet-forms-block-contact-form");
+        $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
         $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         $api->on("sivujetti:onPageBeforeRender", function ($page) use ($api) {
             if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))

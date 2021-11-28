@@ -5,6 +5,7 @@
     data-form-id="<?= $props->id ?>"
     novalidate>
     <?php $i = 0; foreach (json_decode($props->fields, flags: JSON_THROW_ON_ERROR) as $f):
+        // Note: No need to escape $f->* since they're pre-validated
         echo "<div class=\"form-group\">",
             "<label class=\"form-label\" for=\"{$f->name}\">{$f->label}</label>",
             match ($f->type) {
