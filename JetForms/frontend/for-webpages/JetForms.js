@@ -43,7 +43,8 @@ class JetForms {
             //
             const formId = formEl.getAttribute('data-form-id');
             if (formId && formId === sentFormBlockId) {
-                showFormdSentMessage(formEl);
+                showFormSentMessage(formEl);
+                history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
             }
         });
     }
@@ -52,12 +53,11 @@ class JetForms {
 /**
  * @param {HTMLFormElement} formEl
  */
-function showFormdSentMessage(formEl) {
+function showFormSentMessage(formEl) {
     const messageEl = document.createElement('div');
     messageEl.textContent = formEl.getAttribute('data-form-sent-message');
     formEl.parentElement.insertBefore(messageEl, formEl); // or formEl.replaceWith(messageEl)
     formEl.scrollIntoView(true);
-    history.replaceState(null, null, location.href.replace('#contact-form-sent', ''));
 }
 
 export default JetForms;

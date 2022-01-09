@@ -1,4 +1,5 @@
-import {http, __} from '@sivujetti-commons';
+import {http} from '@sivujetti-commons';
+import {__} from '../../../../../frontend/edit-app/src/commons/main.js';
 
 class ContactFormEditForm extends preact.Component {
     /**
@@ -8,18 +9,12 @@ class ContactFormEditForm extends preact.Component {
     render({block}) {
         return <div>
             <p>todo</p>
-            <p>Fields: { JSON.parse(block.fields).map(({label}) => label).join(', ') }</p>
             <p>Behaviours: { JSON.parse(block.behaviours).map(({name}) => name).join(', ') }</p>
         </div>;
     }
 }
 
-const initialData = {
-    fields: JSON.stringify([
-        {name: 'name', label: __('Name'), type: 'text', isRequired: true},
-        {name: 'email', label: __('Email'), type: 'email', isRequired: true},
-        {name: 'message', label: __('Message'), type: 'textarea', isRequired: false},
-    ]),
+const initialData = {blockType: 'JetFormsContactForm', data: {
     behaviours: JSON.stringify([
         {name: 'SendMail', data: {
             subjectTemplate: __('Uusi yhteydenotto sivustolta [siteName]'),
@@ -41,16 +36,23 @@ const initialData = {
             ].join('\n')
         }}
     ])
-};
+}, children: [
+    {blockType: 'JetFormsTextInput', data: {name: 'name', isRequired: 1, label: '', placeholder: __('Name')}, children: []},
+    {blockType: 'JetFormsEmailInput', data: {name: 'email', isRequired: 1, label: '', placeholder: __('Email')}, children: []},
+    {blockType: 'JetFormsTextareaInput', data: {name: 'message', isRequired: 0, label: '', placeholder: __('Message')}, children: []},
+]};
 
 export default {
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form',
-    ownPropNames: Object.keys(initialData),
+    ownPropNames: Object.keys(initialData.data),
     initialData,
     defaultRenderer: 'sivujetti:jet-forms-block-contact-form',
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },
+    createSnapshot: from => ({
+        behaviours: from.behaviours,
+    }),
     editForm: ContactFormEditForm,
 };

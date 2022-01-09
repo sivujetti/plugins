@@ -12,7 +12,6 @@ final class ContactFormBlockType implements BlockTypeInterface {
      */
     public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
         return $builder
-            ->newProperty("fields", $builder::DATA_TYPE_TEXT)
             ->newProperty("behaviours", $builder::DATA_TYPE_TEXT)
             ->getResult();
     }

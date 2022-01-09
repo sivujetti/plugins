@@ -10,12 +10,18 @@ Temporary manual steps.
 
 Copy `plugins/JetForms/frontend/pristine/pristine.min.js` to `public/sivujetti/vendor/pristine.min.js`.
 
-## Create pass-through file
+## Create pass-through files
 
-`SIVUJETTI_BACKEND_PATH . "assets/jet-forms-block-contact-form.tmpl.php"`:
+Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-contact-form.tmpl.php"` with following contents:
 
 ```php
 <?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-contact-form.tmpl.php" ?>
+```
+
+Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-input-auto.tmpl.php"` with following contents:
+
+```php
+<?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-input-auto.tmpl.php" ?>
 ```
 
 ## Bundle frontend
