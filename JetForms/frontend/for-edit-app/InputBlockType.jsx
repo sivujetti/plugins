@@ -1,5 +1,4 @@
-import {__, env} from '../../../../../frontend/edit-app/src/commons/main.js';
-import hookForm, {unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '../../../../../frontend/edit-app/src/commons/Form3.jsx';
+import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '@sivujetti-commons-for-edit-app';
 import {formValidation} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 
@@ -90,7 +89,7 @@ class InputBlockEditForm extends preact.Component {
 }
 
 const initialData = {
-    name: __('Input name'),
+    name: __('inputName'),
     isRequired: 1,
     label: '',
     placeholder: '',

@@ -20,6 +20,7 @@ final class JetForms implements UserPluginInterface {
         $api->registerBlockRenderer(TextareaInputBlockType::DEFAULT_RENDERER);
         $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
         $api->registerBlockRenderer(TextInputBlockType::DEFAULT_RENDERER);
+        $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
         $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         $api->on("sivujetti:onPageBeforeRender", function ($page) use ($api) {
             if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))

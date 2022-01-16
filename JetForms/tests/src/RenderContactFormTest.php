@@ -53,20 +53,17 @@ class RenderContactFormTest extends PluginTestCase {
         "    method=\"post\"\r\n" .
         "    class=\"jet-form\"    data-form-sent-message=\"Thank you for your message!\"\r\n" .
         "    data-form-id=\"-bbbbbbbbbbbbbbbbbbb\"\r\n" .
-        "    novalidate>\r\n    " .
+        "    novalidate>\r\n" .
         BlockTestUtils::decorateWithRef($testEmailInputBlock,
             "<input name=\"email\" id=\"email\" type=\"email\" class=\"form-input\" placeholder=\"Email\" data-pristine-required>"
-        ) .
-        BlockTestUtils::decorateWithRef($testTextInputBlock,
+        ) . BlockTestUtils::decorateWithRef($testTextInputBlock,
             "<div class=\"form-group\">" .
                 "<label class=\"form-label\" for=\"name\">Test escape&lt;</label>" .
                 "<input name=\"name\" id=\"name\" type=\"text\" class=\"form-input\" data-pristine-required>" .
             "</div>"
-        ) .
-        BlockTestUtils::decorateWithRef($testTextareaInputBlock,
+        ) . BlockTestUtils::decorateWithRef($testTextareaInputBlock,
             "<textarea name=\"message\" id=\"message\" type=\"textarea\" class=\"form-input\" placeholder=\"Message\"></textarea>"
-        ) .
-         BlockTestUtils::decorateWithRef($testButtonBlock,
+        ) . BlockTestUtils::decorateWithRef($testButtonBlock,
             $this->blockTestUtils->getExpectedButtonBlockOutput($testButtonBlock)
         ) .
         "    <input type=\"hidden\" name=\"_returnTo\" value=\"/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb\">\r\n" .

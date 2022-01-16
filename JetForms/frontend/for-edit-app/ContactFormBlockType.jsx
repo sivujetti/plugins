@@ -1,5 +1,4 @@
-import {http} from '@sivujetti-commons';
-import {__} from '../../../../../frontend/edit-app/src/commons/main.js';
+import {http, __} from '@sivujetti-commons-for-edit-app';
 
 class ContactFormEditForm extends preact.Component {
     /**
@@ -17,29 +16,34 @@ class ContactFormEditForm extends preact.Component {
 const initialData = {blockType: 'JetFormsContactForm', data: {
     behaviours: JSON.stringify([
         {name: 'SendMail', data: {
-            subjectTemplate: __('Uusi yhteydenotto sivustolta [siteName]'),
+            subjectTemplate: __('New contact form entry on [siteName]'),
             toAddress: 'sivuston-omistaja@mail.com',
             fromAddress: 'no-reply@sivuston-nimi.com',
             bodyTemplate: [
-                `${__('Uusi yhteydenotto sivustolta')} [siteName].`,
+                `${__('New contact form entry on [siteName]')}.`,
                 ``,
-                `${__('Lähettäjä')}:`,
+                `${__('Sender')}:`,
                 `[name]`,
                 `${__('Email')}:`,
                 `[email]`,
-                `${__('Viesti')}:`,
+                `${__('Message')}:`,
                 `[message]`,
                 ``,
                 `------------`,
-                `${__('(Tämä viesti lähetettiin JetForms-lisäosalla)')}`,
+                `(${__('(Sent by JetForms)')})`,
                 ``,
             ].join('\n')
         }}
     ])
 }, children: [
-    {blockType: 'JetFormsTextInput', data: {name: 'name', isRequired: 1, label: '', placeholder: __('Name')}, children: []},
-    {blockType: 'JetFormsEmailInput', data: {name: 'email', isRequired: 1, label: '', placeholder: __('Email')}, children: []},
-    {blockType: 'JetFormsTextareaInput', data: {name: 'message', isRequired: 0, label: '', placeholder: __('Message')}, children: []},
+    {blockType: 'JetFormsTextInput', data: {name: 'name', isRequired: 1, label: '',
+        placeholder: __('Name')}, children: []},
+    {blockType: 'JetFormsEmailInput', data: {name: 'email', isRequired: 1, label: '',
+        placeholder: __('Email')}, children: []},
+    {blockType: 'JetFormsTextareaInput', data: {name: 'message', isRequired: 0, label: '',
+        placeholder: __('Message')}, children: []},
+    {blockType: 'Button', data: {text: __('Send'), tagType: 'button', url: '',
+        cssClass: ''}, children: []},
 ]};
 
 export default {
