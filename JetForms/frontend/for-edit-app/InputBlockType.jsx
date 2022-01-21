@@ -1,5 +1,5 @@
 import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '@sivujetti-commons-for-edit-app';
-import {formValidation} from '../../../../../frontend/edit-app/src/constants.js';
+import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 
 class InputBlockEditForm extends preact.Component {
@@ -21,11 +21,11 @@ class InputBlockEditForm extends preact.Component {
         const {block, onValueChanged} = this.props;
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: block.name, validations: [['identifier'], ['maxLength', formValidation.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+            {name: 'name', value: block.name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'label', value: block.label, validations: [['maxLength', formValidation.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
+            {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'placeholder', value: block.placeholder, validations: [['maxLength', formValidation.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
+            {name: 'placeholder', value: block.placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
         ]), {
             isRequired: block.isRequired,

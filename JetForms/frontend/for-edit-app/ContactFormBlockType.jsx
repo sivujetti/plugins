@@ -1,15 +1,35 @@
-import {http, __} from '@sivujetti-commons-for-edit-app';
+import {http, __, env} from '@sivujetti-commons-for-edit-app';
+import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 class ContactFormEditForm extends preact.Component {
+    // parsedBehaviours;
+    /**
+     * @param {RawBlockData} snapshot
+     * @access public
+     */
+    overrideValues(snapshot) {
+        this.parsedBehaviours = JSON.parse(snapshot.behaviours);
+        this.setState({sendFormBehaviour: this.parsedBehaviours[0]});
+    }
+    /**
+     * @access protected
+     */
+    componentWillMount() {
+        this.overrideValues(this.props.snapshot);
+    }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({block}) {
-        return <div>
-            <p>todo</p>
-            <p>Behaviours: { JSON.parse(block.behaviours).map(({name}) => name).join(', ') }</p>
-        </div>;
+    render({onValueChanged}, {sendFormBehaviour}) {
+        return <SendFormBehaviourConfigurer
+            behaviour={ sendFormBehaviour }
+            onConfigurationChanged={ vals => {
+                // Mutates this.state.sendFormBehaviour and this.parsedBehaviours. Also: does not setState
+                this.parsedBehaviours[0].data = Object.assign(this.state.sendFormBehaviour.data, vals);
+                const jsonified = JSON.stringify(this.parsedBehaviours);
+                onValueChanged(jsonified, 'behaviours', false, env.normalTypingDebounceMillis);
+            } }/>;
     }
 }
 
@@ -30,7 +50,7 @@ const initialData = {blockType: 'JetFormsContactForm', data: {
                 `[message]`,
                 ``,
                 `------------`,
-                `(${__('(Sent by JetForms)')})`,
+                `(${__('Sent by JetForms')})`,
                 ``,
             ].join('\n')
         }}
@@ -42,7 +62,7 @@ const initialData = {blockType: 'JetFormsContactForm', data: {
         placeholder: __('Email')}, children: []},
     {blockType: 'JetFormsTextareaInput', data: {name: 'message', isRequired: 0, label: '',
         placeholder: __('Message')}, children: []},
-    {blockType: 'Button', data: {text: __('Send'), tagType: 'button', url: '',
+    {blockType: 'Button', data: {html: __('Send'), tagType: 'submit', url: '',
         cssClass: ''}, children: []},
 ]};
 

@@ -36,7 +36,7 @@ class RenderContactFormTest extends PluginTestCase {
                             propsData: self::createDataForTestInputBlock("message"),
                         ),
                         $this->blockTestUtils->makeBlockData(Block::TYPE_BUTTON,
-                            propsData: (object) ["html" => "Send", "linkTo" => "", "cssClass" => ""],
+                            propsData: (object) ["html" => "Send", "linkTo" => "", "tagType" => "submit", "cssClass" => ""],
                         )
                     ]
                 );

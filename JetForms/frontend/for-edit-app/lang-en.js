@@ -9,4 +9,9 @@ window.sivujetti.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Required',
     'inputName': 'inputName',
+    // SendFormBehaviourConfigurer.jsx
+    'Subject': 'Subject',
+    'To': 'To',
+    'From': 'From',
+    'Body': 'Body',
 });

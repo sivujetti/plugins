@@ -36,12 +36,8 @@ final class SendMailBehaviour {
      */
     public function run(object $behaviour, object $reqBody): void {
         $errors = [];
-        if (($errors = self::validateBehaviour($behaviour)))
+        if (($errors = self::validateReqBodyForTemplate($reqBody)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
-        //
-        $errors2 = [];
-        if (($errors2 = self::validateReqBodyForTemplate($reqBody)))
-            throw new PikeException(implode("\n", $errors2), PikeException::BAD_INPUT);
         //
         $vars = $this->makeTemplateVars($reqBody);
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
@@ -100,20 +96,5 @@ final class SendMailBehaviour {
         foreach ($vars as $key => $val)
             $tmpl = str_replace("[{$key}]", htmlentities($val), $tmpl);
         return $tmpl;
-    }
-    /**
-     * @param object $behaviourFromDb
-     * @return string[] A list of error messages or []
-     */
-    private static function validateBehaviour(object $behaviourFromDb): array {
-        return Validation::makeObjectValidator()
-            ->rule("subjectTemplate", "type", "string")
-            ->rule("subjectTemplate", "maxLength", 128)
-            ->rule("bodyTemplate", "type", "string")
-            ->rule("fromAddress", "type", "string")
-            ->rule("fromName?", "type", "string")
-            ->rule("toAddress", "type", "string")
-            ->rule("toName?", "type", "string")
-            ->validate($behaviourFromDb);
     }
 }

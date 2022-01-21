@@ -9,4 +9,9 @@ window.sivujetti.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Vaaditaan',
     'inputName': 'syotteenNimi',
+    // SendFormBehaviourConfigurer.jsx
+    'Subject': 'Aihe',
+    'To': 'Vastaanottaja',
+    'From': 'Lähettäjä',
+    'Body': 'Sisältötemplaatti',
 });
