@@ -1,6 +1,6 @@
 # Q reactions
 
-Allow your site visitors to react (like, clap, kudos) to articles or pages.
+Allows your site visitors to react (like, clap, kudos) to articles or pages.
 
 # Installation
 
@@ -42,7 +42,7 @@ CREATE TABLE QReactionsReactions (
 `SIVUJETTI_BACKEND_PATH . "assets/q-reactions-block-reaction-buttons.tmpl.php"`:
 
 ```php
-<?php require SIVUJETTI_BACKEND_PATH . "plugins/QReactions/templates/block-reaction-buttons.tmpl.php" ?>
+<?php require SIVUJETTI_PLUGINS_PATH . "QReactions/templates/block-reaction-buttons.tmpl.php" ?>
 ```
 
 ## Bundling frontend

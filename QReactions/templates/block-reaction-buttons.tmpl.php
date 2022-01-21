@@ -1,6 +1,6 @@
 <div class="q-reactions"
-    data-linked-to-entity-id="<?= $this->e($page->id) ?>"
-    data-linked-to-entity-type="<?= $this->e($page->type) ?>"
+    data-linked-to-entity-id="<?= $this->e($currentPage->id) ?>"
+    data-linked-to-entity-type="<?= $this->e($currentPage->type) ?>"
     data-error-message="<?= $this->__("Something went wrong") ?>">
     <div class="q-reaction-buttons">
     <?php foreach (json_decode($props->buttons) as $button): ?>

@@ -1,4 +1,4 @@
-import {http} from '@sivujetti-commons';
+import {http} from '@sivujetti-commons-for-edit-app';
 
 class ReactionsButtonsEditForm extends preact.Component {
     /**
@@ -30,5 +30,9 @@ export default {
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },
+    createSnapshot: from => ({
+        showReactionCount: from.showReactionCount,
+        buttons: from.buttons,
+    }),
     editForm: ReactionsButtonsEditForm,
 };

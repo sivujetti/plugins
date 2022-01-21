@@ -53,9 +53,9 @@ final class ReactionsController {
      * @return array{submissionIdentityType: "userId"|"ipAddr", submissionIdentityValue: string}
      */
     private static function getIdentity(Request $req): array {
-        if (property_exists($req->myData, "user"))
+        if (($id = $req->myData->user?->id ?? null))
             return ["submissionIdentityType" => "userId",
-                    "submissionIdentityValue" => $req->myData->user->id];
+                    "submissionIdentityValue" => $id];
         return ["submissionIdentityType" => "ipAddr",
                 "submissionIdentityValue" => sha1($req->attr("REMOTE_ADDR"))];
     }

@@ -13,8 +13,8 @@ final class QReactions implements UserPluginInterface {
         $api->on("sivujetti:onPageBeforeRender", function ($page) use ($api) {
             if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ReactionButtonsBlockType::NAME))
                 return;
-            if (!$api->isJsFileEnqueued("sivujetti/sivujetti-website-tools.js"))
-                $api->enqueueJsFile("sivujetti/sivujetti-website-tools.js");
+            if (!$api->isJsFileEnqueued("sivujetti/sivujetti-commons-for-web-pages.js"))
+                $api->enqueueJsFile("sivujetti/sivujetti-commons-for-web-pages.js");
             if (!$api->isJsFileEnqueued("plugin-q-reactions-bundle.js"))
                 $api->enqueueJsFile("plugin-q-reactions-bundle.js");
         });

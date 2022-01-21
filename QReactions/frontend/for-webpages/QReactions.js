@@ -1,4 +1,4 @@
-import {http, env} from '@sivujetti-website-tools';
+import {http, env} from '@sivujetti-commons-for-web-pages';
 
 /**
  * Makes .q-reaction elements alive.
