@@ -68,7 +68,7 @@ const initialData = {blockType: 'JetFormsContactForm', data: {
 
 export default {
     name: 'JetFormsContactForm',
-    friendlyName: 'Contact form',
+    friendlyName: 'JetForms: Contact form',
     ownPropNames: Object.keys(initialData.data),
     initialData,
     defaultRenderer: 'sivujetti:jet-forms-block-contact-form',

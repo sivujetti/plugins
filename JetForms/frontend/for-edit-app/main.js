@@ -1,13 +1,12 @@
+import {api} from '@sivujetti-commons-for-edit-app';
 import ContactFormBlockType from './ContactFormBlockType.jsx';
 import EmailInputBlockType from './EmailInputBlockType.jsx';
 import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
+import SubscriptionFormBlockType from './SubscriptionFormBlockType.jsx';
 
-window.sivujetti.blockTypes.register(ContactFormBlockType.name,
-                                     ContactFormBlockType);
-window.sivujetti.blockTypes.register(EmailInputBlockType.name,
-                                     EmailInputBlockType);
-window.sivujetti.blockTypes.register(TextareaInputBlockType.name,
-                                     TextareaInputBlockType);
-window.sivujetti.blockTypes.register(TextInputBlockType.name,
-                                     TextInputBlockType);
+api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
+api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
+api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
+api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
+api.blockTypes.register(SubscriptionFormBlockType.name, () => SubscriptionFormBlockType);
