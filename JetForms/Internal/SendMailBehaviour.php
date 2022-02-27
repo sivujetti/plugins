@@ -3,30 +3,30 @@
 namespace SitePlugins\JetForms\Internal;
 
 use Pike\{PhpMailerMailer, PikeException, Validation};
-use SitePlugins\JetForms\JetForms;
+use SitePlugins\JetForms\{BehaviourExecutorInterface, JetForms};
 use Sivujetti\SharedAPIContext;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
 
 /**
  * Validates and runs a {type: "SendMail" ...} behaviour.
  */
-final class SendMailBehaviour {
+final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\PhpMailerMailer */
     private PhpMailerMailer $mailer;
     /** @var \Sivujetti\SharedAPIContext  */
-    private SharedAPIContext $storage;
+    private SharedAPIContext $apiCtx;
     /** @var \Sivujetti\TheWebsite\Entities\TheWebsite */
     private TheWebsite $theWebsite;
     /**
      * @param \Pike\PhpMailerMailer $mailer 
-     * @param \Sivujetti\SharedAPIContext $storage 
+     * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sivujetti\TheWebsite\Entities\TheWebsite $theWebsite
      */
     public function __construct(PhpMailerMailer $mailer,
-                                SharedAPIContext $storage,
+                                SharedAPIContext $apiCtx,
                                 TheWebsite $theWebsite) {
         $this->mailer = $mailer;
-        $this->storage = $storage;
+        $this->apiCtx = $apiCtx;
         $this->theWebsite = $theWebsite;
     }
     /**
@@ -50,7 +50,7 @@ final class SendMailBehaviour {
             "body" => self::renderTemplate($behaviour->bodyTemplate, $vars),
             "configureMailer" => function ($mailer) {
                 // Allow each on(JetForms::ON_MAILER_CONFIGURE, fn) subscriber to modify $mailer
-                $this->storage->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer);
+                $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer);
             },
         ]);
     }

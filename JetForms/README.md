@@ -37,19 +37,22 @@ Add to `site/Site.php`:
 
 namespace MySite;
 
-use Pike\PhpMailerMailer;
+use PHPMailer\PHPMailer\PHPMailer;
 use SitePlugins\JetForms\JetForms;
 ...
     public function __construct(UserSiteAPI $api) {
         ...
-        if (class_exists("SitePlugins\JetForms\JetForms", false))
-            $api->on(JetForms::ON_MAILER_CONFIGURE, function (PhpMailerMailer $mailer) {
+        $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
+            if (($jetForms = $api->getPlugin("JetForms")) === null)
+                return;
+            $api->on($jetForms::ON_MAILER_CONFIGURE, function (PHPMailer $mailer) {
                 $mailer->isMail();
                 // or
                 // $mailer->isSMTP();
                 // $mailer->Host = 'smtp.foo.com';
                 // ... etc.
             });
+        });
 ...
 ```
 
