@@ -1,6 +1,6 @@
 import {http} from '@sivujetti-commons-for-edit-app';
 
-class ReactionsButtonsEditForm extends preact.Component {
+class ReactionButtonsEditForm extends preact.Component {
     /**
      * @param {BlockEditFormProps} props
      * @access protected
@@ -23,10 +23,10 @@ const initialData = {
 
 export default {
     name: 'QReactionsReactionButtons',
-    friendlyName: 'Reaction buttons',
+    friendlyName: 'QReactions: Reaction buttons',
     ownPropNames: Object.keys(initialData),
-    defaultRenderer: 'sivujetti:q-reactions-block-reaction-buttons',
     initialData,
+    defaultRenderer: 'sivujetti:q-reactions-block-reaction-buttons',
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },
@@ -34,5 +34,5 @@ export default {
         showReactionCount: from.showReactionCount,
         buttons: from.buttons,
     }),
-    editForm: ReactionsButtonsEditForm,
+    editForm: ReactionButtonsEditForm,
 };

@@ -33,17 +33,28 @@ final class ReactionsController {
         }
         //
         $identity = self::getIdentity($req);
-        if ($reactionsRepo->getSingle($identity,
-                                      $req->body->linkedTo->entityType,
-                                      $req->body->linkedTo->entityId)) {
+        if ($reactionsRepo->select()
+            ->where(
+                "`submissionIdentityType` = ? AND `submissionIdentityValue` = ? AND" .
+                " `linkedToEntityType` = ? AND `linkedToEntityId` = ?",
+                array_merge(array_values($identity), [$req->body->linkedTo->entityType, $req->body->linkedTo->entityId])
+            )
+            ->fetch()) {
             $res->status(200)->json(["ok" => "ok",
                                      "userHadAlreadyReacted" => true]);
             return;
         }
         //
-        $reactionsRepo->insert($req->body->reactionType,
-                               $req->body->linkedTo,
-                               $identity);
+        $reactionsRepo->insert()
+            ->values((object) [
+                "reactionType" => $req->body->reactionType,
+                "submissionIdentityType" => $identity["submissionIdentityType"],
+                "submissionIdentityValue" => $identity["submissionIdentityValue"],
+                "linkedToEntityType" => $req->body->linkedTo->entityType,
+                "linkedToEntityId" => $req->body->linkedTo->entityId,
+                "submittedAt" => time()
+            ])
+            ->execute();
         $res->status(201)->json(["ok" => "ok",
                                  "userHadAlreadyReacted" => false]);
 

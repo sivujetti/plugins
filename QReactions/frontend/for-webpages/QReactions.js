@@ -4,28 +4,29 @@ import {http, env} from '@sivujetti-commons-for-web-pages';
  * Makes .q-reaction elements alive.
  */
 class QReactions {
+    // browserStorage;
+    // reactionButtons;
     /**
      * @param {Storage} browserStorage = env.window.localStorage
      */
     constructor(browserStorage = env.window.localStorage) {
         this.browserStorage = browserStorage;
-        this.reactionsWrappers = [];
+        this.reactionButtons = [];
     }
     /**
      * Adds reaction counts and click handlers to parentElement.
-     * querySelectorAll('.q-reactions > .q-reaction-buttons > button')[*].
+     * querySelectorAll('.q-reaction-buttons > [data-block-root] > button')[*].
      *
      * @param {HTMLElement} parentElement
      * @access public
      */
     interactifyAllElements(parentElement) {
-        this.reactionsWrappers = extractValidReactionWrappers(parentElement.querySelectorAll('.q-reactions'));
-        if (!this.reactionsWrappers.length) return;
+        this.reactionButtons = extractValidReactionButtonWrappers(parentElement.querySelectorAll('.q-reaction-buttons'));
+        if (!this.reactionButtons.length) return;
         //
         const submitted = this.getReactionsFromBrowserStore();
-        this.reactionsWrappers.forEach(wrapper => {
-            for (let i = 0; i < wrapper.buttons.length; ++i) {
-                const button = wrapper.buttons[i];
+        this.reactionButtons.forEach(wrapper => {
+            wrapper.buttons.forEach((button, i) => {
                 if (submitted.some(reaction =>
                     reaction.reactionType === button.reactionType &&
                     reaction.linkedTo.entityType === wrapper.linkedTo.entityType &&
@@ -36,12 +37,12 @@ class QReactions {
                 button.el.addEventListener('click', () =>
                     this.handleReactionButtonClicked(i, wrapper)
                 );
-            }
+            });
         });
     }
     /**
      * @param {Number} buttonIndex
-     * @param {ReactionWrapperElement} wrapper
+     * @param {ReactionButtonsWrapper} wrapper
      * @access private
      */
     handleReactionButtonClicked(buttonIndex, wrapper) {
@@ -90,7 +91,7 @@ class QReactions {
         }));
     }
     /**
-     * @param {ReactionWrapperElement} wrapper
+     * @param {ReactionButtonsWrapper} wrapper
      * @returns {Boolean}
      * @access private
      */
@@ -104,46 +105,39 @@ class QReactions {
 }
 
 /**
- * @param {HTMLCollection} candidateEls
- * @returns {Array<ReactionWrapperElement>}
+ * @param {HTMLCollection} outerEls
+ * @returns {Array<ReactionButtonsWrapper>}
  */
-function extractValidReactionWrappers(candidateEls) {
-    const out = [];
-    for (let i = 0; i < candidateEls.length; ++i) {
-        const el = candidateEls[i];
-        const buttons = extractValidReactionButtons(el.querySelectorAll('.q-reaction-buttons > button'));
-        if (!buttons.length) return;
-        out.push({
-            buttons,
-            linkedTo: {
-                entityType: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-type'),
-                                                     'Entity type'),
-                entityId: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-id'),
-                                                   'Entity id'),
-            },
-            el,
-            errorEl: null,
-        });
-    }
-    return out;
+function extractValidReactionButtonWrappers(outerEls) {
+    return Array.from(outerEls)
+        .map(el => {
+            const buttons = extractValidReactionButtons(el.querySelectorAll('[data-block-root] > button'));
+            return buttons.length ? {
+                buttons,
+                linkedTo: {
+                    entityType: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-type'),
+                                                        'Entity type'),
+                    entityId: getValidAttrValueOrThrow(el.getAttribute('data-linked-to-entity-id'),
+                                                       'Entity id'),
+                },
+                el,
+                errorEl: null,
+            } : null;
+        })
+        .filter(wrapper => wrapper !== null);
 }
 
 /**
  * @param {HTMLCollection} buttonElements
  */
 function extractValidReactionButtons(buttonElements) {
-    const out = [];
-    for (let i = 0; i < buttonElements.length; ++i) {
-        const el = buttonElements[i];
-        out.push({
-            reactionType: getValidAttrValueOrThrow(el.getAttribute('data-button-type'),
-                                                   'Button type'),
-            userHasAlreadyClicked: false,
-            isCurrentlySyncingClick: false,
-            el,
-        });
-    }
-    return out;
+    return Array.from(buttonElements).map(el => ({
+        reactionType: getValidAttrValueOrThrow(el.getAttribute('data-button-type'),
+                                              'Button type'),
+        userHasAlreadyClicked: false,
+        isCurrentlySyncingClick: false,
+        el,
+    }));
 }
 
 /**
@@ -155,7 +149,7 @@ function updateButtonClickStatus(button) {
 }
 
 /**
- * @param {ReactionWrapperElement} wrapper
+ * @param {ReactionButtonsWrapper} wrapper
  * @param {String} message
  */
 function showError(wrapper, message) {
@@ -164,7 +158,7 @@ function showError(wrapper, message) {
         wrapper.errorEl.addEventListener('click', () => {
             wrapper.errorEl.textContent = '';
         });
-        wrapper.el.appendChild(wrapper.errorEl);
+        wrapper.el.querySelector('[data-block-root]').appendChild(wrapper.errorEl);
     }
     wrapper.errorEl.textContent = message;
 }
@@ -182,7 +176,7 @@ function getValidAttrValueOrThrow(candidate, explain = '') {
 }
 
 /**
- * @typedef ReactionWrapperElement
+ * @typedef ReactionButtonsWrapper
  * @prop {Array<ReactionButton>} buttons
  * @prop {ReactionLinkedTo} linkedTo
  * @prop {HTMLElement} el

@@ -1,4 +1,4 @@
+import {api} from '@sivujetti-commons-for-edit-app';
 import ReactionButtonsBlockType from './ReactionButtonsBlockType.jsx';
 
-window.sivujetti.blockTypes.register(ReactionButtonsBlockType.name,
-                                     ReactionButtonsBlockType);
+api.blockTypes.register(ReactionButtonsBlockType.name, () => ReactionButtonsBlockType);

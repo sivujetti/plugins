@@ -6,6 +6,7 @@ use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
 
 final class ReactionButtonsBlockType implements BlockTypeInterface {
     public const NAME = "QReactionsReactionButtons";
+    public const DEFAULT_RENDERER = "sivujetti:q-reactions-block-reaction-buttons";
     /**
      * @inheritdoc
      */

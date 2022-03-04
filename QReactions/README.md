@@ -49,6 +49,13 @@ CREATE TABLE QReactionsReactions (
 
 See `frontend/rollup.config.js`.
 
+# Developing
+
+## Run backend tests
+
+- `cd plugins/QReactions/`
+- `"../../../backend/vendor/bin/phpunit" --bootstrap ./tests/bootstrap.php ./tests`
+
 # License
 
 GPLv3
