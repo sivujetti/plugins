@@ -20,5 +20,5 @@
     $wrapEnd;
 else:
     [$startTag, $endTag] = !(SIVUJETTI_FLAGS & SIVUJETTI_DEVMODE) ? ["<!--", "-->"] : ["<div>", "</div>"];
-    echo "{$startTag} JetForms/templates/block-auto.tmpl.php: Don't know how to render custom block type `{$props->type}` {$endTag}";
+    echo "{$startTag} JetForms/templates/block-input-auto.tmpl.php: Don't know how to render custom block type `{$props->type}` {$endTag}";
 endif; ?>

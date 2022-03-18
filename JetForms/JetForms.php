@@ -4,6 +4,7 @@ namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
 use Sivujetti\Block\BlockTree;
+use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 final class JetForms implements UserPluginInterface {
@@ -18,18 +19,20 @@ final class JetForms implements UserPluginInterface {
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
             $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
-            $api->registerBlockRenderer(EmailInputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
-            $api->registerBlockRenderer(TextareaInputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
-            $api->registerBlockRenderer(TextInputBlockType::DEFAULT_RENDERER);
             $api->registerBlockType(SubscriptionFormBlockType::NAME, new SubscriptionFormBlockType);
             $api->registerBlockRenderer(SubscriptionFormBlockType::DEFAULT_RENDERER);
+            //
+            $api->registerBlockRenderer(InlineInputBlockType::DEFAULT_RENDERER);
+            $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
+            $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
+            $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
+            $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
+            $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
+            //
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         });
-        $api->on($api::ON_PAGE_BEFORE_RENDER, function ($page) use ($api) {
+        $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
             if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME ||
                                                                 $b->type === SubscriptionFormBlockType::NAME))
                 return;

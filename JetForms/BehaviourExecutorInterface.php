@@ -10,6 +10,7 @@ interface BehaviourExecutorInterface {
     /**
      * @param object $behaviourData Valid data from the database (behaviour.data)
      * @param object $reqBody Non-validated data from the form (plugins/JetForms/templates/block-some-form.tmpl.php)
+     * @param array<int, {type: string, name: string, label: string, isRequired: bool}> $inputDetails Details of input form inputs
      */
-    public function run(object $behaviourData, object $reqBody): void;
+    public function run(object $behaviourData, object $reqBody, array $inputDetails): void;
 }

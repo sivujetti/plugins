@@ -24,6 +24,12 @@ Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-input-au
 <?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-input-auto.tmpl.php" ?>
 ```
 
+Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-inline-input-auto.tmpl.php"` with following contents:
+
+```php
+<?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-inline-input-auto.tmpl.php" ?>
+```
+
 ## Bundle frontend
 
 See `frontend/rollup.config.js`.

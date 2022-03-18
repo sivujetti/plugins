@@ -1,6 +1,8 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 
 api.registerTranslationStrings({
+    // CheckboxInputBlockType.jsx
+    'JetForms: Checkbox input': 'JetForms: Checkbox input',
     // ContactFormBlockType.jsx
     'JetForms: Contact form': 'JetForms: Contact form',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',

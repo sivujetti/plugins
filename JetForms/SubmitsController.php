@@ -3,8 +3,9 @@
 namespace SitePlugins\JetForms;
 
 use Envms\FluentPDO\Queries\Select;
-use Pike\{CoolDb, PikeException, Request, Response, Validation};
+use Pike\Db\FluentDb;
 use Pike\Interfaces\RowMapperInterface;
+use Pike\{PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\SendMailBehaviour;
 use Sivujetti\{App, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
@@ -44,12 +45,14 @@ final class SubmitsController {
         if (!($form->behaviours = json_decode($form->behaviours, flags: JSON_THROW_ON_ERROR)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         $clsStrings = self::createValidBehaviourClsStrings($form, $apiCtx->getPlugin("JetForms"));
+        $details = self::createFormInputDetails($form);
         //
         for ($i = 0; $i < count($clsStrings); ++$i)
             // @allow \Pike\PikeException
             $errors = App::$di->execute([$clsStrings[$i], "run"], [
                 $form->behaviours[$i]->data,
                 $req->body,
+                $details,
             ]);
         //
         if ($errors) $errors = array_map("urlencode", $errors);
@@ -57,11 +60,33 @@ final class SubmitsController {
         $res->redirect($req->body->_returnTo . ($asJson ? "&errors={$asJson}" : ""));
     }
     /**
+     * @return array<int, array{type: string, name: string, label: string, isRequired: bool}>
+    */
+    private static function createFormInputDetails(object $form): array {
+        $out = [];
+        $normalInputs = [
+            CheckboxInputBlockType::NAME,
+            EmailInputBlockType::NAME,
+            TextareaInputBlockType::NAME,
+            TextInputBlockType::NAME,
+        ];
+        BlockTree::traverse($form->children, function ($block) use ($normalInputs, &$out) {
+            if (in_array($block->type, $normalInputs, true))
+                $out[] = [
+                    "type" => $block->type,
+                    "name" => $block->name,
+                    "label" => $block->label,
+                    "isRequired" => ($block->isRequired ?? null) === 1,
+                ];
+        });
+        return $out;
+    }
+    /**
      * @param \Sivujetti\Block\Entities\Block $block Form block from db
      * @param \SitePlugins\JetForms\JetForms $plugin
      * @return class-string[]
      * @throws \Pike\PikeException
-    */
+     */
     private static function createValidBehaviourClsStrings(Block $form, JetForms $plugin): array {
         return array_map(function (object $behaviour) use ($plugin) {
             $ClassString = match ($behaviour->name) {
@@ -89,19 +114,18 @@ final class SubmitsController {
 }
 
 final class PagesRepositoryTemp {
-    private CoolDb $coolDb;
-    public function __construct(CoolDb $coolDb) {
-        $this->coolDb = $coolDb;
+    private FluentDb $fluentDb;
+    public function __construct(FluentDb $fluentDb) {
+        $this->fluentDb = $fluentDb;
     }
     public function fetch(): Select {
-        return $this->coolDb->select("\${p}pages", Page::class)
+        return $this->fluentDb->select("\${p}pages", Page::class)
             ->fields(["id","slug","path","level","title","layoutId","blocks AS blocksJson","status"])
             ->mapWith(new class implements RowMapperInterface {
                 public function mapRow(object $page, int $_numRow, array $_rows): object {
                     $page->blocks = array_map(fn($blockRaw) =>
                         Block::fromObject($blockRaw)
                     , json_decode($page->blocksJson, flags: JSON_THROW_ON_ERROR));
-                    unset($page->blocksJson);
                     return $page;
                 }
             });
