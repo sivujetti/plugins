@@ -38,7 +38,9 @@ const initialData = {blockType: 'JetFormsContactForm', data: {
         {name: 'SendMail', data: {
             subjectTemplate: __('New contact form entry on [siteName]'),
             toAddress: 'sivuston-omistaja@mail.com',
+            toName: 'Sivuston Omistaja',
             fromAddress: 'no-reply@sivuston-nimi.com',
+            fromName: 'Sivuston nimi',
             bodyTemplate: [
                 `${__('New contact form entry on [siteName]')}.`,
                 ``,

@@ -18,8 +18,10 @@ api.registerTranslationStrings({
     'inputName': 'inputName',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Subject',
-    'To': 'To',
-    'From': 'From',
+    'To (email)': 'To (email)',
+    'To (name)': 'To (name)',
+    'From (email)': 'From (email)',
+    'From (name)': 'From (name)',
     'Body': 'Body',
     // SubscriptionFormBlockType.jsx
     'JetForms: Subscription form': 'JetForms: Subscription form',

@@ -59,6 +59,7 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("post", $formEl->getAttribute("method"));
         $this->assertEquals("Thank you for your message!", $formEl->getAttribute("data-form-sent-message"));
         $this->assertEquals("-bbbbbbbbbbbbbbbbbbb", $formEl->getAttribute("data-form-id"));
+        $this->assertEquals("contact", $formEl->getAttribute("data-form-type"));
         $all = $formEl->childNodes;
         // "<input name=\"email\" id=\"email\" type=\"email\" class=\"form-input\" placeholder=\"Email\" data-pristine-required>"
         $emailInputEl = $all[2];
@@ -123,7 +124,7 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals("/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb", $returnToInput->getAttribute("value"));
         // <input type=\"hidden\" name=\"_csrf\" value=\"todo\">
-        $returnToInput = $all[19];
+        $returnToInput = $all[18];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
         $this->assertEquals("todo", $returnToInput->getAttribute("value"));

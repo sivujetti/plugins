@@ -4,6 +4,8 @@
     class="jet-form"<?php // see also public/plugin-jet-forms-bundle.js ?>
     data-form-sent-message="<?= $this->__("Thank you for your message!") ?>"
     data-form-id="<?= $props->id ?>"
+    data-block-type="<?= $this->e(\SitePlugins\JetForms\ContactFormBlockType::NAME) ?>"
+    data-block="<?= $this->e($props->id) ?>"
     novalidate>
     <?= $this->renderChildren($props) ?>
     <input type="hidden" name="_returnTo" value="<?= is_string($props->returnTo ?? null)

@@ -18,8 +18,10 @@ api.registerTranslationStrings({
     'inputName': 'syotteenNimi',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Aihe',
-    'To': 'Vastaanottaja',
-    'From': 'Lähettäjä',
+    'To (email)': 'Vastaanottaja (email)',
+    'To (name)': 'Vastaanottaja (nimi)',
+    'From (email)': 'Lähettäjä (email)',
+    'From (name)': 'Lähettäjä (nimi)',
     'Body': 'Sisältötemplaatti',
     // SubscriptionFormBlockType.jsx
     'JetForms: Subscription form': 'JetForms: Tilauslomake',
