@@ -1,6 +1,15 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 
 api.registerTranslationStrings({
+    // MailSendSettings/MailSendSettingsManageDialog.jsx
+    'Host': 'Hosti',
+    'Port': 'Portti',
+    'Username': 'Käyttäjänimi',
+    'Password': 'Salasana',
+    'jetFormsTodo1': 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
+    'Send method': 'Lähetystapa',
+    'Encryption': 'Salaus',
+    'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
     // CheckboxInputBlockType.jsx
     'JetForms: Checkbox input': 'JetForms: Checkbox-kenttä',
     // ContactFormBlockType.jsx
@@ -11,6 +20,8 @@ api.registerTranslationStrings({
     'Message': 'Viesti',
     'Sent by JetForms': 'Lähetetty JetFormsilla',
     'Send': 'Lähetä',
+    // EditAppMainPanelSection.jsx
+    'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx
     'JetForms: Email input': 'JetForms: Sähköpostikenttä',
     // InputBlockType.jsx
