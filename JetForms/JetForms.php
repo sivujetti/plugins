@@ -7,6 +7,9 @@ use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
+/**
+ * @psalm-type JetFormsMailSendSettings = array{sendingMethod: string, SMTP_host: ?string, SMTP_port: ?string, SMTP_username: ?string, SMTP_password: ?string, SMTP_secureProtocol: ?string}
+ */
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
     public const ON_MAILER_CONFIGURE = "plugins:jetFormsMailerOnConfigure";

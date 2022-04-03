@@ -3,12 +3,16 @@
 namespace SitePlugins\JetForms\Internal;
 
 use Pike\{PhpMailerMailer, PikeException, Validation};
-use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms};
+use Pike\Auth\Crypto;
+use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType,
+                          JetForms, SettingsController, SettingsStorage};
 use Sivujetti\SharedAPIContext;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
 
 /**
  * Validates and runs a {type: "SendMail" ...} behaviour.
+ *
+ * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
  */
 final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\PhpMailerMailer */
@@ -17,17 +21,27 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     private SharedAPIContext $apiCtx;
     /** @var \Sivujetti\TheWebsite\Entities\TheWebsite */
     private TheWebsite $theWebsite;
+    /** @var \Pike\Auth\Crypto*/
+    private SettingsStorage $settingsRepo;
+    /** @var \SitePlugins\JetForms\SettingsStorage */
+    private Crypto $crypto;
     /**
      * @param \Pike\PhpMailerMailer $mailer 
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sivujetti\TheWebsite\Entities\TheWebsite $theWebsite
+     * @param \Pike\Auth\Crypto $crypto
+     * @param \SitePlugins\JetForms\SettingsStorage $settingsRepo
      */
     public function __construct(PhpMailerMailer $mailer,
                                 SharedAPIContext $apiCtx,
-                                TheWebsite $theWebsite) {
+                                TheWebsite $theWebsite,
+                                Crypto $crypto,
+                                SettingsStorage $settingsRepository) {
         $this->mailer = $mailer;
         $this->apiCtx = $apiCtx;
         $this->theWebsite = $theWebsite;
+        $this->settingsRepo = $settingsRepository;
+        $this->crypto = $crypto;
     }
     /**
      * @param object $behaviour Data from the database
@@ -41,6 +55,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
         $vars = $this->makeTemplateVars($reqBody, $inputDetails);
+        $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
         $this->mailer->sendMail((object) [
             "fromAddress" => $behaviour->fromAddress,
@@ -49,9 +64,22 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
             "toName" => is_string($behaviour->toName ?? null) ? $behaviour->toName : "",
             "subject" => self::renderTemplate($behaviour->subjectTemplate, $vars),
             "body" => self::renderTemplate($behaviour->bodyTemplate, $vars),
-            "configureMailer" => function ($mailer) {
+            "configureMailer" => function ($mailer) use ($mailSettings) {
+                if ($mailSettings["sendingMethod"] === "mail") {
+                    $mailer->isMail();
+                } elseif ($mailSettings["sendingMethod"] === "smtp") {
+                    $mailer->isSMTP();
+                    $mailer->Host = $mailSettings["SMTP_host"];
+                    $mailer->Port = $mailSettings["SMTP_port"];
+                    $mailer->SMTPSecure = $mailSettings["SMTP_secureProtocol"];
+                    $mailer->SMTPAuth = true;
+                    $mailer->Username = $mailSettings["SMTP_username"];
+                    $mailer->Password = $mailSettings["SMTP_password"];
+                } else {
+                    throw new PikeException("Should not happen", PikeException::BAD_INPUT);
+                }
                 // Allow each on(JetForms::ON_MAILER_CONFIGURE, fn) subscriber to modify $mailer
-                $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer);
+                $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer, $mailSettings);
             },
         ]);
     }
@@ -71,6 +99,15 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                 ;
         }
         return $v->validate($reqBody);
+    }
+    /**
+     * @psalm-return JetFormsMailSendSettings
+     */
+    private function getSendMailSettingsOrThrow(): array {
+        $dataBag = $this->settingsRepo->getDataBag("jetFormsMailSendSettings");
+        if (!$dataBag)
+            throw new PikeException("", PikeException::ERROR_EXCEPTION);
+        return SettingsController::withDecryptedValues($dataBag->data, $this->crypto);
     }
     /**
      * @param object $reqBody Validated form data

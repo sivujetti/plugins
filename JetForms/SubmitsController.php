@@ -2,15 +2,11 @@
 
 namespace SitePlugins\JetForms;
 
-use Envms\FluentPDO\Queries\Select;
-use Pike\Db\FluentDb;
-use Pike\Interfaces\RowMapperInterface;
 use Pike\{PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\SendMailBehaviour;
-use Sivujetti\{App, SharedAPIContext};
+use Sivujetti\{App, PagesRepositoryTemp, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
-use Sivujetti\Page\Entities\Page;
 
 /**
  * Contains handlers for "/plugins/jet-forms/submits/*".
@@ -24,7 +20,7 @@ final class SubmitsController {
      * @param \Pike\Request $req
      * @param \Pike\Response $res
      * @param \Sivujetti\SharedAPIContext $apiCtx
-     * @param \SitePlugins\JetForms\PagesRepositoryTemp $pagesRepo
+     * @param \Sitejetti\PagesRepositoryTemp $pagesRepo
      */
     public function handleSubmit(Request $req,
                                  Response $res,
@@ -49,7 +45,7 @@ final class SubmitsController {
         //
         for ($i = 0; $i < count($clsStrings); ++$i)
             // @allow \Pike\PikeException
-            $errors = App::$di->execute([$clsStrings[$i], "run"], [
+            $errors = App::$adi->execute([$clsStrings[$i], "run"], [
                 $form->behaviours[$i]->data,
                 $req->body,
                 $details,
@@ -110,24 +106,5 @@ final class SubmitsController {
             ->rule("_returnTo", "type", "string")
             ->rule("_returnTo", "maxLength", 512)
             ->validate($input);
-    }
-}
-
-final class PagesRepositoryTemp {
-    private FluentDb $fluentDb;
-    public function __construct(FluentDb $fluentDb) {
-        $this->fluentDb = $fluentDb;
-    }
-    public function fetch(): Select {
-        return $this->fluentDb->select("\${p}pages", Page::class)
-            ->fields(["id","slug","path","level","title","layoutId","blocks AS blocksJson","status"])
-            ->mapWith(new class implements RowMapperInterface {
-                public function mapRow(object $page, int $_numRow, array $_rows): object {
-                    $page->blocks = array_map(fn($blockRaw) =>
-                        Block::fromObject($blockRaw)
-                    , json_decode($page->blocksJson, flags: JSON_THROW_ON_ERROR));
-                    return $page;
-                }
-            });
     }
 }
