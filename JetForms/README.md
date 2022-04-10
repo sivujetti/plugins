@@ -9,21 +9,8 @@ Temporary manual steps.
 ## Setup the database
 
 ```
-if ($sqlite) {
-CREATE TABLE `jetFormsSettings` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `bagName` TEXT NOT NULL,
-    `data` JSON
-);
-} else {
-CREATE TABLE `jetFormsSettings` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `bagName` VARCHAR(92) NOT NULL,
-    `data` JSON,
-    PRIMARY KEY (`id`)
-) DEFAULT CHARSET = utf8mb4";
-}
-INSERT INTO `jetFormsSettings` VALUES ('1','jetFormsMailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}');
+
+INSERT INTO `storedObjects` (`itemName`,`data`) VALUES ('JetForms:mailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}');
 ```
 
 ## Copy validation lib to public directory

@@ -15,7 +15,7 @@ class EditAppMainPanelSection extends Section {
             </button>
             <div>
             <a onClick={ this.openManageMailSendSettingsDialog.bind(this) } class="with-icon">
-                <Icon iconId="box" className="size-sm color-dimmed"/>
+                <Icon iconId="send" className="size-sm color-dimmed"/>
                 <span class="color-dimmed">{ __('Send mail settings') }</span>
             </a>
             </div>

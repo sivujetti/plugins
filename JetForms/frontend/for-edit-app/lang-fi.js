@@ -8,6 +8,8 @@ api.registerTranslationStrings({
     'Password': 'Salasana',
     'jetFormsTodo1': 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
     'Send method': 'Lähetystapa',
+    'jetFormsTodo2': 'Käytä webhotellisi oletussähköpostiserveriä.',
+    'jetFormsTodo3': 'Käytä ulkopuolista SMTP-palveluntarjoajaa (esim. Office 365, Gmail).',
     'Encryption': 'Salaus',
     'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
     // CheckboxInputBlockType.jsx

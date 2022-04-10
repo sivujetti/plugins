@@ -14,3 +14,32 @@ api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
 api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
 api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
 api.blockTypes.register(SubscriptionFormBlockType.name, () => SubscriptionFormBlockType);
+
+setTimeout(() => {
+    const el = document.createElement('style');
+    el.setAttribute('injected-by', 'jet-forms-plugin');
+    el.innerHTML = (
+`h4, .h4 {
+    font: 800 1rem/1rem "Fira Sans";
+}
+.button-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1.4rem;
+}
+.button-options label {
+    border-radius: 9px;
+    border: 2px solid transparent;
+    padding-top: .8rem;
+}
+.button-options label.selected {
+    border: 2px solid var(--color-accent);
+}
+.button-options .form-icon {
+    left: initial;
+    right: 1rem;
+    top: .8rem;
+}`
+    );
+    document.head.appendChild(el);
+}, 1500);

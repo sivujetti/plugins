@@ -1,21 +1,18 @@
-import {__, http, env, hookForm, unhookForm, FormGroupInline, Input, InputErrors} from '@sivujetti-commons-for-edit-app';
+import {__, http, env, hookForm, unhookForm, FormGroupInline, Input, InputErrors, handleSubmit} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../../frontend/edit-app/src/constants.js';
 import LoadingSpinner from '../../../../../../frontend/edit-app/src/commons/LoadingSpinner.jsx';
 
-const sendingMethods = [
-    {name: 'mail', friendlyName: 'mail()'},
-    {name: 'smtp', friendlyName: 'SMTP'},
-];
-
 class MailSendSettingsManageDialog extends preact.Component {
+    // boundHandleSubmit;
     /**
      * @param {{floatingDialog: FloatingDialog;}} props
      */
     constructor(props) {
         super(props);
         this.state = {settings: null};
-        http.get('/plugins/jet-forms/settings/mailSendSettings')
-            .then(settings => { this.createState(settings); })
+        this.boundHandleSubmit = this.applyCreateGlobalBlockTree.bind(this);
+        http.get('/api/stored-objects/JetForms:mailSendSettings')
+            .then(/*** @param {RawStoredObjectsEntry} entry */ entry => { this.createState(entry.data); })
             .catch(env.window.console.error);
     }
     /**
@@ -46,16 +43,35 @@ class MailSendSettingsManageDialog extends preact.Component {
     /**
      * @access protected
      */
-    render(_, {sendingMethod}) {
-        return <form onSubmit={ this.applyCreateGlobalBlockTree.bind(this) }>
+    render(_, {sendingMethod, formIsSubmittingClass}) {
+        return <form onSubmit={ e => handleSubmit(this, this.boundHandleSubmit, e) }>
             <div class="mb-1">{ __('jetFormsTodo1') }</div>
-            { sendingMethod ? [<FormGroupInline>
-                <label htmlFor="name" class="form-label">{ __('Send method') }</label>
-                <select value={ sendingMethod } onChange={ e => this.setState({sendingMethod: e.target.value}) } class="form-select">{ sendingMethods.map(({name, friendlyName}) =>
-                    <option value={ name }>{ friendlyName }</option>
-                ) }</select>
-            </FormGroupInline>,
-            sendingMethod === 'smtp' ? <div class="form-horizontal pt-0">
+            { sendingMethod ? [<div>
+                <div class="form-label">{ __('Send method') }</div>
+                <div class="button-options">
+                    <label class={ `form-radio box${sendingMethod === 'mail' ? ' selected' : ''}` }>
+                        <span class="d-block mb-2">
+                            <input type="radio" name="sendingMethod"
+                                checked={ sendingMethod === 'mail' }
+                                onClick={ this.handleSendMethodRadioClicked.bind(this) }
+                                value="mail"/>
+                            <i class="form-icon"></i><b class="h4">mail()</b>
+                        </span>
+                        <span>{ __('jetFormsTodo2') }</span>
+                    </label>
+                    <label class={ `form-radio box${sendingMethod === 'smtp' ? ' selected' : ''}` }>
+                        <span class="d-block mb-2">
+                            <input type="radio" name="sendingMethod"
+                                checked={ sendingMethod === 'smtp' }
+                                onClick={ this.handleSendMethodRadioClicked.bind(this) }
+                                value="smtp"/>
+                            <i class="form-icon"></i><b class="h4">SMTP</b>
+                        </span>
+                        <span>{ __('jetFormsTodo3') }</span>
+                    </label>
+                </div>
+            </div>,
+            sendingMethod === 'smtp' ? <div class="form-horizontal">
                 <FormGroupInline>
                     <label htmlFor="SMTP_host" class="form-label">{ __('Host') }</label>
                     <Input vm={ this } prop="SMTP_host"/>
@@ -87,7 +103,7 @@ class MailSendSettingsManageDialog extends preact.Component {
             </div> : null] : <LoadingSpinner/> }
             <div class="mt-8">
                 <button
-                    class="btn btn-primary mr-2"
+                    class={ `btn btn-primary mr-2${formIsSubmittingClass}` }
                     type="submit">{ __('Save send mail settings') }</button>
                 <button
                     onClick={ () => this.props.floatingDialog.close() }
@@ -97,10 +113,18 @@ class MailSendSettingsManageDialog extends preact.Component {
         </form>;
     }
     /**
+     * @param {Event} e
      * @access private
      */
-    applyCreateGlobalBlockTree(e) {
-        e.preventDefault();
+    handleSendMethodRadioClicked(e) {
+        const newValue = e.target.value;
+        if (this.state.sendingMethod !== newValue)
+            this.setState({sendingMethod: newValue});
+    }
+    /**
+     * @access private
+     */
+    applyCreateGlobalBlockTree() {
         const mailSendSettings = Object.assign(
             {
                 sendingMethod: this.state.sendingMethod,
@@ -115,13 +139,10 @@ class MailSendSettingsManageDialog extends preact.Component {
                 }
                 : this.state.values
         );
-        return http.post('/plugins/jet-forms/settings/mailSendSettings', mailSendSettings)
+        return http.post('/api/stored-objects/JetForms:mailSendSettings/data', mailSendSettings)
             .then(resp => {
-                if (!resp.ok !== 'ok') throw new Error;
+                if (resp.ok !== 'ok') throw new Error;
                 this.props.floatingDialog.close();
-            })
-            .catch(err => {
-                env.window.console.error(err);
             });
     }
 }
@@ -129,12 +150,19 @@ class MailSendSettingsManageDialog extends preact.Component {
 /**
  * @typedef RawSendMailSettings
  *
- * @prop {String} sendingMethod
- * @prop {String} SMTP_host
- * @prop {String} SMTP_port
- * @prop {String} SMTP_username
- * @prop {String} SMTP_password
- * @prop {String} SMTP_secureProtocol
+ * @prop {String?} sendingMethod
+ * @prop {String?} SMTP_host
+ * @prop {String?} SMTP_port
+ * @prop {String?} SMTP_username
+ * @prop {String?} SMTP_password
+ * @prop {String?} SMTP_secureProtocol
+ */
+
+/**
+ * @typedef RawStoredObjectsEntry
+ *
+ * @prop {String} objectName
+ * @prop {{[key: String]: any;}} data
  */
 
 export default MailSendSettingsManageDialog;

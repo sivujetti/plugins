@@ -6,8 +6,10 @@ api.registerTranslationStrings({
     'Port': 'Port',
     'Username': 'Username',
     'Password': 'Password',
-    'jetFormsTodo1': 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
+    'jetFormsTodo1': 'todo1', // fi = 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
     'Send method': 'Send method',
+    'jetFormsTodo2': 'todo2', // fi = 'Käytä webhotellisi oletussähköpostiserveriä.',
+    'jetFormsTodo3': 'todo3', // fi = 'Käytä ulkopuolista SMTP-palveluntarjoajaa (esim. Office 365, Gmail).',
     'Encryption': 'Encryption',
     'Save send mail settings': 'Save send mail settings',
     // CheckboxInputBlockType.jsx
