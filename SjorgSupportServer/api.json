@@ -1,0 +1,76 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "...",
+    "version": "0.0.0",
+    "title": "..."
+  },
+  "basePath": "/plugins/sjorg-support-server",
+  "paths": {
+    "articles/featured": {
+      "get": {
+        "summary": "Lists features articles",
+        "operationId": "articlesListFeatured",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Page"
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected happened"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Page": {
+      "type": "object",
+      "required": [
+        "title",
+        "blocks"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Home page"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Block"
+          }
+        }
+      }
+    },
+    "Block": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "-Mp0vJAK3ONadMGjgWus"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Paragraph",
+            "Heading",
+            "Section"
+          ]
+        },
+        "children": {
+          "type": "array",
+          "$ref": "#/definitions/Block"
+        }
+      }
+    }
+  }
+}
