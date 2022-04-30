@@ -63,15 +63,16 @@ const initialData = {
     label: __('Label text'),
 };
 
+const blockTypeName = 'JetFormsCheckboxInput';
 const checkboxInputBlockType = {
-    name: 'JetFormsCheckboxInput',
+    name: blockTypeName,
     friendlyName: 'JetForms: Checkbox input',
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
     icon: 'checkbox',
-    reRender({name, label}, _renderChildren) {
-        return ['<div class="form-group">',
+    reRender({name, label, id}, _renderChildren) {
+        return ['<div class="form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
             '<label class="form-checkbox">',
                 '<input name="', name, '" type="checkbox">',
                 '<i class="form-icon"></i> ', label,

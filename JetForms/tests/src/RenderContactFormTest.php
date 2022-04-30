@@ -5,7 +5,7 @@ namespace SitePlugins\JetForms\Tests;
 use Laminas\Dom\Query;
 use Pike\TestUtils\MutedSpyingResponse;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
-                          TextareaInputBlockType, TextInputBlockType};
+                          SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
 use Sivujetti\Block\Entities\Block;
 use Sivujetti\Template;
 use Sivujetti\Tests\Utils\{PluginTestCase};
@@ -18,6 +18,7 @@ class RenderContactFormTest extends PluginTestCase {
             ->useBlockType(ContactFormBlockType::NAME, new ContactFormBlockType)
             ->useBlockType(EmailInputBlockType::NAME, new EmailInputBlockType)
             ->useBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType)
+            ->useBlockType(SelectInputBlockType::NAME, new SelectInputBlockType)
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->useBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType)
             ->withPageData(function (object $testPageData) {
@@ -36,6 +37,10 @@ class RenderContactFormTest extends PluginTestCase {
                         $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
                             renderer: TextareaInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("message"),
+                        ),
+                        $this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
+                            renderer: SelectInputBlockType::DEFAULT_RENDERER,
+                            propsData: self::createDataForTestInputBlock("wizardLevel"),
                         ),
                         $this->blockTestUtils->makeBlockData(CheckboxInputBlockType::NAME,
                             renderer: CheckboxInputBlockType::DEFAULT_RENDERER,
@@ -93,13 +98,31 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("textarea", $textareaEl->getAttribute("type"));
         $this->assertEquals("form-input", $textareaEl->getAttribute("class"));
         $this->assertEquals("Message", $textareaEl->getAttribute("placeholder"));
+        // <select class="form-select" name="wizardLevel">
+        //     <option value="value">text</option>
+        //     ...
+        //     <option value="-">-</option>
+        // </select>
+        $selectEl = $all[11]->childNodes[0];
+        $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
+        $optionEls = $selectEl->getElementsByTagName("option");
+        $this->assertCount(4, $optionEls);
+        $optsData = json_decode(self::createDataForTestInputBlock("wizardLevel")->options);
+        $this->assertEquals($optsData[0]->value, $optionEls[0]->getAttribute("value"));
+        $this->assertEquals($optsData[1]->value, $optionEls[1]->getAttribute("value"));
+        $this->assertEquals($optsData[2]->value, $optionEls[2]->getAttribute("value"));
+        $this->assertEquals("-", $optionEls[3]->getAttribute("value"));
+        $this->assertEquals($optsData[0]->text, $optionEls[0]->nodeValue);
+        $this->assertEquals($optsData[1]->text, $optionEls[1]->nodeValue);
+        $this->assertEquals($optsData[2]->text, $optionEls[2]->nodeValue);
+        $this->assertEquals("-", $optionEls[3]->nodeValue);
         // <div class=\"form-group\">" .
         //        "<label class=\"form-checkbox\">" .
         //            "<input name=\"wantsReply\" type=\"checkbox\">" .
         //            "<i class=\"form-icon\"></i> Test escape&gt;" .
         //        "</label>" .
         //    "</div>
-        $checkboxInputOuter = $all[11];
+        $checkboxInputOuter = $all[14];
         $this->assertEquals("form-group", $checkboxInputOuter->getAttribute("class"));
         [$labelEl] = $checkboxInputOuter->childNodes;
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
@@ -113,7 +136,7 @@ class RenderContactFormTest extends PluginTestCase {
         //         "{$rawBlock->html}{$childMarker}" .
         //     "</button>" .
         // "</p>"
-        $buttonOuter = $all[14];
+        $buttonOuter = $all[17];
         $this->assertEquals("button", $buttonOuter->getAttribute("class"));
         $this->assertEquals("Button", $buttonOuter->getAttribute("data-block-type"));
         [$buttonEl] = $buttonOuter->childNodes;
@@ -121,13 +144,13 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("btn", $buttonEl->getAttribute("class"));
         $this->assertEquals("Send", $buttonEl->nodeValue);
         // <input type=\"hidden\" name=\"_returnTo\" value=\"/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb\">
-        $returnToInput = $all[17];
+        $returnToInput = $all[20];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
         // <input type=\"hidden\" name=\"_csrf\" value=\"todo\">
-        $returnToInput = $all[18];
+        $returnToInput = $all[21];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
         $this->assertEquals("todo", $returnToInput->getAttribute("value"));
@@ -163,6 +186,16 @@ class RenderContactFormTest extends PluginTestCase {
                 "isRequired" => 0,
                 "label" => "",
                 "placeholder" => "Message",
+            ],
+            "wizardLevel" => (object) [
+                "name" => "wizardLevel",
+                "label" => "",
+                "options" => json_encode([
+                    ["text" => "Squib", "value" => "squib"],
+                    ["text" => "Harry Potter", "value" => "harry-potter"],
+                    ["text" => "Supreme Mugwump", "value" => "mugwump"],
+                ]),
+                "multiple" => 0,
             ],
             "wantsReply" => (object) [
                 "name" => "wantsReply",

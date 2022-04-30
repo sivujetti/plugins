@@ -29,6 +29,7 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
             $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
+            $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
             //

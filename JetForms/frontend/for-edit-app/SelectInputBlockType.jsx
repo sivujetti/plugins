@@ -1,8 +1,8 @@
-import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '@sivujetti-commons-for-edit-app';
+import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroup, FormGroupInline} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 
-class InputBlockEditForm extends preact.Component {
+class SelectInputBlockEditForm extends preact.Component {
     // nameInput;
     /**
      * @param {RawBlockData} snapshot
@@ -10,9 +10,8 @@ class InputBlockEditForm extends preact.Component {
      */
     overrideValues(snapshot) {
         reHookValues(this, [{name: 'name', value: snapshot.name},
-                            {name: 'label', value: snapshot.label},
-                            {name: 'placeholder', value: snapshot.placeholder}]);
-        this.setState({isRequired: snapshot.isRequired});
+                            {name: 'label', value: snapshot.label}]);
+        this.setState({multiple: snapshot.multiple});
     }
     /**
      * @access protected
@@ -25,10 +24,8 @@ class InputBlockEditForm extends preact.Component {
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
             {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'placeholder', value: block.placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
         ]), {
-            isRequired: block.isRequired,
+            multiple: block.multiple,
         });
     }
     /**
@@ -47,7 +44,7 @@ class InputBlockEditForm extends preact.Component {
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render(_, {isRequired}) {
+    render(_, {multiple}) {
         if (!this.state.values) return;
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
@@ -61,69 +58,70 @@ class InputBlockEditForm extends preact.Component {
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
-                <span class="form-label">{ __('Required') }?</span>
+                <span class="form-label">{ __('Multiple') }?</span>
                 <label class="form-checkbox mt-0">
                     <input
-                        onClick={ this.emitIsRequired.bind(this) }
-                        checked={ isRequired }
+                        onClick={ this.emitMultiple.bind(this) }
+                        checked={ multiple }
                         type="checkbox"
                         class="form-input"/><i class="form-icon"></i>
                 </label>
             </FormGroupInline>
-            <FormGroupInline>
-                <label htmlFor="placeholder" class="form-label">{ __('Placeholder') }</label>
-                <Input vm={ this } prop="placeholder"/>
-                <InputErrors vm={ this } prop="placeholder"/>
-            </FormGroupInline>
+            <FormGroup>
+                <label htmlFor="options" class="form-label">{ __('Options') }</label>
+                <textarea placeholder="Todo" class="form-input code"></textarea>
+            </FormGroup>
         </div>;
     }
     /**
      * @param {Event} e
      * @access private
      */
-    emitIsRequired(e) {
-        const isRequired = e.target.checked ? 1 : 0;
-        this.setState({isRequired});
-        this.props.onValueChanged(isRequired, 'isRequired');
+    emitMultiple(e) {
+        const multiple = e.target.checked ? 1 : 0;
+        this.setState({multiple});
+        this.props.onValueChanged(multiple, 'multiple');
     }
 }
 
 const initialData = {
     name: __('inputName'),
-    isRequired: 1,
     label: '',
-    placeholder: '',
+    options: JSON.stringify([
+        {text: 'Option label', value: 'option-1'},
+    ]),
+    multiple: 0,
 };
 
 /**
- * @param {{name: String; friendlyName: String; type?: String; icon?: String;}} settings
  * @returns {todo}
  */
-export default settings => ({
-    name: `JetForms${settings.name}`,
-    friendlyName: settings.friendlyName,
+export default {
+    name: 'JetFormsSelectInput',
+    friendlyName: 'JetForms: Select input',
     ownPropNames: Object.keys(initialData),
     initialData,
-    defaultRenderer: 'plugins/JetForms:block-input-auto',
-    icon: settings.icon || 'box',
-    reRender({name, isRequired, label, placeholder, id}, _renderChildren) {
-        const [startTag, closingTag] = settings.type !== 'textarea' ? ['input', ''] : ['textarea', '</textarea>'];
+    defaultRenderer: 'plugins/JetForms:block-input-select',
+    icon: 'box',
+    reRender({name, label, options, multiple, id}, _renderChildren) {
         return [
-            '<div data-block-type="JetForms', settings.name, '" data-block="', id, '"',
-                !label ? '>' : ` class="form-group"><label class="form-label" for="${name}">${label}</label>`,
-                '<', startTag, ' name="', name, '" id="', name,
-                    '" type="', settings.type, '" class="form-input"',
-                    placeholder ? ` placeholder="${placeholder}"` : '',
-                    isRequired ? ' data-pristine-required' : '',
-                '>', closingTag,
+            '<div class="form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',
+                !label ? '' : `<label class="form-label">${label}</label>`,
+                '<select class="form-select" name="', name, '"', !multiple ? '' : ' multiple', '>'
+            ].concat(
+                JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>
+                    ['<option value="', value ,'">', __(text), '</option>']
+                ).flat()
+            ).concat([
+                '</select>',
             '</div>'
-        ].join('');
+        ]).join('');
     },
     createSnapshot: from => ({
         name: from.name,
         label: from.label,
-        isRequired: from.isRequired,
-        placeholder: from.placeholder,
+        options: from.options,
+        multiple: from.multiple,
     }),
-    editForm: InputBlockEditForm,
-});
+    editForm: SelectInputBlockEditForm,
+};
