@@ -69,7 +69,7 @@ const checkboxInputBlockType = {
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
-    icon: 'box',
+    icon: 'checkbox',
     reRender({name, label}, _renderChildren) {
         return ['<div class="form-group">',
             '<label class="form-checkbox">',

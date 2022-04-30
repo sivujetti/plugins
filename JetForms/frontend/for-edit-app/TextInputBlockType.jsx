@@ -4,7 +4,7 @@ const textInputBlockType = createInputBlockType({
     name: 'TextInput',
     friendlyName: 'JetForms: Short text input',
     type: 'text',
-    icon: 'box',
+    icon: 'letter-t',
 });
 
 export default textInputBlockType;

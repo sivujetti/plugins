@@ -4,7 +4,7 @@ const textareaInputBlockType = createInputBlockType({
     name: 'TextareaInput',
     friendlyName: 'JetForms: Long text input',
     type: 'textarea',
-    icon: 'box',
+    icon: 'writing',
 });
 
 export default textareaInputBlockType;

@@ -4,7 +4,7 @@ const emailInputBlockType = createInputBlockType({
     name: 'EmailInput',
     friendlyName: 'JetForms: Email input',
     type: 'email',
-    icon: 'box',
+    icon: 'at',
 });
 
 export default emailInputBlockType;

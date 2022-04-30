@@ -74,6 +74,7 @@ export default {
     ownPropNames: Object.keys(initialData.data),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-contact-form',
+    icon: 'message-2',
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },
