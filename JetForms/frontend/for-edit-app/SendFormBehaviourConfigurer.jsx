@@ -94,7 +94,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
             </FormGroupInline>
             <FormGroup>
                 <label htmlFor="bodyTemplate" class="form-label">{ __('Body') }</label>
-                <Textarea vm={ this } prop="bodyTemplate" ref={ this.bodyTemplateInputEl }/>
+                <Textarea vm={ this } prop="bodyTemplate" class="form-input code" ref={ this.bodyTemplateInputEl }/>
                 <InputErrors vm={ this } prop="bodyTemplate"/>
             </FormGroup>
         </div>;

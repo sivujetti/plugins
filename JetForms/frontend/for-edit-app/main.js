@@ -17,7 +17,7 @@ api.blockTypes.register(SubscriptionFormBlockType.name, () => SubscriptionFormBl
 
 setTimeout(() => {
     const el = document.createElement('style');
-    el.setAttribute('injected-by', 'jet-forms-plugin');
+    el.setAttribute('data-injected-by', 'jet-forms-plugin');
     el.innerHTML = (
 `h4, .h4 {
     font: 800 1rem/1rem "Fira Sans";

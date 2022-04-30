@@ -1,7 +1,9 @@
 <div class="q-reaction-buttons"
-    data-linked-to-entity-id="<?= $this->e($currentPage->id) ?>"
-    data-linked-to-entity-type="<?= $this->e($currentPage->type) ?>"
-    data-error-message="<?= $this->__("Something went wrong") ?>">
+    data-linked-to-entity-id="<?= $currentPage->id ?>"
+    data-linked-to-entity-type="<?= $currentPage->type ?>"
+    data-error-message="<?= $this->__("Something went wrong") ?>"
+    data-block-type="<?= \SitePlugins\QReactions\ReactionButtonsBlockType::NAME ?>"
+    data-block="<?= $props->id ?>">
     <div data-block-root>
     <?php foreach (json_decode($props->buttons) as $button): ?>
         <button data-button-type="<?= $this->e($button->kind) ?>" title="<?= $this->__($button->verb) ?>">

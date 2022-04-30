@@ -17,26 +17,6 @@ INSERT INTO `storedObjects` (`itemName`,`data`) VALUES ('JetForms:mailSendSettin
 
 Copy `plugins/JetForms/frontend/pristine/pristine.min.js` to `public/sivujetti/vendor/pristine.min.js`.
 
-## Create pass-through files
-
-Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-contact-form.tmpl.php"` with following contents:
-
-```php
-<?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-contact-form.tmpl.php" ?>
-```
-
-Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-input-auto.tmpl.php"` with following contents:
-
-```php
-<?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-input-auto.tmpl.php" ?>
-```
-
-Create file `SIVUJETTI_BACKEND_PATH . "assets/templates/jet-forms-block-inline-input-auto.tmpl.php"` with following contents:
-
-```php
-<?php require SIVUJETTI_PLUGINS_PATH . "JetForms/templates/block-inline-input-auto.tmpl.php" ?>
-```
-
 ## Bundle frontend
 
 See `frontend/rollup.config.js`.

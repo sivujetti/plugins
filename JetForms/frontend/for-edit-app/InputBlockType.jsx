@@ -104,7 +104,7 @@ export default settings => ({
     friendlyName: settings.friendlyName,
     ownPropNames: Object.keys(initialData),
     initialData,
-    defaultRenderer: 'sivujetti:jet-forms-block-input-auto',
+    defaultRenderer: 'plugins/JetForms:block-input-auto',
     icon: settings.icon || 'box',
     reRender({name, isRequired, label, placeholder}, _renderChildren) {
         const wrap = inner => !label ? inner : `<div class="form-group"><label class="form-label" for="${name}">${label}${inner}</label></div>`;

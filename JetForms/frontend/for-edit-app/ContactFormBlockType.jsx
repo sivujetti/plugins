@@ -73,7 +73,7 @@ export default {
     friendlyName: 'JetForms: Contact form',
     ownPropNames: Object.keys(initialData.data),
     initialData,
-    defaultRenderer: 'sivujetti:jet-forms-block-contact-form',
+    defaultRenderer: 'plugins/JetForms:block-contact-form',
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },

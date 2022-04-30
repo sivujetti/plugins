@@ -31,7 +31,9 @@ class RenderReactionButtonsTest extends PluginTestCase {
         $expected = "<div class=\"q-reaction-buttons\"\r\n" .
         "    data-linked-to-entity-id=\"1\"\r\n" .
         "    data-linked-to-entity-type=\"Pages\"\r\n" .
-        "    data-error-message=\"Something went wrong\">\r\n" .
+        "    data-error-message=\"Something went wrong\"\r\n" .
+        "    data-block-type=\"" . ReactionButtonsBlockType::NAME . "\"\r\n" .
+        "    data-block=\"{$this->testReactionButtonsBlockData->id}\">\r\n" .
         "    <div data-block-root>\r\n" .
         "            <button data-button-type=\"{$buttons[0]->kind}\" title=\"{$buttons[0]->verb}\">\r\n" .
         "            {$expectedLikeIcon}\r\n" .

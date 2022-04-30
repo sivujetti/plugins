@@ -6,7 +6,7 @@ use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
 
 final class ContactFormBlockType implements BlockTypeInterface {
     public const NAME = "JetFormsContactForm";
-    public const DEFAULT_RENDERER = "sivujetti:jet-forms-block-contact-form";
+    public const DEFAULT_RENDERER = "plugins/JetForms:block-contact-form";
     /**
      * @inheritdoc
      */

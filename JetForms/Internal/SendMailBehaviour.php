@@ -40,7 +40,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     /**
      * @param object $behaviour Data from the database
      * @param object $reqBody Data from the form (plugins/JetForms/templates/block-contact-form.tmpl.php)
-     * @throws \Pike\PikeException If $behavious or $reqBody wasn't valid
+     * @throws \Pike\PikeException If $behaviours or $reqBody wasn't valid
      * @param array<int, {type: string, name: string, label: string, isRequired: bool}> $inputDetails
      */
     public function run(object $behaviour, object $reqBody, array $inputDetails): void {
@@ -109,10 +109,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @return object
      */
     private function makeTemplateVars(object $reqBody, array $inputDetails): object {
-        $combined = (object) [
-            "siteName" => $this->theWebsite->name,
-            "siteLang" => $this->theWebsite->lang,
-        ];
+        $combined = (object) ["siteName" => $this->theWebsite->name];
         foreach ($inputDetails as ["name" => $name, "type" => $type]) {
             if ($type === CheckboxInputBlockType::NAME) {
                 $combined->{$name} = property_exists($reqBody, $name) ? "Checked" : "Not checked";

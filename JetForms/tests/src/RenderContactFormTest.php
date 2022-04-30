@@ -7,6 +7,7 @@ use Pike\TestUtils\MutedSpyingResponse;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
                           TextareaInputBlockType, TextInputBlockType};
 use Sivujetti\Block\Entities\Block;
+use Sivujetti\Template;
 use Sivujetti\Tests\Utils\{PluginTestCase};
 
 class RenderContactFormTest extends PluginTestCase {
@@ -55,14 +56,15 @@ class RenderContactFormTest extends PluginTestCase {
         /** @var ?\DOMElement */
         $formEl = $dom->execute(".jet-form")[0] ?? null;
         $this->assertNotNull($formEl);
-        $this->assertEquals("/sivujetti/plugins/jet-forms/submits/-bbbbbbbbbbbbbbbbbbb/hello", $formEl->getAttribute("action"));
+        $this->assertEquals(Template::makeUrl("/plugins/jet-forms/submits/-bbbbbbbbbbbbbbbbbbb/hello"),
+                            $formEl->getAttribute("action"));
         $this->assertEquals("post", $formEl->getAttribute("method"));
         $this->assertEquals("Thank you for your message!", $formEl->getAttribute("data-form-sent-message"));
         $this->assertEquals("-bbbbbbbbbbbbbbbbbbb", $formEl->getAttribute("data-form-id"));
         $this->assertEquals("contact", $formEl->getAttribute("data-form-type"));
         $all = $formEl->childNodes;
         // "<input name=\"email\" id=\"email\" type=\"email\" class=\"form-input\" placeholder=\"Email\" data-pristine-required>"
-        $emailInputEl = $all[2];
+        $emailInputEl = $all[2]->childNodes[0];
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
         $this->assertEquals("email", $emailInputEl->getAttribute("id"));
         $this->assertEquals("email", $emailInputEl->getAttribute("type"));
@@ -85,7 +87,7 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("form-input", $inputEl->getAttribute("class"));
         $this->assertEquals("", $inputEl->getAttribute("data-pristine-required"));
         // <textarea name=\"message\" id=\"message\" type=\"textarea\" class=\"form-input\" placeholder=\"Message\"></textarea>
-        $textareaEl = $all[8];
+        $textareaEl = $all[8]->childNodes[0];
         $this->assertEquals("message", $textareaEl->getAttribute("name"));
         $this->assertEquals("message", $textareaEl->getAttribute("id"));
         $this->assertEquals("textarea", $textareaEl->getAttribute("type"));
@@ -122,7 +124,8 @@ class RenderContactFormTest extends PluginTestCase {
         $returnToInput = $all[17];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
-        $this->assertEquals("/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb", $returnToInput->getAttribute("value"));
+        $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
+                            $returnToInput->getAttribute("value"));
         // <input type=\"hidden\" name=\"_csrf\" value=\"todo\">
         $returnToInput = $all[18];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));

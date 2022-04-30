@@ -37,15 +37,7 @@ CREATE TABLE QReactionsReactions (
 );
 ```
 
-## Create pass-through file
-
-`SIVUJETTI_BACKEND_PATH . "assets/q-reactions-block-reaction-buttons.tmpl.php"`:
-
-```php
-<?php require SIVUJETTI_PLUGINS_PATH . "QReactions/templates/block-reaction-buttons.tmpl.php" ?>
-```
-
-## Bundling frontend
+## Bundle frontend
 
 See `frontend/rollup.config.js`.
 

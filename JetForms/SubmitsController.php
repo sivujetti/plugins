@@ -13,7 +13,7 @@ use Sivujetti\Block\Entities\Block;
  */
 final class SubmitsController {
     /**
-     * POST /plugins/jet-forms/submits/:blockId/:pageSlug: fetched $params->pageSlug
+     * POST /plugins/jet-forms/submits/:blockId/:pageSlug: fetches $params->pageSlug
      * from the database, finds $foundPage->blocks->find($params->blockId) and runs
      * each behaviour configured to it ([{type: "SendMail", ...}] by default).
      *

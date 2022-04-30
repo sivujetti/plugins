@@ -26,7 +26,7 @@ export default {
     friendlyName: 'QReactions: Reaction buttons',
     ownPropNames: Object.keys(initialData),
     initialData,
-    defaultRenderer: 'sivujetti:q-reactions-block-reaction-buttons',
+    defaultRenderer: 'plugins/QReactions:block-reaction-buttons',
     reRender(block, _renderChildren) {
         return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
     },

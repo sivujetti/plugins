@@ -6,7 +6,7 @@ use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
 
 abstract class InlineInputBlockType implements BlockTypeInterface {
     public const NAME = "_";
-    public const DEFAULT_RENDERER = "sivujetti:jet-forms-block-inline-input-auto";
+    public const DEFAULT_RENDERER = "plugins/JetForms:block-inline-input-auto";
     /**
      * @inheritdoc
      */

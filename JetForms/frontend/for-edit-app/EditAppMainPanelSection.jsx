@@ -1,8 +1,7 @@
-import {__, Icon, floatingDialog} from '@sivujetti-commons-for-edit-app';
-import {Section} from '../../../../../frontend/edit-app/src/DefaultView/OnThisPageSection.jsx';
+import {__, Icon, floatingDialog, MenuSection} from '@sivujetti-commons-for-edit-app';
 import MailSendSettingsManageDialog from './MailSendSettings/MailSendSettingsManageDialog.jsx';
 
-class EditAppMainPanelSection extends Section {
+class EditAppMainPanelSection extends MenuSection {
     /**
      * @access protected
      */
