@@ -2,7 +2,6 @@
 
 namespace SitePlugins\JetForms;
 
-use Pike\Auth\Crypto;
 use Pike\PikeException;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
@@ -33,14 +32,6 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
             //
-            $api->registerStoredObjectsSlot("JetForms:mailSendSettings", validateFn: function (object $input) {
-                return [];
-            }, processFn: function (array $storedObject, Crypto $crypto): array {
-                if ($storedObject["sendingMethod"] === "smtp")
-                    $storedObject["SMTP_password"] = $crypto->decrypt($storedObject["SMTP_password"], SIVUJETTI_SECRET);
-                return $storedObject;
-            });
-            //
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         });
@@ -55,6 +46,12 @@ final class JetForms implements UserPluginInterface {
         });
         $api->registerHttpRoute("POST", "/plugins/jet-forms/submits/[w:blockId]/[w:pageSlug]",
             SubmitsController::class, "handleSubmit"
+        );
+        $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
+            SettingsController::class, "getMailSendSettings"
+        );
+        $api->registerHttpRoute("PUT", "/plugins/jet-forms/settings/mailSendSettings",
+            SettingsController::class, "updateMailSendSettings"
         );
     }
     /**

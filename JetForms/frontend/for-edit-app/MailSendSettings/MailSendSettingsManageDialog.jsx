@@ -11,8 +11,8 @@ class MailSendSettingsManageDialog extends preact.Component {
         super(props);
         this.state = {settings: null};
         this.boundHandleSubmit = this.applyCreateGlobalBlockTree.bind(this);
-        http.get('/api/stored-objects/JetForms:mailSendSettings')
-            .then(/*** @param {RawStoredObjectsEntry} entry */ entry => { this.createState(entry.data); })
+        http.get('/plugins/jet-forms/settings/mailSendSettings')
+            .then(settings => { this.createState(settings); })
             .catch(env.window.console.error);
     }
     /**
@@ -139,7 +139,7 @@ class MailSendSettingsManageDialog extends preact.Component {
                 }
                 : this.state.values
         );
-        return http.post('/api/stored-objects/JetForms:mailSendSettings/data', mailSendSettings)
+        return http.put('/plugins/jet-forms/settings/mailSendSettings', mailSendSettings)
             .then(resp => {
                 if (resp.ok !== 'ok') throw new Error;
                 this.props.floatingDialog.close();
@@ -156,13 +156,6 @@ class MailSendSettingsManageDialog extends preact.Component {
  * @prop {String?} SMTP_username
  * @prop {String?} SMTP_password
  * @prop {String?} SMTP_secureProtocol
- */
-
-/**
- * @typedef RawStoredObjectsEntry
- *
- * @prop {String} objectName
- * @prop {{[key: String]: any;}} data
  */
 
 export default MailSendSettingsManageDialog;
