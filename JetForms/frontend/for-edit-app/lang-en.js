@@ -23,6 +23,7 @@ api.registerTranslationStrings({
     'Sent by JetForms': 'Sent by JetForms',
     'Send': 'Send',
     // EditAppMainPanelSection.jsx
+    'Manage forms': 'Manage forms',
     'Send mail settings': 'Send mail settings',
     // EmailInputBlockType.jsx
     'JetForms: Email input': 'JetForms: Email input',

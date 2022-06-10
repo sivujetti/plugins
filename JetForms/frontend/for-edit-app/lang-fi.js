@@ -23,6 +23,7 @@ api.registerTranslationStrings({
     'Sent by JetForms': 'Lähetetty JetFormsilla',
     'Send': 'Lähetä',
     // EditAppMainPanelSection.jsx
+    'Manage forms': 'Sivuston lomakkeet',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx
     'JetForms: Email input': 'JetForms: Sähköpostikenttä',

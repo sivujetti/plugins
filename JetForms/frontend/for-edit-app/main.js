@@ -5,17 +5,17 @@ import EmailInputBlockType from './EmailInputBlockType.jsx';
 import SelectInputBlockType from './SelectInputBlockType.jsx';
 import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
-import SubscriptionFormBlockType from './SubscriptionFormBlockType.jsx';
 import EditAppMainPanelSection from './EditAppMainPanelSection.jsx';
 
-api.mainPanel.registerSection('plugin:jetForms', EditAppMainPanelSection);
+if (api.user.can('doAnything')) {
+    api.mainPanel.registerSection('plugin:jetForms', EditAppMainPanelSection);
+}
 api.blockTypes.register(CheckboxInputBlockType.name, () => CheckboxInputBlockType);
 api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
 api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
 api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
 api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
 api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
-api.blockTypes.register(SubscriptionFormBlockType.name, () => SubscriptionFormBlockType);
 
 setTimeout(() => {
     const el = document.createElement('style');
@@ -44,4 +44,4 @@ setTimeout(() => {
 }`
     );
     document.head.appendChild(el);
-}, 1500);
+}, 900);

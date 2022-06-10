@@ -4,9 +4,10 @@ namespace SitePlugins\JetForms;
 
 use Pike\{PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\SendMailBehaviour;
-use Sivujetti\{App, PagesRepositoryTemp, SharedAPIContext};
+use Sivujetti\{App, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
+use Sivujetti\Page\PagesRepository2;
 
 /**
  * Contains handlers for "/plugins/jet-forms/submits/*".
@@ -20,12 +21,12 @@ final class SubmitsController {
      * @param \Pike\Request $req
      * @param \Pike\Response $res
      * @param \Sivujetti\SharedAPIContext $apiCtx
-     * @param \Sitejetti\PagesRepositoryTemp $pagesRepo
+     * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
      */
     public function handleSubmit(Request $req,
                                  Response $res,
                                  SharedAPIContext $apiCtx,
-                                 PagesRepositoryTemp $pagesRepo): void {
+                                 PagesRepository2 $pagesRepo): void {
         if (($errors = self::validateSubmitInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //

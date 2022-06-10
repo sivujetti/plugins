@@ -97,7 +97,7 @@ const initialData = {
 
 /**
  * @param {{name: String; friendlyName: String; type?: String; icon?: String;}} settings
- * @returns {todo}
+ * @returns {Object}
  */
 export default settings => ({
     name: `JetForms${settings.name}`,
@@ -110,7 +110,9 @@ export default settings => ({
         const [startTag, closingTag] = settings.type !== 'textarea' ? ['input', ''] : ['textarea', '</textarea>'];
         return [
             '<div data-block-type="JetForms', settings.name, '" data-block="', id, '"',
-                !label ? '>' : ` class="form-group"><label class="form-label" for="${name}">${label}</label>`,
+                !label
+                    ? ' class="jet-forms-input-wrap">'
+                    : ` class="jet-forms-input-wrap form-group"><label class="form-label" for="${name}">${label}</label>`,
                 '<', startTag, ' name="', name, '" id="', name,
                     '" type="', settings.type, '" class="form-input"',
                     placeholder ? ` placeholder="${placeholder}"` : '',

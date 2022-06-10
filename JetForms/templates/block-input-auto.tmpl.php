@@ -4,8 +4,8 @@
     "JetFormsTextInput" => ["type" => "text", "startTag" => "input", "closingTag" => ""],
 ][$props->type] ?? null))):
     $closeWrap = !$props->label
-        ? ">"
-        : " class=\"form-group\"><label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>";
+        ? " class=\"jet-forms-input-wrap\">"
+        : " class=\"jet-forms-input-wrap form-group\"><label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>";
     //
     echo "<div data-block-type=\"{$props->type}\" data-block=\"{$props->id}\"", $closeWrap,
         "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name),
@@ -16,5 +16,5 @@
     "</div>";
 else:
     [$startTag, $endTag] = !(SIVUJETTI_FLAGS & SIVUJETTI_DEVMODE) ? ["<!--", "-->"] : ["<div>", "</div>"];
-    echo "{$startTag} JetForms/templates/block-input-auto.tmpl.php: Don't know how to render custom block type `{$props->type}` {$endTag}";
+    echo $startTag, " JetForms/templates/block-input-auto.tmpl.php: Don't know how to render custom block type `", $this->e($props->type), "` ", $endTag;
 endif; ?>

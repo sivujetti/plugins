@@ -94,7 +94,7 @@ const initialData = {
 };
 
 /**
- * @returns {todo}
+ * @returns {Object}
  */
 export default {
     name: 'JetFormsSelectInput',

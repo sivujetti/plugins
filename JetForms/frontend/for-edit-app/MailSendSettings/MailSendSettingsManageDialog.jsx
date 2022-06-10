@@ -1,6 +1,5 @@
-import {__, http, env, hookForm, unhookForm, FormGroupInline, Input, InputErrors, handleSubmit} from '@sivujetti-commons-for-edit-app';
+import {__, http, env, LoadingSpinner, hookForm, unhookForm, FormGroupInline, Input, InputErrors, handleSubmit} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../../frontend/edit-app/src/constants.js';
-import LoadingSpinner from '../../../../../../frontend/edit-app/src/commons/LoadingSpinner.jsx';
 
 class MailSendSettingsManageDialog extends preact.Component {
     // boundHandleSubmit;

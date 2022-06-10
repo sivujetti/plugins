@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
+use Sivujetti\Auth\ACLRulesBuilder;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
@@ -19,6 +20,20 @@ final class JetForms implements UserPluginInterface {
      * @inheritdoc
      */
     public function __construct(UserPluginAPI $api) {
+        $api->registerHttpRoute("POST", "/plugins/jet-forms/submits/[w:blockId]/[w:pageSlug]",
+            SubmitsController::class, "handleSubmit"
+        );
+        $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
+            SettingsController::class, "getMailSendSettings",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["read", "mailSendSettings"]]
+        );
+        $api->registerHttpRoute("PUT", "/plugins/jet-forms/settings/mailSendSettings",
+            SettingsController::class, "updateMailSendSettings",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["update", "mailSendSettings"]]
+        );
+        //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
             $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
@@ -29,9 +44,11 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
             $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
-            $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
+            //
+            $api->registerBlockRenderer(SelectInputBlockType::DEFAULT_RENDERER);
+            $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             //
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
@@ -45,15 +62,14 @@ final class JetForms implements UserPluginInterface {
             if (!$api->isJsFileEnqueued("plugin-jet-forms-bundle.js"))
                 $api->enqueueJsFile("plugin-jet-forms-bundle.js");
         });
-        $api->registerHttpRoute("POST", "/plugins/jet-forms/submits/[w:blockId]/[w:pageSlug]",
-            SubmitsController::class, "handleSubmit"
-        );
-        $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
-            SettingsController::class, "getMailSendSettings"
-        );
-        $api->registerHttpRoute("PUT", "/plugins/jet-forms/settings/mailSendSettings",
-            SettingsController::class, "updateMailSendSettings"
-        );
+    }
+    /**
+     * @inheritdoc
+     */
+    public function defineAclRules(ACLRulesBuilder $builder): ACLRulesBuilder {
+        return $builder
+            ->defineResource("mailSendSettings", ["read", "update"]);
+            // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
     }
     /**
      * @param string $name

@@ -81,7 +81,7 @@ class RenderContactFormTest extends PluginTestCase {
         //        "<input name=\"name\" id=\"name\" type=\"text\" class=\"form-input\" data-pristine-required>" .
         //    "</div>"
         $textInputOuter = $all[5];
-        $this->assertEquals("form-group", $textInputOuter->getAttribute("class"));
+        $this->assertEquals("jet-forms-input-wrap form-group", $textInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $textInputOuter->childNodes;
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
         $this->assertEquals("name", $labelEl->getAttribute("for"));
