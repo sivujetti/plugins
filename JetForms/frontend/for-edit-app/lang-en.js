@@ -22,6 +22,9 @@ api.registerTranslationStrings({
     'Message': 'Messaeg',
     'Sent by JetForms': 'Sent by JetForms',
     'Send': 'Send',
+    // CrudList.jsx
+    'Drag': 'Drag',
+    'Add %s': 'Add %s',
     // EditAppMainPanelSection.jsx
     'Manage forms': 'Manage forms',
     'Send mail settings': 'Send mail settings',
@@ -30,6 +33,14 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Required',
     'inputName': 'inputName',
+    // SelectInputBlockType.jsx
+    'JetForms: Select input': 'JetForms: Select input',
+    'Multiple': 'Multiple',
+    'Options': 'Options',
+    'Option text': 'Option text',
+    'option': 'option',
+    // SelectInputOptionEditForm.jsx
+    'Done': 'Done',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Subject',
     'To (email)': 'To (email)',

@@ -1,6 +1,9 @@
-import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroup, FormGroupInline} from '@sivujetti-commons-for-edit-app';
+import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
+        FormGroup, FormGroupInline} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+import CrudList from './CrudList.jsx';
+import SelectInputOptionEditForm from './SelectInputOptionEditForm.jsx';
 
 class SelectInputBlockEditForm extends preact.Component {
     // nameInput;
@@ -11,7 +14,7 @@ class SelectInputBlockEditForm extends preact.Component {
     overrideValues(snapshot) {
         reHookValues(this, [{name: 'name', value: snapshot.name},
                             {name: 'label', value: snapshot.label}]);
-        this.setState({multiple: snapshot.multiple});
+        this.setState({multiple: snapshot.multiple, options: JSON.parse(snapshot.options)});
     }
     /**
      * @access protected
@@ -24,9 +27,10 @@ class SelectInputBlockEditForm extends preact.Component {
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
             {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
-        ]), {
+        ], {
             multiple: block.multiple,
-        });
+            options: JSON.parse(block.options),
+        }));
     }
     /**
      * @access protected
@@ -44,9 +48,9 @@ class SelectInputBlockEditForm extends preact.Component {
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render(_, {multiple}) {
+    render(_, {multiple, options}) {
         if (!this.state.values) return;
-        return <div class="form-horizontal pt-0">
+        return [<div class="form-horizontal py-0">
             <FormGroupInline>
                 <label htmlFor="name" class="form-label">{ __('Name') }</label>
                 <Input vm={ this } prop="name" ref={ this.nameInput }/>
@@ -67,11 +71,18 @@ class SelectInputBlockEditForm extends preact.Component {
                         class="form-input"/><i class="form-icon"></i>
                 </label>
             </FormGroupInline>
-            <FormGroup>
-                <label htmlFor="options" class="form-label">{ __('Options') }</label>
-                <textarea placeholder="Todo" class="form-input code"></textarea>
-            </FormGroup>
-        </div>;
+        </div>,
+        <FormGroup>
+            <label htmlFor="options" class="form-label pt-0 pb-1">{ __('Options') }</label>
+            <CrudList
+                items={ options }
+                itemTitleKey="text"
+                onListMutated={ this.emitOptions.bind(this) }
+                createNewItem={ () => ({text: __('Option text')}) }
+                editForm={ SelectInputOptionEditForm }
+                itemTypeFriendlyName={ __('option') }/>
+        </FormGroup>
+        ];
     }
     /**
      * @param {Event} e
@@ -82,13 +93,23 @@ class SelectInputBlockEditForm extends preact.Component {
         this.setState({multiple});
         this.props.onValueChanged(multiple, 'multiple');
     }
+    /**
+     * @param {Array<{text: String;}>} list
+     * @access private
+     */
+    emitOptions(list) {
+        const withReAssignedValues = list.map((item, i) =>
+            Object.assign({}, item, {value: `option-${i + 1}`}))
+        ;
+        this.props.onValueChanged(JSON.stringify(withReAssignedValues), 'options', false, env.normalTypingDebounceMillis);
+    }
 }
 
 const initialData = {
     name: __('inputName'),
     label: '',
     options: JSON.stringify([
-        {text: 'Option label', value: 'option-1'},
+        {text: __('Option text'), value: 'option-1'},
     ]),
     multiple: 0,
 };
@@ -102,7 +123,7 @@ export default {
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-select',
-    icon: 'box',
+    icon: 'chevron-down',
     reRender({name, label, options, multiple, id}, _renderChildren) {
         return [
             '<div class="form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',

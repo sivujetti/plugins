@@ -22,6 +22,9 @@ api.registerTranslationStrings({
     'Message': 'Viesti',
     'Sent by JetForms': 'Lähetetty JetFormsilla',
     'Send': 'Lähetä',
+    // CrudList.jsx
+    'Drag': 'Raahaa',
+    'Add %s': 'Lisää %s',
     // EditAppMainPanelSection.jsx
     'Manage forms': 'Sivuston lomakkeet',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
@@ -30,6 +33,14 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Vaaditaan',
     'inputName': 'syotteenNimi',
+    // SelectInputBlockType.jsx
+    'JetForms: Select input': 'JetForms: Alasvetovalikko/monivalinta',
+    'Multiple': 'Monivalinta',
+    'Options': 'Vaihtoehdot',
+    'Option text': 'Vaihtoehdon teksti',
+    'option': 'vaihtoehto',
+    // SelectInputOptionEditForm.jsx
+    'Done': 'Valmis',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Aihe',
     'To (email)': 'Vastaanottaja (email)',
