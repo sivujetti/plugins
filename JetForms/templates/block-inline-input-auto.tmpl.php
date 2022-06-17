@@ -1,5 +1,5 @@
 <?php if ($props->type === "JetFormsCheckboxInput"):
-    echo "<div class=\"form-group\"",
+    echo "<div class=\"jet-forms-input-wrap form-group\"",
         " data-block-type=\"JetFormsCheckboxInput\"",
         " data-block=\"", $props->id, "\"",
         ">",

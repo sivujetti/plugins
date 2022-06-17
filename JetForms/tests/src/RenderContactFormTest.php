@@ -10,7 +10,7 @@ use Sivujetti\Block\Entities\Block;
 use Sivujetti\Template;
 use Sivujetti\Tests\Utils\{PluginTestCase};
 
-class RenderContactFormTest extends PluginTestCase {
+final class RenderContactFormTest extends PluginTestCase {
     public function testRenderPageResultContainsContactForm(): void {
         $response = $this
             ->setupRenderPageTest()
@@ -68,7 +68,9 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("-bbbbbbbbbbbbbbbbbbb", $formEl->getAttribute("data-form-id"));
         $this->assertEquals("contact", $formEl->getAttribute("data-form-type"));
         $all = $formEl->childNodes;
-        // "<input name=\"email\" id=\"email\" type=\"email\" class=\"form-input\" placeholder=\"Email\" data-pristine-required>"
+        // <div ... class="jet-forms-input-wrap">
+        //     <input name="email" id="email" type="email" class="form-input" placeholder="Email" data-pristine-required>
+        // </div>
         $emailInputEl = $all[2]->childNodes[0];
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
         $this->assertEquals("email", $emailInputEl->getAttribute("id"));
@@ -76,10 +78,10 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("form-input", $emailInputEl->getAttribute("class"));
         $this->assertEquals("Email", $emailInputEl->getAttribute("placeholder"));
         $this->assertEquals("", $emailInputEl->getAttribute("data-pristine-required"));
-        // "<div class=\"form-group\">" .
-        //        "<label class=\"form-label\" for=\"name\">Test escape&lt;</label>" .
-        //        "<input name=\"name\" id=\"name\" type=\"text\" class=\"form-input\" data-pristine-required>" .
-        //    "</div>"
+        // <div ... class="jet-forms-input-wrap form-group">
+        //     <label class="form-label" for="name">Test escape&lt;</label>
+        //     <input name="name" id="name" type="text" class="form-input" data-pristine-required>
+        // </div>
         $textInputOuter = $all[5];
         $this->assertEquals("jet-forms-input-wrap form-group", $textInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $textInputOuter->childNodes;
@@ -91,18 +93,22 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("text", $inputEl->getAttribute("type"));
         $this->assertEquals("form-input", $inputEl->getAttribute("class"));
         $this->assertEquals("", $inputEl->getAttribute("data-pristine-required"));
-        // <textarea name=\"message\" id=\"message\" type=\"textarea\" class=\"form-input\" placeholder=\"Message\"></textarea>
+        // <div data-block-type="JetFormsTextareaInput" data-block="-bbbbbbbbbbbbbbbbbbb" class="jet-forms-input-wrap">
+        //    <textarea name="message" id="message" type="textarea" class="form-input" placeholder="Message"></textarea>
+        // </div>
         $textareaEl = $all[8]->childNodes[0];
         $this->assertEquals("message", $textareaEl->getAttribute("name"));
         $this->assertEquals("message", $textareaEl->getAttribute("id"));
         $this->assertEquals("textarea", $textareaEl->getAttribute("type"));
         $this->assertEquals("form-input", $textareaEl->getAttribute("class"));
         $this->assertEquals("Message", $textareaEl->getAttribute("placeholder"));
-        // <select class="form-select" name="wizardLevel">
-        //     <option value="value">text</option>
-        //     ...
-        //     <option value="-">-</option>
-        // </select>
+        // <div class="form-group" ...>
+        //     <select class="form-select" name="wizardLevel">
+        //         <option value="value">text</option>
+        //         ...
+        //         <option value="-">-</option>
+        //     </select>
+        // </div>
         $selectEl = $all[11]->childNodes[0];
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
         $optionEls = $selectEl->getElementsByTagName("option");
@@ -116,14 +122,14 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals($optsData[1]->text, $optionEls[1]->nodeValue);
         $this->assertEquals($optsData[2]->text, $optionEls[2]->nodeValue);
         $this->assertEquals("-", $optionEls[3]->nodeValue);
-        // <div class=\"form-group\">" .
-        //        "<label class=\"form-checkbox\">" .
-        //            "<input name=\"wantsReply\" type=\"checkbox\">" .
-        //            "<i class=\"form-icon\"></i> Test escape&gt;" .
-        //        "</label>" .
-        //    "</div>
+        // <div class="form-group" ...>
+        //     <label class="form-checkbox">
+        //         <input name="wantsReply" type="checkbox">
+        //         <i class="form-icon"></i> Test escape&gt;
+        //    </label>
+        // </div>
         $checkboxInputOuter = $all[14];
-        $this->assertEquals("form-group", $checkboxInputOuter->getAttribute("class"));
+        $this->assertEquals("jet-forms-input-wrap form-group", $checkboxInputOuter->getAttribute("class"));
         [$labelEl] = $checkboxInputOuter->childNodes;
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
         [$inputEl, $iconEl, $textNode] = $labelEl->childNodes;
@@ -131,11 +137,9 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("checkbox", $inputEl->getAttribute("type"));
         $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
         $this->assertEquals(" Test escape%gt;", rtrim($textNode->nodeValue));
-        // "<p class=\"button\" data-block-type=\"Button\">" .
-        //     "<button type=\"submit\" class=\"btn{$cls}\" data-block-root>" .
-        //         "{$rawBlock->html}{$childMarker}" .
-        //     "</button>" .
-        // "</p>"
+        // <p class="button" data-block-type="Button" data-block="-bbbbbbbbbbbbbbbbbbb">
+        //     <button type="submit" class="btn" data-block-root>Send</button>
+        // </p>
         $buttonOuter = $all[17];
         $this->assertEquals("button", $buttonOuter->getAttribute("class"));
         $this->assertEquals("Button", $buttonOuter->getAttribute("data-block-type"));
@@ -143,22 +147,22 @@ class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
         $this->assertEquals("btn", $buttonEl->getAttribute("class"));
         $this->assertEquals("Send", $buttonEl->nodeValue);
-        // <input type=\"hidden\" name=\"_returnTo\" value=\"/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb\">
+        // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
         $returnToInput = $all[20];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
-        // <input type=\"hidden\" name=\"_csrf\" value=\"todo\">
+        // <input type="hidden" name="_csrf" value="todo">
         $returnToInput = $all[21];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
         $this->assertEquals("todo", $returnToInput->getAttribute("value"));
     }
-    private static function createDataForTestContactFormBlock(): object {
+    public static function createDataForTestContactFormBlock(): object {
         return (object) [
             "behaviours" => json_encode([
-                ["name" => "SendForm", "data" => [
+                ["name" => "SendMail", "data" => [
                     "subjectTemplate" => "",
                     "toAddress" => "",
                     "fromAddress" => "",

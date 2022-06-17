@@ -2,8 +2,8 @@
 
 namespace SitePlugins\JetForms\Internal;
 
-use Pike\{PhpMailerMailer, PikeException, Validation};
-use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms};
+use Pike\{ArrayUtils, PhpMailerMailer, PikeException, Validation};
+use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms, SelectInputBlockType};
 use Sivujetti\SharedAPIContext;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
@@ -12,6 +12,7 @@ use Sivujetti\TheWebsite\Entities\TheWebsite;
  * Validates and runs a {type: "SendMail" ...} behaviour.
  *
  * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
+ * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\PhpMailerMailer */
@@ -41,14 +42,14 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @param object $behaviour Data from the database
      * @param object $reqBody Data from the form (plugins/JetForms/templates/block-contact-form.tmpl.php)
      * @throws \Pike\PikeException If $behaviours or $reqBody wasn't valid
-     * @param array<int, {type: string, name: string, label: string, isRequired: bool}> $inputDetails
+     * @param array<int, InputMeta> $inputsMeta
      */
-    public function run(object $behaviour, object $reqBody, array $inputDetails): void {
+    public function run(object $behaviour, object $reqBody, array $inputsMeta): void {
         $errors = [];
-        if (($errors = self::validateReqBodyForTemplate($reqBody, $inputDetails)))
+        if (($errors = self::validateReqBodyForTemplate($reqBody, $inputsMeta)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
-        $vars = $this->makeTemplateVars($reqBody, $inputDetails);
+        $vars = $this->makeTemplateVars($reqBody, $inputsMeta);
         $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
         $this->mailer->sendMail((object) [
@@ -79,18 +80,27 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param object $reqBody
-     * @param array<int, {type: string, name: string, label: string, isRequired: bool}> $inputDetails
+     * @param array<int, InputMeta> $inputsMeta
      * @return string[] A list of error messages or []
      */
-    private static function validateReqBodyForTemplate(object $reqBody, array $inputDetails): array {
+    private static function validateReqBodyForTemplate(object $reqBody, array $inputsMeta): array {
         $v = Validation::makeObjectValidator();
-        foreach ($inputDetails as $details) {
-            if ($details["type"] !== CheckboxInputBlockType::NAME) {
-                $propPath = $details["name"] . ($details["isRequired"] ? "" : "?");
+        foreach ($inputsMeta as $meta) {
+            if ($meta["type"] === CheckboxInputBlockType::NAME)
+                ; // ??
+            elseif ($meta["type"] === SelectInputBlockType::NAME) {
+                $validValues = array_merge(array_column($meta["details"]["options"], "value"), ["-"]);
+                if (!$meta["details"]["multiple"]) {
+                    $v->rule($meta["name"], "in", $validValues);
+                } else {
+                    $v->rule("{$meta["name"]}?", "type", "array");
+                    $v->rule("{$meta["name"]}?.*", "in", $validValues);
+                }
+            } else {
+                $propPath = $meta["name"] . ($meta["isRequired"] ? "" : "?");
                 $v->rule($propPath, "type", "string");
                 $v->rule($propPath, "maxLength", 6000);
-            } else
-                ;
+            }
         }
         return $v->validate($reqBody);
     }
@@ -105,14 +115,26 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param object $reqBody Validated form data
-     * @param array<int, {type: string, name: string, label: string, isRequired: bool}> $inputDetails
+     * @param array<int, InputMeta> $inputsMeta
      * @return object
      */
-    private function makeTemplateVars(object $reqBody, array $inputDetails): object {
+    private function makeTemplateVars(object $reqBody, array $inputsMeta): object {
         $combined = (object) ["siteName" => $this->theWebsite->name];
-        foreach ($inputDetails as ["name" => $name, "type" => $type]) {
+        foreach ($inputsMeta as $meta) {
+            ["name" => $name, "type" => $type] = $meta;
             if ($type === CheckboxInputBlockType::NAME) {
                 $combined->{$name} = property_exists($reqBody, $name) ? "Checked" : "Not checked";
+            } elseif ($type === SelectInputBlockType::NAME) {
+                $opts = $meta["details"]["options"];
+                if (!$meta["details"]["multiple"]) {
+                    $selected = $reqBody->{$name} ?? "-";
+                    $combined->{$name} = $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
+                } else {
+                    $selected = $reqBody->{$name} ?? [];
+                    $combined->{$name} = implode("\n", array_map(fn($opt) =>
+                        "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
+                    , $opts));
+                }
             } else {
                 $combined->{$name} = $reqBody->{$name} ?? "- None provided";
             }

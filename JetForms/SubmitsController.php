@@ -11,6 +11,8 @@ use Sivujetti\Page\PagesRepository2;
 
 /**
  * Contains handlers for "/plugins/jet-forms/submits/*".
+ *
+ * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SubmitsController {
     /**
@@ -30,7 +32,7 @@ final class SubmitsController {
         if (($errors = self::validateSubmitInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
-        $page = $pagesRepo->fetch()
+        $page = $pagesRepo->fetch(fields: ["@blocks"])
             ->where("slug = ?", "/{$req->params->pageSlug}")
             ->fetch();
         if (!$page) throw new PikeException("Invalid input (not such page)",
@@ -42,14 +44,14 @@ final class SubmitsController {
         if (!($form->behaviours = json_decode($form->behaviours, flags: JSON_THROW_ON_ERROR)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         $clsStrings = self::createValidBehaviourClsStrings($form, $apiCtx->getPlugin("JetForms"));
-        $details = self::createFormInputDetails($form);
+        $meta = self::createInputsMeta($form);
         //
         for ($i = 0; $i < count($clsStrings); ++$i)
             // @allow \Pike\PikeException
             $errors = App::$adi->execute([$clsStrings[$i], "run"], [
                 $form->behaviours[$i]->data,
                 $req->body,
-                $details,
+                $meta,
             ]);
         //
         if ($errors) $errors = array_map("urlencode", $errors);
@@ -57,23 +59,30 @@ final class SubmitsController {
         $res->redirect($req->body->_returnTo . ($asJson ? "&errors={$asJson}" : ""));
     }
     /**
-     * @return array<int, array{type: string, name: string, label: string, isRequired: bool}>
-    */
-    private static function createFormInputDetails(object $form): array {
+     * @return array<int, InputMeta>
+     */
+    private static function createInputsMeta(object $form): array {
         $out = [];
-        $normalInputs = [
+        $inputs = [
             CheckboxInputBlockType::NAME,
             EmailInputBlockType::NAME,
             TextareaInputBlockType::NAME,
             TextInputBlockType::NAME,
         ];
-        BlockTree::traverse($form->children, function ($block) use ($normalInputs, &$out) {
-            if (in_array($block->type, $normalInputs, true))
+        BlockTree::traverse($form->children, function ($block) use ($inputs, &$out) {
+            $isSelect = $block->type === SelectInputBlockType::NAME;
+            if ($isSelect || in_array($block->type, $inputs, true))
                 $out[] = [
                     "type" => $block->type,
                     "name" => $block->name,
                     "label" => $block->label,
                     "isRequired" => ($block->isRequired ?? null) === 1,
+                    "details" => !$isSelect ? [] : [
+                        "options" => json_decode($block->options,
+                                                 associative: true,
+                                                 flags: JSON_THROW_ON_ERROR),
+                        "multiple" => $block->multiple === 1,
+                    ]
                 ];
         });
         return $out;

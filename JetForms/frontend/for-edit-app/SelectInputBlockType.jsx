@@ -81,8 +81,7 @@ class SelectInputBlockEditForm extends preact.Component {
                 createNewItem={ () => ({text: __('Option text')}) }
                 editForm={ SelectInputOptionEditForm }
                 itemTypeFriendlyName={ __('option') }/>
-        </FormGroup>
-        ];
+        </FormGroup>];
     }
     /**
      * @param {Event} e
@@ -114,9 +113,6 @@ const initialData = {
     multiple: 0,
 };
 
-/**
- * @returns {Object}
- */
 export default {
     name: 'JetFormsSelectInput',
     friendlyName: 'JetForms: Select input',
@@ -126,7 +122,7 @@ export default {
     icon: 'chevron-down',
     reRender({name, label, options, multiple, id}, _renderChildren) {
         return [
-            '<div class="form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',
+            '<div class="jet-forms-input-wrap form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',
                 !label ? '' : `<label class="form-label">${label}</label>`,
                 '<select class="form-select" name="', name, '"', !multiple ? '' : ' multiple', '>'
             ].concat(
