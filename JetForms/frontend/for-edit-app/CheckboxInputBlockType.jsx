@@ -5,25 +5,24 @@ import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-fo
 class CheckboxInputBlockEditForm extends preact.Component {
     // nameInput;
     /**
-     * @param {RawBlockData} snapshot
-     * @access public
-     */
-    overrideValues(snapshot) {
-        reHookValues(this, [{name: 'name', value: snapshot.name},
-                            {name: 'label', value: snapshot.label}]);
-    }
-    /**
      * @access protected
      */
     componentWillMount() {
-        const {block, onValueChanged} = this.props;
+        const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
+        const {name, label} = getBlockCopy();
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: block.name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
         ]));
+        grabChanges((block, _origin, isUndo) => {
+            if (isUndo && (this.state.values.name !== block.name ||
+                           this.state.values.label !== block.label))
+                reHookValues(this, [{name: 'name', value: block.name},
+                                    {name: 'label', value: block.label}]);
+        });
     }
     /**
      * @access protected
@@ -38,7 +37,7 @@ class CheckboxInputBlockEditForm extends preact.Component {
         unhookForm(this);
     }
     /**
-     * @param {BlockEditFormProps} props
+     * @param {BlockEditFormProps2} props
      * @access protected
      */
     render(_) {
@@ -71,12 +70,13 @@ const checkboxInputBlockType = {
     initialData,
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
     icon: 'checkbox',
-    reRender({name, label, id}, _renderChildren) {
+    reRender({name, label, id}, renderChildren) {
         return ['<div class="jet-forms-input-wrap form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
             '<label class="form-checkbox">',
                 '<input name="', name, '" type="checkbox">',
                 '<i class="form-icon"></i> ', label,
             '</label>',
+            renderChildren(),
         '</div>'].join('');
     },
     createSnapshot: from => ({

@@ -7,17 +7,17 @@ class EditAppMainPanelSection extends MenuSection {
      */
     render(_, {isCollapsed}) {
         return <section class={ `panel-section${isCollapsed ? '' : ' open'}` }>
-            <button class="d-flex col-12 flex-centered pr-2" onClick={ () => { this.setState({isCollapsed: !isCollapsed}); } }>
-                <Icon iconId="box" className="size-sm mr-2"/>
-                <span class="pl-1 color-default">
+            <button class="flex-centered pr-2 section-title col-12" onClick={ () => { this.setState({isCollapsed: !isCollapsed}); } }>
+                <Icon iconId="box" className="p-absolute size-sm mr-2 color-purple"/>
+                <span class="pl-1 d-block col-12 color-default">
                     JetForms
-                    <span class="text-ellipsis text-tiny">{ __('Manage forms') }</span>
+                    <span class="text-ellipsis text-tiny col-12">{ __('Manage forms') }</span>
                 </span>
-                <Icon iconId="chevron-right" className="col-ml-auto size-xs"/>
+                <Icon iconId="chevron-right" className="p-absolute size-xs"/>
             </button>
             <div>
             <a onClick={ this.openManageMailSendSettingsDialog.bind(this) } class="with-icon">
-                <Icon iconId="send" className="size-sm color-dimmed"/>
+                <Icon iconId="send" className="size-xs color-dimmed"/>
                 <span class="color-dimmed">{ __('Send mail settings') }</span>
             </a>
             </div>

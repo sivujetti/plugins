@@ -50,7 +50,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
     componentDidMount() {
         setFocusTo(this.subjectInputEl);
         createTrier(() => {
-            let textareaEl = this.bodyTemplateInputEl.current.inputEl.current;
+            const textareaEl = this.bodyTemplateInputEl.current.inputEl.current;
             if (!textareaEl || textareaEl.value === undefined) return false;
             window.autosize(textareaEl);
             return true;

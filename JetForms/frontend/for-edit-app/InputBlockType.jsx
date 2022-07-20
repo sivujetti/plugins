@@ -5,30 +5,31 @@ import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-fo
 class InputBlockEditForm extends preact.Component {
     // nameInput;
     /**
-     * @param {RawBlockData} snapshot
-     * @access public
-     */
-    overrideValues(snapshot) {
-        reHookValues(this, [{name: 'name', value: snapshot.name},
-                            {name: 'label', value: snapshot.label},
-                            {name: 'placeholder', value: snapshot.placeholder}]);
-        this.setState({isRequired: snapshot.isRequired});
-    }
-    /**
      * @access protected
      */
     componentWillMount() {
-        const {block, onValueChanged} = this.props;
+        const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
+        const {name, label, placeholder, isRequired} = getBlockCopy();
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: block.name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'placeholder', value: block.placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'placeholder', value: placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
         ]), {
-            isRequired: block.isRequired,
+            isRequired,
+        });
+        grabChanges((block, _origin, isUndo) => {
+            if (isUndo && (this.state.values.name !== block.name ||
+                           this.state.values.label !== block.label ||
+                           this.state.values.placeholder !== block.placeholder))
+                reHookValues(this, [{name: 'name', value: block.name},
+                                    {name: 'label', value: block.label},
+                                    {name: 'placeholder', value: block.placeholder}]);
+            if (this.state.isRequired !== block.isRequired)
+                this.setState({isRequired: block.isRequired});
         });
     }
     /**
@@ -44,7 +45,7 @@ class InputBlockEditForm extends preact.Component {
         unhookForm(this);
     }
     /**
-     * @param {BlockEditFormProps} props
+     * @param {BlockEditFormProps2} props
      * @access protected
      */
     render(_, {isRequired}) {
@@ -83,8 +84,7 @@ class InputBlockEditForm extends preact.Component {
      */
     emitIsRequired(e) {
         const isRequired = e.target.checked ? 1 : 0;
-        this.setState({isRequired});
-        this.props.onValueChanged(isRequired, 'isRequired');
+        this.props.emitValueChanged(isRequired, 'isRequired', false, env.normalTypingDebounceMillis);
     }
 }
 
@@ -106,7 +106,7 @@ export default settings => ({
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-auto',
     icon: settings.icon || 'box',
-    reRender({name, isRequired, label, placeholder, id}, _renderChildren) {
+    reRender({name, isRequired, label, placeholder, id}, renderChildren) {
         const [startTag, closingTag] = settings.type !== 'textarea' ? ['input', ''] : ['textarea', '</textarea>'];
         return [
             '<div data-block-type="JetForms', settings.name, '" data-block="', id, '"',
@@ -118,6 +118,7 @@ export default settings => ({
                     placeholder ? ` placeholder="${placeholder}"` : '',
                     isRequired ? ' data-pristine-required' : '',
                 '>', closingTag,
+                renderChildren(),
             '</div>'
         ].join('');
     },

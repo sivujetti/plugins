@@ -7,8 +7,9 @@
             "<input name=\"", $this->e($props->name), "\" type=\"checkbox\">",
             "<i class=\"form-icon\"></i> ", $this->e($props->label),
         "</label>",
+        $this->renderChildren($props),
     "</div>";
 else:
     [$startTag, $endTag] = !(SIVUJETTI_FLAGS & SIVUJETTI_DEVMODE) ? ["<!--", "-->"] : ["<div>", "</div>"];
-    echo "{$startTag} JetForms/templates/block-inline-input-auto.tmpl.php: Don't know how to render custom block type `{$props->type}` {$endTag}";
+    echo $startTag, " JetForms/templates/block-inline-input-auto.tmpl.php: Don't know how to render custom block type `", $this->e($props->type), "` ", $endTag;
 endif; ?>

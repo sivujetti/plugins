@@ -8,4 +8,5 @@
         echo "<option value=\"", $this->e($value), "\">", $this->__($text), "</option>";
     }
 echo "</select>",
+    $this->renderChildren($props),
 "</div>";

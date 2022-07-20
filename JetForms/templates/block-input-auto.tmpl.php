@@ -7,12 +7,13 @@
         ? " class=\"jet-forms-input-wrap\">"
         : " class=\"jet-forms-input-wrap form-group\"><label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>";
     //
-    echo "<div data-block-type=\"{$props->type}\" data-block=\"{$props->id}\"", $closeWrap,
+    echo "<div data-block-type=\"", $props->type, "\" data-block=\"", $props->id, "\"", $closeWrap,
         "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name),
             "\" type=\"", $settings["type"], "\" class=\"form-input\"",
             $props->placeholder ? " placeholder=\"{$this->e($props->placeholder)}\"" : "",
             $props->isRequired ? " data-pristine-required" : "",
         ">", $settings["closingTag"], // @allow raw html
+        $this->renderChildren($props),
     "</div>";
 else:
     [$startTag, $endTag] = !(SIVUJETTI_FLAGS & SIVUJETTI_DEVMODE) ? ["<!--", "-->"] : ["<div>", "</div>"];

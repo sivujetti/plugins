@@ -8,29 +8,32 @@ import SelectInputOptionEditForm from './SelectInputOptionEditForm.jsx';
 class SelectInputBlockEditForm extends preact.Component {
     // nameInput;
     /**
-     * @param {RawBlockData} snapshot
-     * @access public
-     */
-    overrideValues(snapshot) {
-        reHookValues(this, [{name: 'name', value: snapshot.name},
-                            {name: 'label', value: snapshot.label}]);
-        this.setState({multiple: snapshot.multiple, options: JSON.parse(snapshot.options)});
-    }
-    /**
      * @access protected
      */
     componentWillMount() {
-        const {block, onValueChanged} = this.props;
+        const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
+        const {name, label, multiple, options} = getBlockCopy();
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: block.name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'label', value: block.label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
-             onAfterValueChanged: (value, hasErrors) => { onValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
+            {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
+             onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
         ], {
-            multiple: block.multiple,
-            options: JSON.parse(block.options),
+            multiple,
+            optionsJson: options,
+            optionsParsed: JSON.parse(options),
         }));
+        grabChanges((block, _origin, isUndo) => {
+            if (isUndo && (this.state.values.name !== block.name ||
+                           this.state.values.label !== block.label))
+                reHookValues(this, [{name: 'name', value: block.name},
+                                    {name: 'label', value: block.label}]);
+            if (this.state.multiple !== block.multiple)
+                this.setState({multiple: block.multiple});
+            if (this.state.optionsJson !== block.options)
+                this.setState({optionsJson: block.options, optionsParsed: JSON.parse(block.options)});
+        });
     }
     /**
      * @access protected
@@ -45,10 +48,10 @@ class SelectInputBlockEditForm extends preact.Component {
         unhookForm(this);
     }
     /**
-     * @param {BlockEditFormProps} props
+     * @param {BlockEditFormProps2} props
      * @access protected
      */
-    render(_, {multiple, options}) {
+    render(_, {multiple, optionsParsed}) {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
@@ -66,7 +69,7 @@ class SelectInputBlockEditForm extends preact.Component {
                 <label class="form-checkbox mt-0">
                     <input
                         onClick={ this.emitMultiple.bind(this) }
-                        checked={ multiple }
+                        checked={ multiple === 1 }
                         type="checkbox"
                         class="form-input"/><i class="form-icon"></i>
                 </label>
@@ -75,7 +78,7 @@ class SelectInputBlockEditForm extends preact.Component {
         <FormGroup>
             <label htmlFor="options" class="form-label pt-0 pb-1">{ __('Options') }</label>
             <CrudList
-                items={ options }
+                items={ optionsParsed }
                 itemTitleKey="text"
                 onListMutated={ this.emitOptions.bind(this) }
                 createNewItem={ () => ({text: __('Option text')}) }
@@ -89,8 +92,7 @@ class SelectInputBlockEditForm extends preact.Component {
      */
     emitMultiple(e) {
         const multiple = e.target.checked ? 1 : 0;
-        this.setState({multiple});
-        this.props.onValueChanged(multiple, 'multiple');
+        this.props.emitValueChanged(multiple, 'multiple', false, env.normalTypingDebounceMillis);
     }
     /**
      * @param {Array<{text: String;}>} list
@@ -100,7 +102,7 @@ class SelectInputBlockEditForm extends preact.Component {
         const withReAssignedValues = list.map((item, i) =>
             Object.assign({}, item, {value: `option-${i + 1}`}))
         ;
-        this.props.onValueChanged(JSON.stringify(withReAssignedValues), 'options', false, env.normalTypingDebounceMillis);
+        this.props.emitValueChanged(JSON.stringify(withReAssignedValues), 'options', false, env.normalTypingDebounceMillis);
     }
 }
 
@@ -120,17 +122,18 @@ export default {
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-select',
     icon: 'chevron-down',
-    reRender({name, label, options, multiple, id}, _renderChildren) {
+    reRender({name, label, options, multiple, id}, renderChildren) {
         return [
             '<div class="jet-forms-input-wrap form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',
                 !label ? '' : `<label class="form-label">${label}</label>`,
-                '<select class="form-select" name="', name, '"', !multiple ? '' : ' multiple', '>'
+                '<select class="form-select" name="', name, multiple ? '"' : '[]" multiple', '>'
             ].concat(
                 JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>
-                    ['<option value="', value ,'">', __(text), '</option>']
+                    ['<option value="', value , '">', __(text), '</option>']
                 ).flat()
             ).concat([
                 '</select>',
+                renderChildren(),
             '</div>'
         ]).join('');
     },
