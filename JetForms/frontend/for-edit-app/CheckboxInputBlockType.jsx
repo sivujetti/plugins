@@ -70,9 +70,11 @@ const checkboxInputBlockType = {
     initialData,
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
     icon: 'checkbox',
-    reRender({name, label, id}, renderChildren) {
-        return ['<div class="jet-forms-input-wrap form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
-            '<label class="form-checkbox">',
+    reRender({name, label, id, styleClasses}, renderChildren) {
+        return ['<div class="j-', blockTypeName,
+                styleClasses ? ` ${styleClasses}` : '',
+                ' form-group" data-block-type="', blockTypeName, '" data-block="', id,
+            '"><label class="form-checkbox">',
                 '<input name="', name, '" type="checkbox">',
                 '<i class="form-icon"></i> ', label,
             '</label>',

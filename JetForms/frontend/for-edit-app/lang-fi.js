@@ -33,6 +33,8 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Vaaditaan',
     'inputName': 'syotteenNimi',
+    // NumberInputBlockType.jsx
+    'JetForms: Numero-kenttä': 'JetForms: Numero-kenttä',
     // SelectInputBlockType.jsx
     'JetForms: Select input': 'JetForms: Alasvetovalikko/monivalinta',
     'Multiple': 'Monivalinta',

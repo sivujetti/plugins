@@ -1,8 +1,9 @@
 <?php if ($props->type === "JetFormsCheckboxInput"):
-    echo "<div class=\"jet-forms-input-wrap form-group\"",
+    echo "<div class=\"j-JetFormsCheckboxInput",
+        $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
+        " form-group\"",
         " data-block-type=\"JetFormsCheckboxInput\"",
-        " data-block=\"", $props->id, "\"",
-        ">",
+        " data-block=\"", $props->id, "\">",
         "<label class=\"form-checkbox\">",
             "<input name=\"", $this->e($props->name), "\" type=\"checkbox\">",
             "<i class=\"form-icon\"></i> ", $this->e($props->label),

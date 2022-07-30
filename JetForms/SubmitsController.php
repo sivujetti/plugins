@@ -32,7 +32,7 @@ final class SubmitsController {
         if (($errors = self::validateSubmitInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
-        $page = $pagesRepo->fetch(fields: ["@blocks"])
+        $page = $pagesRepo->select(fields: ["@blocks"])
             ->where("slug = ?", "/{$req->params->pageSlug}")
             ->fetch();
         if (!$page) throw new PikeException("Invalid input (not such page)",

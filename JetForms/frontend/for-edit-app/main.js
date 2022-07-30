@@ -2,6 +2,7 @@ import {api} from '@sivujetti-commons-for-edit-app';
 import ContactFormBlockType from './ContactFormBlockType.jsx';
 import CheckboxInputBlockType from './CheckboxInputBlockType.jsx';
 import EmailInputBlockType from './EmailInputBlockType.jsx';
+import NumberInputBlockType from './NumberInputBlockType.jsx';
 import SelectInputBlockType from './SelectInputBlockType.jsx';
 import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
@@ -13,6 +14,7 @@ if (api.user.can('doAnything')) {
 api.blockTypes.register(CheckboxInputBlockType.name, () => CheckboxInputBlockType);
 api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
 api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
+api.blockTypes.register(NumberInputBlockType.name, () => NumberInputBlockType);
 api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
 api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
 api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
@@ -41,6 +43,19 @@ setTimeout(() => {
     left: initial;
     right: 1rem;
     top: .8rem;
+}
+ul.table-list > li {
+    border-bottom: 1px solid rgba(var(--components-color-fb-default),.14);
+    margin: 0;
+    padding: .4rem 0;
+    display: flex;
+    align-items: center;
+}
+.drag-handle {
+    background: transparent;
+    border: none;
+    cursor: grab;
+    color: var(--color-fg-dimmed);
 }`
     );
     document.head.appendChild(el);

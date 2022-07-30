@@ -33,6 +33,8 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Required': 'Required',
     'inputName': 'inputName',
+    // NumberInputBlockType.jsx
+    'JetForms: Number input': 'JetForms: Number input',
     // SelectInputBlockType.jsx
     'JetForms: Select input': 'JetForms: Select input',
     'Multiple': 'Multiple',

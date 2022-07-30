@@ -96,7 +96,7 @@ const initialData = {
 };
 
 /**
- * @param {{name: String; friendlyName: String; type?: String; icon?: String;}} settings
+ * @param {{name: String; friendlyName: String; type?: String; icon?: String; inputMode?: String;}} settings
  * @returns {Object}
  */
 export default settings => ({
@@ -106,15 +106,22 @@ export default settings => ({
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-auto',
     icon: settings.icon || 'box',
-    reRender({name, isRequired, label, placeholder, id}, renderChildren) {
-        const [startTag, closingTag] = settings.type !== 'textarea' ? ['input', ''] : ['textarea', '</textarea>'];
+    reRender({name, isRequired, label, placeholder, id, styleClasses}, renderChildren) {
+        const [startTag, closingTag, inputModeStr] = settings.type !== 'textarea'
+            ? ['input', '', !settings.inputMode ? '' : ` inputmode="${settings.inputMode}"`]
+            : ['textarea', '</textarea>', ''];
+        const blockTypeName = `JetForms${settings.name}`;
         return [
-            '<div data-block-type="JetForms', settings.name, '" data-block="', id, '"',
+            '<div class="j-', blockTypeName,
+                    styleClasses ? ` ${styleClasses}` : '',
+                    label ? ' form-group' : '',
+                    '" data-block-type="', blockTypeName, '" data-block="', id, '">',
                 !label
-                    ? ' class="jet-forms-input-wrap">'
-                    : ` class="jet-forms-input-wrap form-group"><label class="form-label" for="${name}">${label}</label>`,
+                    ? ''
+                    : `<label class="form-label" for="${name}">${label}</label>`,
                 '<', startTag, ' name="', name, '" id="', name,
                     '" type="', settings.type, '" class="form-input"',
+                    inputModeStr,
                     placeholder ? ` placeholder="${placeholder}"` : '',
                     isRequired ? ' data-pristine-required' : '',
                 '>', closingTag,

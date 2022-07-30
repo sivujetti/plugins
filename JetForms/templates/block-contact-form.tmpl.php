@@ -1,7 +1,7 @@
 <form
     action="<?= $this->url("/plugins/jet-forms/submits/{$props->id}{$currentPage->slug}") ?>"
     method="post"
-    class="jet-form"<?php // see also public/plugin-jet-forms-bundle.js ?>
+    class="j-<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?> jet-form<?= /* see also public/plugin-jet-forms-bundle.js */ $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "" ?>"
     data-form-sent-message="<?= $this->__("Thank you for your message!") ?>"
     data-form-id="<?= $props->id ?>"
     data-form-type="contact"

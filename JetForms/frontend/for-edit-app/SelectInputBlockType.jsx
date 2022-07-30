@@ -115,18 +115,23 @@ const initialData = {
     multiple: 0,
 };
 
+const blockTypeName = 'JetFormsSelectInput';
+
 export default {
-    name: 'JetFormsSelectInput',
+    name: blockTypeName,
     friendlyName: 'JetForms: Select input',
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-select',
-    icon: 'chevron-down',
-    reRender({name, label, options, multiple, id}, renderChildren) {
+    icon: 'selector',
+    reRender({name, label, options, multiple, id, styleClasses}, renderChildren) {
         return [
-            '<div class="jet-forms-input-wrap form-group" data-block-type="JetFormsSelectInput" data-block="', id, '">',
-                !label ? '' : `<label class="form-label">${label}</label>`,
-                '<select class="form-select" name="', name, multiple ? '"' : '[]" multiple', '>'
+            '<div class="j-', blockTypeName,
+                    styleClasses ? ` ${styleClasses}` : '',
+                    label ? ' form-group' : '',
+                    '" data-block-type="', blockTypeName, '" data-block="', id, '">',
+                !label ? '' : `<label class="form-label" for="${name}">${label}</label>`,
+                '<select class="form-select" name="', name, !multiple ? '"' : '[]" multiple', '>'
             ].concat(
                 JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>
                     ['<option value="', value , '">', __(text), '</option>']
