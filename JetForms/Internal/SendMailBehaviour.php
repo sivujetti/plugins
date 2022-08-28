@@ -3,7 +3,9 @@
 namespace SitePlugins\JetForms\Internal;
 
 use Pike\{ArrayUtils, PhpMailerMailer, PikeException, Validation};
-use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms, SelectInputBlockType};
+use Pike\Auth\Crypto;
+use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms,
+                            SelectInputBlockType, SettingsController};
 use Sivujetti\SharedAPIContext;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
@@ -23,20 +25,25 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     private TheWebsite $theWebsite;
     /** @var \Sivujetti\StoredObjects\StoredObjectsRepository */
     private StoredObjectsRepository $storedObjectsRepo;
+    /** @var \Pike\Auth\Crypto */
+    private Crypto $crypto;
     /**
      * @param \Pike\PhpMailerMailer $mailer 
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sivujetti\TheWebsite\Entities\TheWebsite $theWebsite
      * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storedObjectsRepo
+     * @param \Pike\Auth\Crypto $crypto
      */
     public function __construct(PhpMailerMailer $mailer,
                                 SharedAPIContext $apiCtx,
                                 TheWebsite $theWebsite,
-                                StoredObjectsRepository $storedObjectsRepository) {
+                                StoredObjectsRepository $storedObjectsRepo,
+                                Crypto $crypto) {
         $this->mailer = $mailer;
         $this->apiCtx = $apiCtx;
         $this->theWebsite = $theWebsite;
-        $this->storedObjectsRepo = $storedObjectsRepository;
+        $this->storedObjectsRepo = $storedObjectsRepo;
+        $this->crypto = $crypto;
     }
     /**
      * @param object $behaviour Data from the database
@@ -111,7 +118,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
         $dataBag = $this->storedObjectsRepo->getEntry("JetForms:mailSendSettings");
         if (!$dataBag)
             throw new PikeException("", PikeException::ERROR_EXCEPTION);
-        return $dataBag->data;
+        return SettingsController::withDecryptedValues($dataBag->data, $this->crypto);
     }
     /**
      * @param object $reqBody Validated form data

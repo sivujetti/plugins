@@ -81,7 +81,7 @@ final class SettingsController {
      * @param \Pike\Auth\Crypto $crypto
      * @psalm-return JetFormsMailSendSettings
      */
-    private static function withDecryptedValues(array &$mailSettings, Crypto $crypto): array {
+    public static function withDecryptedValues(array &$mailSettings, Crypto $crypto): array {
         if ($mailSettings["sendingMethod"] === "smtp")
             $mailSettings["SMTP_password"] = $crypto->decrypt($mailSettings["SMTP_password"], SIVUJETTI_SECRET);
         return $mailSettings;
