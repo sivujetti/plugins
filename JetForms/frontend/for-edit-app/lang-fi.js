@@ -14,6 +14,7 @@ api.registerTranslationStrings({
     'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
     // CheckboxInputBlockType.jsx
     'JetForms: Checkbox input': 'JetForms: Checkbox-kenttä',
+    'Text': 'Teksti',
     // ContactFormBlockType.jsx
     'JetForms: Contact form': 'JetForms: Yhteydenottolomake',
     'New contact form entry on [siteName]': 'Uusi yhteydenotto sivustolta [siteName]',
@@ -31,10 +32,12 @@ api.registerTranslationStrings({
     // EmailInputBlockType.jsx
     'JetForms: Email input': 'JetForms: Sähköpostikenttä',
     // InputBlockType.jsx
+    'Label_with_descr': 'Nimike (label)',
+    'Placeholder_with_descr': 'Vihje (placeholder)',
     'Required': 'Vaaditaan',
     'inputName': 'syotteenNimi',
     // NumberInputBlockType.jsx
-    'JetForms: Numero-kenttä': 'JetForms: Numero-kenttä',
+    'JetForms: Number input': 'JetForms: Numero-kenttä',
     // SelectInputBlockType.jsx
     'JetForms: Select input': 'JetForms: Alasvetovalikko/monivalinta',
     'Multiple': 'Monivalinta',
@@ -50,6 +53,7 @@ api.registerTranslationStrings({
     'From (email)': 'Lähettäjä (email)',
     'From (name)': 'Lähettäjä (nimi)',
     'Body': 'Sisältötemplaatti',
+    'useYourOwnEmailHereHint': 'Täytä oma sähköpostisi ja nimesi näihin kenttiin.',
     // SubscriptionFormBlockType.jsx
     'JetForms: Subscription form': 'JetForms: Tilauslomake',
     'Send mail': 'Lähetä e-mail',

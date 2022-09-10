@@ -15,7 +15,7 @@ class SelectInputBlockEditForm extends preact.Component {
         const {name, label, multiple, options} = getBlockCopy();
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
             {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
@@ -55,12 +55,7 @@ class SelectInputBlockEditForm extends preact.Component {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
-                <label htmlFor="name" class="form-label">{ __('Name') }</label>
-                <Input vm={ this } prop="name" ref={ this.nameInput }/>
-                <InputErrors vm={ this } prop="name"/>
-            </FormGroupInline>
-            <FormGroupInline>
-                <label htmlFor="label" class="form-label">{ __('Label') }</label>
+                <label htmlFor="label" class="form-label">{ __('Label_with_descr') }</label>
                 <Input vm={ this } prop="label"/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
@@ -73,6 +68,11 @@ class SelectInputBlockEditForm extends preact.Component {
                         type="checkbox"
                         class="form-input"/><i class="form-icon"></i>
                 </label>
+            </FormGroupInline>
+            <FormGroupInline>
+                <label htmlFor="name" class="form-label">Id</label>
+                <Input vm={ this } prop="name" ref={ this.nameInput }/>
+                <InputErrors vm={ this } prop="name"/>
             </FormGroupInline>
         </div>,
         <FormGroup>

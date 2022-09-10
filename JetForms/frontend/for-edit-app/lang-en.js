@@ -14,6 +14,7 @@ api.registerTranslationStrings({
     'Save send mail settings': 'Save send mail settings',
     // CheckboxInputBlockType.jsx
     'JetForms: Checkbox input': 'JetForms: Checkbox input',
+    'Text': 'Text',
     // ContactFormBlockType.jsx
     'JetForms: Contact form': 'JetForms: Contact form',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',
@@ -31,6 +32,8 @@ api.registerTranslationStrings({
     // EmailInputBlockType.jsx
     'JetForms: Email input': 'JetForms: Email input',
     // InputBlockType.jsx
+    'Label_with_descr': 'Label',
+    'Placeholder_with_descr': 'Label',
     'Required': 'Required',
     'inputName': 'inputName',
     // NumberInputBlockType.jsx
@@ -50,6 +53,7 @@ api.registerTranslationStrings({
     'From (email)': 'From (email)',
     'From (name)': 'From (name)',
     'Body': 'Body',
+    'useYourOwnEmailHereHint': 'Täytä oma sähköpostisi ja nimesi näihin kenttiin.',
     // SubscriptionFormBlockType.jsx
     'JetForms: Subscription form': 'JetForms: Subscription form',
     'Send mail': 'Send mail',

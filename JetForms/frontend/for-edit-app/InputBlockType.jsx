@@ -12,15 +12,15 @@ class InputBlockEditForm extends preact.Component {
         const {name, label, placeholder, isRequired} = getBlockCopy();
         this.nameInput = preact.createRef();
         this.setState(hookForm(this, [
-            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Name'),
+            {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
             {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
             {name: 'placeholder', value: placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
-        ]), {
+        ], {
             isRequired,
-        });
+        }));
         grabChanges((block, _origin, isUndo) => {
             if (isUndo && (this.state.values.name !== block.name ||
                            this.state.values.label !== block.label ||
@@ -52,14 +52,14 @@ class InputBlockEditForm extends preact.Component {
         if (!this.state.values) return;
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
-                <label htmlFor="name" class="form-label">{ __('Name') }</label>
-                <Input vm={ this } prop="name" ref={ this.nameInput }/>
-                <InputErrors vm={ this } prop="name"/>
-            </FormGroupInline>
-            <FormGroupInline>
-                <label htmlFor="label" class="form-label">{ __('Label') }</label>
+                <label htmlFor="label" class="form-label">{ __('Label_with_descr') }</label>
                 <Input vm={ this } prop="label"/>
                 <InputErrors vm={ this } prop="label"/>
+            </FormGroupInline>
+            <FormGroupInline>
+                <label htmlFor="placeholder" class="form-label">{ __('Placeholder_with_descr') }</label>
+                <Input vm={ this } prop="placeholder"/>
+                <InputErrors vm={ this } prop="placeholder"/>
             </FormGroupInline>
             <FormGroupInline>
                 <span class="form-label">{ __('Required') }?</span>
@@ -72,9 +72,9 @@ class InputBlockEditForm extends preact.Component {
                 </label>
             </FormGroupInline>
             <FormGroupInline>
-                <label htmlFor="placeholder" class="form-label">{ __('Placeholder') }</label>
-                <Input vm={ this } prop="placeholder"/>
-                <InputErrors vm={ this } prop="placeholder"/>
+                <label htmlFor="name" class="form-label">Id</label>
+                <Input vm={ this } prop="name" ref={ this.nameInput }/>
+                <InputErrors vm={ this } prop="name"/>
             </FormGroupInline>
         </div>;
     }
