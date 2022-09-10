@@ -6,8 +6,7 @@
     data-form-id="<?= $props->id ?>"
     data-form-type="contact"
     data-block-type="<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?>"
-    data-block="<?= $props->id ?>"
-    novalidate>
+    data-block="<?= $props->id ?>">
     <?= $this->renderChildren($props) ?>
     <input type="hidden" name="_returnTo" value="<?= is_string($props->returnTo ?? null)
         ? $this->e($props->returnTo)

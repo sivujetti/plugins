@@ -1,7 +1,6 @@
 <?php echo "<div class=\"j-JetFormsSelectInput",
     $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
-    $props->label ? " form-group" : "",
-    "\" data-block-type=\"JetFormsSelectInput\" data-block=\"", $props->id, "\">",
+    " form-group\" data-block-type=\"JetFormsSelectInput\" data-block=\"", $props->id, "\">",
     !$props->label
         ? ""
         : "<label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>",

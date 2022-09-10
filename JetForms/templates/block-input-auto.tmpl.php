@@ -10,8 +10,7 @@
 ][$props->type] ?? null))):
     echo "<div class=\"j-", $props->type,
             $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
-            $props->label ? " form-group" : "",
-            "\" data-block-type=\"", $props->type, "\" data-block=\"", $props->id, "\">",
+            " form-group\" data-block-type=\"", $props->type, "\" data-block=\"", $props->id, "\">",
             !$props->label
                 ? ""
                 : "<label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>",

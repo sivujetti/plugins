@@ -77,7 +77,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <input name="email" id="email" type="email" class="form-input" placeholder="Email" data-pristine-required>
         // </div>
         $emailInputOuter = $all[2];
-        $this->assertEquals("j-JetFormsEmailInput", $emailInputOuter->getAttribute("class"));
+        $this->assertEquals("j-JetFormsEmailInput form-group", $emailInputOuter->getAttribute("class"));
         $emailInputEl = $emailInputOuter->childNodes[0];
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
         $this->assertEquals("email", $emailInputEl->getAttribute("id"));
@@ -104,7 +104,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //    <textarea name="message" id="message" type="textarea" class="form-input" placeholder="Message"></textarea>
         // </div>
         $textareaOuter = $all[4];
-        $this->assertEquals("j-JetFormsTextareaInput", $textareaOuter->getAttribute("class"));
+        $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
         $textareaEl = $textareaOuter->childNodes[0];
         $this->assertEquals("message", $textareaEl->getAttribute("name"));
         $this->assertEquals("message", $textareaEl->getAttribute("id"));
@@ -119,7 +119,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     </select>
         // </div>
         $selectElOuter = $all[5];
-        $this->assertEquals("j-JetFormsSelectInput", $selectElOuter->getAttribute("class"));
+        $this->assertEquals("j-JetFormsSelectInput form-group", $selectElOuter->getAttribute("class"));
         $selectEl = $selectElOuter->childNodes[0];
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
         $optionEls = $selectEl->getElementsByTagName("option");
