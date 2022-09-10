@@ -119,7 +119,7 @@ const blockTypeName = 'JetFormsSelectInput';
 
 export default {
     name: blockTypeName,
-    friendlyName: 'JetForms: Select input',
+    friendlyName: 'Select input (JetForms)',
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-input-select',

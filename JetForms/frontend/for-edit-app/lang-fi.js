@@ -13,10 +13,10 @@ api.registerTranslationStrings({
     'Encryption': 'Salaus',
     'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
     // CheckboxInputBlockType.jsx
-    'JetForms: Checkbox input': 'JetForms: Checkbox-kenttä',
+    'Checkbox input (JetForms)': 'Checkbox-kenttä (JetForms)',
     'Text': 'Teksti',
     // ContactFormBlockType.jsx
-    'JetForms: Contact form': 'JetForms: Yhteydenottolomake',
+    'Contact form (JetForms)': 'Yhteydenottolomake (JetForms)',
     'New contact form entry on [siteName]': 'Uusi yhteydenotto sivustolta [siteName]',
     'Sender': 'Lähettäjä',
     'Email': 'Sähköposti',
@@ -30,16 +30,16 @@ api.registerTranslationStrings({
     'Manage forms': 'Sivuston lomakkeet',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx
-    'JetForms: Email input': 'JetForms: Sähköpostikenttä',
+    'Email input (JetForms)': 'Sähköpostikenttä (JetForms)',
     // InputBlockType.jsx
     'Label_with_descr': 'Nimike (label)',
     'Placeholder_with_descr': 'Vihje (placeholder)',
     'Required': 'Vaaditaan',
     'inputName': 'syotteenNimi',
     // NumberInputBlockType.jsx
-    'JetForms: Number input': 'JetForms: Numero-kenttä',
+    'Number input (JetForms)': 'Numero-kenttä (JetForms)',
     // SelectInputBlockType.jsx
-    'JetForms: Select input': 'JetForms: Alasvetovalikko/monivalinta',
+    'Select input (JetForms)': 'Alasvetovalikko/monivalinta (JetForms)',
     'Multiple': 'Monivalinta',
     'Options': 'Vaihtoehdot',
     'Option text': 'Vaihtoehdon teksti',
@@ -55,7 +55,7 @@ api.registerTranslationStrings({
     'Body': 'Sisältötemplaatti',
     'useYourOwnEmailHereHint': 'Täytä oma sähköpostisi ja nimesi näihin kenttiin.',
     // SubscriptionFormBlockType.jsx
-    'JetForms: Subscription form': 'JetForms: Tilauslomake',
+    'Subscription form (JetForms)': 'Tilauslomake (JetForms)',
     'Send mail': 'Lähetä e-mail',
     'Subscription': 'Subscription',
     'Subscribe to': 'Subscribe to',
@@ -64,7 +64,7 @@ api.registerTranslationStrings({
     'I agree to receive this newsletter and know that I can easily unsubscribe at any time.': 'Hyväksyn tietojen tallentamisen.',
     'Subscribe': 'Tilaa uutiskirje',
     // TextareaInputBlockType.jsx
-    'JetForms: Long text input': 'JetForms: Pitkä tekstikenttä',
+    'Long text input (JetForms)': 'Pitkä tekstikenttä (JetForms)',
     // TextInputBlockType.jsx
-    'JetForms: Short text input': 'JetForms: Lyhyt tekstikenttä',
+    'Short text input (JetForms)': 'Lyhyt tekstikenttä (JetForms)',
 });

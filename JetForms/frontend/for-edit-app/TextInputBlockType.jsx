@@ -2,7 +2,7 @@ import createInputBlockType from './InputBlockType.jsx';
 
 const textInputBlockType = createInputBlockType({
     name: 'TextInput',
-    friendlyName: 'JetForms: Short text input',
+    friendlyName: 'Short text input (JetForms)',
     type: 'text',
     icon: 'letter-t',
 });

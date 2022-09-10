@@ -58,7 +58,7 @@ const initialData = {
 
 export default {
     name: 'JetFormsContactForm',
-    friendlyName: 'JetForms: Contact form',
+    friendlyName: 'Contact form (JetForms)',
     ownPropNames: Object.keys(initialData),
     initialChildren: [
         {blockType: 'JetFormsTextInput', initialOwnData: {name: 'name', isRequired: 1, label: '',

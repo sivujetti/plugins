@@ -13,10 +13,10 @@ api.registerTranslationStrings({
     'Encryption': 'Encryption',
     'Save send mail settings': 'Save send mail settings',
     // CheckboxInputBlockType.jsx
-    'JetForms: Checkbox input': 'JetForms: Checkbox input',
+    'Checkbox input (JetForms)': 'Checkbox input (JetForms)',
     'Text': 'Text',
     // ContactFormBlockType.jsx
-    'JetForms: Contact form': 'JetForms: Contact form',
+    'Contact form (JetForms)': 'Contact form (JetForms)',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',
     'Sender': 'Sender',
     'Email': 'Email',
@@ -30,16 +30,16 @@ api.registerTranslationStrings({
     'Manage forms': 'Manage forms',
     'Send mail settings': 'Send mail settings',
     // EmailInputBlockType.jsx
-    'JetForms: Email input': 'JetForms: Email input',
+    'Email input (JetForms)': 'Email input (JetForms)',
     // InputBlockType.jsx
     'Label_with_descr': 'Label',
     'Placeholder_with_descr': 'Label',
     'Required': 'Required',
     'inputName': 'inputName',
     // NumberInputBlockType.jsx
-    'JetForms: Number input': 'JetForms: Number input',
+    'Number input (JetForms)': 'Number input (JetForms)',
     // SelectInputBlockType.jsx
-    'JetForms: Select input': 'JetForms: Select input',
+    'Select input (JetForms)': 'Select input (JetForms)',
     'Multiple': 'Multiple',
     'Options': 'Options',
     'Option text': 'Option text',
@@ -55,7 +55,7 @@ api.registerTranslationStrings({
     'Body': 'Body',
     'useYourOwnEmailHereHint': 'Täytä oma sähköpostisi ja nimesi näihin kenttiin.',
     // SubscriptionFormBlockType.jsx
-    'JetForms: Subscription form': 'JetForms: Subscription form',
+    'Subscription form (JetForms)': 'Subscription form (JetForms)',
     'Send mail': 'Send mail',
     'Subscription': 'Subscription',
     'Subscribe to': 'Subscribe to',
@@ -64,7 +64,7 @@ api.registerTranslationStrings({
     'I agree to receive this newsletter and know that I can easily unsubscribe at any time.': 'I agree to receive this newsletter and know that I can easily unsubscribe at any time.',
     'Subscribe': 'Subscribe',
     // TextareaInputBlockType.jsx
-    'JetForms: Long text input': 'JetForms: Long text input',
+    'Long text input (JetForms)': 'Long text input (JetForms)',
     // TextInputBlockType.jsx
-    'JetForms: Short text input': 'JetForms: Short text input',
+    'Short text input (JetForms)': 'Short text input (JetForms)',
 });

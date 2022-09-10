@@ -2,7 +2,7 @@ import createInputBlockType from './InputBlockType.jsx';
 
 const numberInputBlockType = createInputBlockType({
     name: 'NumberInput',
-    friendlyName: 'JetForms: Number input',
+    friendlyName: 'Number input (JetForms)',
     type: 'input',
     icon: 'number-1',
     inputMode: 'numeric',

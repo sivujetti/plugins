@@ -65,7 +65,7 @@ const initialData = {
 const blockTypeName = 'JetFormsCheckboxInput';
 const checkboxInputBlockType = {
     name: blockTypeName,
-    friendlyName: 'JetForms: Checkbox input',
+    friendlyName: 'Checkbox input (JetForms)',
     ownPropNames: Object.keys(initialData),
     initialData,
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
