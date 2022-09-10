@@ -48,7 +48,7 @@ class SelectInputBlockEditForm extends preact.Component {
         unhookForm(this);
     }
     /**
-     * @param {BlockEditFormProps2} props
+     * @param {BlockEditFormProps} props
      * @access protected
      */
     render(_, {multiple, optionsParsed}) {

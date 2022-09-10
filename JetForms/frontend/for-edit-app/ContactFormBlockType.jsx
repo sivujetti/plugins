@@ -2,38 +2,35 @@ import {http, __, env} from '@sivujetti-commons-for-edit-app';
 import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 class ContactFormEditForm extends preact.Component {
-    // parsedBehaviours;
-    /**
-     * @param {RawBlockData} snapshot
-     * @access public
-     */
-    overrideValues(snapshot) {
-        this.parsedBehaviours = JSON.parse(snapshot.behaviours);
-        this.setState({sendFormBehaviour: this.parsedBehaviours[0]});
-    }
     /**
      * @access protected
      */
     componentWillMount() {
-        this.overrideValues(this.props.snapshot);
+        const {getBlockCopy, grabChanges} = this.props;
+        const updateState = behaviours => {
+            this.setState({asJson: behaviours, parsed: JSON.parse(behaviours)});
+        };
+        updateState(getBlockCopy().behaviours);
+        grabChanges((block, _origin, _isUndo) => {
+            if (this.state.asJson !== block.behaviours)
+                updateState(block.behaviours);
+        });
     }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({onValueChanged}, {sendFormBehaviour}) {
+    render({emitValueChanged}, {parsed}) {
         return <SendFormBehaviourConfigurer
-            behaviour={ sendFormBehaviour }
+            behaviour={ parsed[0] }
             onConfigurationChanged={ vals => {
-                // Mutates this.state.sendFormBehaviour and this.parsedBehaviours. Also: does not setState
-                this.parsedBehaviours[0].data = Object.assign(this.state.sendFormBehaviour.data, vals);
-                const jsonified = JSON.stringify(this.parsedBehaviours);
-                onValueChanged(jsonified, 'behaviours', false, env.normalTypingDebounceMillis);
+                Object.assign(parsed[0].data, vals); // Mutates state temporarily
+                emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
             } }/>;
     }
 }
 
-const initialData = {blockType: 'JetFormsContactForm', data: {
+const initialData = {
     behaviours: JSON.stringify([
         {name: 'SendMail', data: {
             subjectTemplate: __('New contact form entry on [siteName]'),
@@ -57,26 +54,27 @@ const initialData = {blockType: 'JetFormsContactForm', data: {
             ].join('\n')
         }}
     ])
-}, children: [
-    {blockType: 'JetFormsTextInput', data: {name: 'name', isRequired: 1, label: '',
-        placeholder: __('Name')}, children: []},
-    {blockType: 'JetFormsEmailInput', data: {name: 'email', isRequired: 1, label: '',
-        placeholder: __('Email')}, children: []},
-    {blockType: 'JetFormsTextareaInput', data: {name: 'message', isRequired: 0, label: '',
-        placeholder: __('Message')}, children: []},
-    {blockType: 'Button', data: {html: __('Send'), tagType: 'submit', url: '',
-        cssClass: ''}, children: []},
-]};
+};
 
 export default {
     name: 'JetFormsContactForm',
     friendlyName: 'JetForms: Contact form',
-    ownPropNames: Object.keys(initialData.data),
-    initialData,
+    ownPropNames: Object.keys(initialData),
+    initialChildren: [
+        {blockType: 'JetFormsTextInput', initialOwnData: {name: 'name', isRequired: 1, label: '',
+            placeholder: __('Name')}, initialDefaultsData: null},
+        {blockType: 'JetFormsEmailInput', initialOwnData: {name: 'email', isRequired: 1, label: '',
+            placeholder: __('Email')}, initialDefaultsData: null},
+        {blockType: 'JetFormsTextareaInput', initialOwnData: {name: 'message', isRequired: 0, label: '',
+            placeholder: __('Message')}, initialDefaultsData: null},
+        {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
+            initialDefaultsData: null},
+    ],
+    initialData: initialData,
     defaultRenderer: 'plugins/JetForms:block-contact-form',
     icon: 'message-2',
     reRender(block, _renderChildren) {
-        return http.post('/api/blocks/render', {block: block.toRaw()}).then(resp => resp.result);
+        return http.post(`/api/blocks/render`, {block}).then(resp => resp.result);
     },
     createSnapshot: from => ({
         behaviours: from.behaviours,

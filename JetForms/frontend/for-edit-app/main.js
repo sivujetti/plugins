@@ -11,13 +11,13 @@ import EditAppMainPanelSection from './EditAppMainPanelSection.jsx';
 if (api.user.can('doAnything')) {
     api.mainPanel.registerSection('plugin:jetForms', EditAppMainPanelSection);
 }
-api.blockTypes.register(CheckboxInputBlockType.name, () => CheckboxInputBlockType);
 api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
+api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
 api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
-api.blockTypes.register(NumberInputBlockType.name, () => NumberInputBlockType);
 api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
 api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
-api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
+api.blockTypes.register(CheckboxInputBlockType.name, () => CheckboxInputBlockType);
+api.blockTypes.register(NumberInputBlockType.name, () => NumberInputBlockType);
 
 setTimeout(() => {
     const el = document.createElement('style');

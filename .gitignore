@@ -3,5 +3,4 @@
 .idea
 .vscode
 
-/*/internal/
-!/*/Internal/*.php
+_internal

@@ -21,7 +21,8 @@ final class JetForms implements UserPluginInterface {
      */
     public function __construct(UserPluginAPI $api) {
         $api->registerHttpRoute("POST", "/plugins/jet-forms/submits/[w:blockId]/[w:pageSlug]",
-            SubmitsController::class, "handleSubmit"
+            SubmitsController::class, "handleSubmit",
+            ["allowMissingRequestedWithHeader" => true, "skipAuth" => true]
         );
         $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
             SettingsController::class, "getMailSendSettings",
