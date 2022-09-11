@@ -59,7 +59,7 @@ final class SubmitsController {
         $res->redirect($req->body->_returnTo . ($asJson ? "&errors={$asJson}" : ""));
     }
     /**
-     * @return array<int, InputMeta>
+     * @psalm-return array<int, InputMeta>
      */
     private static function createInputsMeta(object $form): array {
         $out = [];
@@ -76,6 +76,7 @@ final class SubmitsController {
                     "type" => $block->type,
                     "name" => $block->name,
                     "label" => $block->label,
+                    "placeholder" => $block->placeholder ?? "",
                     "isRequired" => ($block->isRequired ?? null) === 1,
                     "details" => !$isSelect ? [] : [
                         "options" => json_decode($block->options,

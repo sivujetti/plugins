@@ -4,6 +4,7 @@ import {validationConstraints} from '../../../../../frontend/edit-app/src/consta
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 import CrudList from './CrudList.jsx';
 import SelectInputOptionEditForm from './SelectInputOptionEditForm.jsx';
+import services from './services.js';
 
 class SelectInputBlockEditForm extends preact.Component {
     // nameInput;
@@ -106,22 +107,19 @@ class SelectInputBlockEditForm extends preact.Component {
     }
 }
 
-const initialData = {
-    name: __('inputName'),
-    label: '',
-    options: JSON.stringify([
-        {text: __('Option text'), value: 'option-1'},
-    ]),
-    multiple: 0,
-};
-
 const blockTypeName = 'JetFormsSelectInput';
 
 export default {
     name: blockTypeName,
     friendlyName: 'Select input (JetForms)',
-    ownPropNames: Object.keys(initialData),
-    initialData,
+    initialData: () => ({
+        name: services.idGen.getNextId(),
+        label: '',
+        options: JSON.stringify([
+            {text: __('Option text'), value: 'option-1'},
+        ]),
+        multiple: 0,
+    }),
     defaultRenderer: 'plugins/JetForms:block-input-select',
     icon: 'selector',
     reRender({name, label, options, multiple, id, styleClasses}, renderChildren) {

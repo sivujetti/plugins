@@ -1,6 +1,7 @@
 import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+import services from './services.js';
 
 class InputBlockEditForm extends preact.Component {
     // nameInput;
@@ -88,13 +89,6 @@ class InputBlockEditForm extends preact.Component {
     }
 }
 
-const initialData = {
-    name: __('inputName'),
-    isRequired: 1,
-    label: '',
-    placeholder: '',
-};
-
 /**
  * @param {{name: String; friendlyName: String; type?: String; icon?: String; inputMode?: String;}} settings
  * @returns {Object}
@@ -102,8 +96,12 @@ const initialData = {
 export default settings => ({
     name: `JetForms${settings.name}`,
     friendlyName: settings.friendlyName,
-    ownPropNames: Object.keys(initialData),
-    initialData,
+    initialData: () => ({
+        name: services.idGen.getNextId(),
+        isRequired: 1,
+        label: '',
+        placeholder: '',
+    }),
     defaultRenderer: 'plugins/JetForms:block-input-auto',
     icon: settings.icon || 'box',
     reRender({name, isRequired, label, placeholder, id, styleClasses}, renderChildren) {

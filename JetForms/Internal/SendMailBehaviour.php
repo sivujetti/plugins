@@ -49,14 +49,14 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @param object $behaviour Data from the database
      * @param object $reqBody Data from the form (plugins/JetForms/templates/block-contact-form.tmpl.php)
      * @throws \Pike\PikeException If $behaviours or $reqBody wasn't valid
-     * @param array<int, InputMeta> $inputsMeta
+     * @psalm-param array<int, InputMeta> $inputsMeta
      */
     public function run(object $behaviour, object $reqBody, array $inputsMeta): void {
         $errors = [];
         if (($errors = self::validateReqBodyForTemplate($reqBody, $inputsMeta)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
-        $vars = $this->makeTemplateVars($reqBody, $inputsMeta);
+        $vars = $this->makeTemplateVars();
         $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
         $this->mailer->sendMail((object) [
@@ -64,8 +64,8 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
             "fromName" => is_string($behaviour->fromName ?? null) ? $behaviour->fromName : "",
             "toAddress" => $behaviour->toAddress,
             "toName" => is_string($behaviour->toName ?? null) ? $behaviour->toName : "",
-            "subject" => self::renderTemplate($behaviour->subjectTemplate, $vars),
-            "body" => self::renderTemplate($behaviour->bodyTemplate, $vars),
+            "subject" => self::renderConstantTags($behaviour->subjectTemplate, $vars),
+            "body" => self::renderDynamicTags(self::renderConstantTags($behaviour->bodyTemplate, $vars), $inputsMeta, $reqBody),
             "configureMailer" => function ($mailer) use ($mailSettings) {
                 if ($mailSettings["sendingMethod"] === "mail") {
                     $mailer->isMail();
@@ -87,7 +87,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param object $reqBody
-     * @param array<int, InputMeta> $inputsMeta
+     * @psalm-param array<int, InputMeta> $inputsMeta
      * @return string[] A list of error messages or []
      */
     private static function validateReqBodyForTemplate(object $reqBody, array $inputsMeta): array {
@@ -121,41 +121,73 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
         return SettingsController::withDecryptedValues($dataBag->data, $this->crypto);
     }
     /**
-     * @param object $reqBody Validated form data
-     * @param array<int, InputMeta> $inputsMeta
-     * @return object
+     * @return array{siteName: string}
      */
-    private function makeTemplateVars(object $reqBody, array $inputsMeta): object {
-        $combined = (object) ["siteName" => $this->theWebsite->name];
-        foreach ($inputsMeta as $meta) {
-            ["name" => $name, "type" => $type] = $meta;
-            if ($type === CheckboxInputBlockType::NAME) {
-                $combined->{$name} = property_exists($reqBody, $name) ? "Checked" : "Not checked";
-            } elseif ($type === SelectInputBlockType::NAME) {
-                $opts = $meta["details"]["options"];
-                if (!$meta["details"]["multiple"]) {
-                    $selected = $reqBody->{$name} ?? "-";
-                    $combined->{$name} = $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
-                } else {
-                    $selected = $reqBody->{$name} ?? [];
-                    $combined->{$name} = implode("\n", array_map(fn($opt) =>
-                        "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
-                    , $opts));
-                }
-            } else {
-                $combined->{$name} = $reqBody->{$name} ?? "- None provided";
-            }
-        }
-        return $combined;
+    private function makeTemplateVars(): array {
+        return ["siteName" => $this->theWebsite->name];
     }
     /**
      * @param string $tmpl The template defined by the site developer
-     * @param object $vars see self::makeTemplateVars()
+     * @param array{siteName: string} $vars see $this->makeTemplateVars()
      * @return string
      */
-    private static function renderTemplate(string $tmpl, object $vars): string {
+    private static function renderConstantTags(string $tmpl, array $vars): string {
         foreach ($vars as $key => $val)
             $tmpl = str_replace("[{$key}]", htmlentities($val), $tmpl);
         return $tmpl;
+    }
+    /**
+     * @param string $tmpl The template defined by the site developer
+     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @param object $reqBody
+     * @return string
+     */
+    private static function renderDynamicTags(string $tmpl, array $inputsMeta, object $reqBody): string {
+        if (str_contains($tmpl, "[resultsAll]"))
+            return str_replace("[resultsAll]", self::renderResultsAll($inputsMeta, $reqBody), $tmpl);
+        return $tmpl;
+
+    }
+    /**
+     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @param object $reqBody
+     * @return string
+     */
+    private static function renderResultsAll(array $inputsMeta, object $reqBody): string {
+        $lines = [];
+        foreach ($inputsMeta as $meta) {
+            $label = "";
+            if (strlen($meta["label"])) $label = $meta["label"];
+            else if (strlen($meta["placeholder"])) $label = $meta["placeholder"];
+            else $label = $meta["name"];
+            $lines[] = "{$label}:";
+            $lines[] = htmlentities(self::getResultSingle($meta, $reqBody));
+        }
+        return $lines ? implode("\n", $lines) : "-";
+    }
+    /**
+     * @psalm-param InputMeta $meta
+     * @param object $reqBody
+     * @return string
+     */
+    private static function getResultSingle(array $meta, object $reqBody): string {
+        ["name" => $name, "type" => $type] = $meta;
+        //
+        if ($type === CheckboxInputBlockType::NAME)
+            return property_exists($reqBody, $name) ? "Checked" : "Not checked";
+        //
+        if ($type === SelectInputBlockType::NAME) {
+            $opts = $meta["details"]["options"];
+            if (!$meta["details"]["multiple"]) {
+                $selected = $reqBody->{$name} ?? "-";
+                return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
+            }
+            //
+            $selected = $reqBody->{$name} ?? [];
+            return implode("\n", array_map(fn($opt) =>
+                "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
+            , $opts));
+        }
+        return ($reqBody->{$name} ?? "") ?: "- None provided";
     }
 }

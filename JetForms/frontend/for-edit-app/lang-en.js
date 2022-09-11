@@ -9,7 +9,7 @@ api.registerTranslationStrings({
     'jetFormsTodo1': 'todo1', // fi = 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
     'Send method': 'Send method',
     'jetFormsTodo2': 'todo2', // fi = 'Käytä webhotellisi oletussähköpostiserveriä.',
-    'jetFormsTodo3': 'todo3', // fi = 'Käytä ulkopuolista SMTP-palveluntarjoajaa (esim. Office 365, Gmail).',
+    'jetFormsTodo3': 'todo3', // fi = 'Käytä SMTP-palveluntarjoajaa (esim. Office 365, Gmail, tai webhotellisi oma järjestelmä).',
     'Encryption': 'Encryption',
     'Save send mail settings': 'Save send mail settings',
     // CheckboxInputBlockType.jsx
@@ -18,9 +18,6 @@ api.registerTranslationStrings({
     // ContactFormBlockType.jsx
     'Contact form (JetForms)': 'Contact form (JetForms)',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',
-    'Sender': 'Sender',
-    'Email': 'Email',
-    'Message': 'Messaeg',
     'Sent by JetForms': 'Sent by JetForms',
     'Send': 'Send',
     // CrudList.jsx
@@ -35,7 +32,6 @@ api.registerTranslationStrings({
     'Label_with_descr': 'Label',
     'Placeholder_with_descr': 'Label',
     'Required': 'Required',
-    'inputName': 'inputName',
     // NumberInputBlockType.jsx
     'Number input (JetForms)': 'Number input (JetForms)',
     // SelectInputBlockType.jsx

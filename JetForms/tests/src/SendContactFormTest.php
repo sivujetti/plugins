@@ -13,15 +13,15 @@ final class SendContactFormTest extends PluginTestCase {
             inputs: fn() => [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
-                    "name" => "name",
+                    "name" => "input_1",
                     "isRequired" => 1,
                     "label" => "Name",
                     "placeholder" => "",
                 ]
             )],
-            postData: ["name" => "Bob xss >"],
-            bodyTemplate: "User filled: [name]",
-            expectedBody: "User filled: Bob xss &gt;",
+            postData: ["input_1" => "Bob xss >"],
+            bodyTemplate: "All results:\n\n[resultsAll]",
+            expectedBody: "All results:\n\nName:\nBob xss &gt;",
         );
     }
     public function testProcessSubmitHandlesSingleSelectInput(): void {
@@ -29,7 +29,7 @@ final class SendContactFormTest extends PluginTestCase {
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
-                    "name" => "chooseOne",
+                    "name" => "input_1",
                     "label" => "Choose one",
                     "options" => json_encode([
                         ["text" => "Option 1 xss <", "value" => "option-1"],
@@ -38,9 +38,9 @@ final class SendContactFormTest extends PluginTestCase {
                     "multiple" => 0,
                 ])
             ],
-            postData: ["chooseOne" => "option-1"],
-            bodyTemplate: "User chose: [chooseOne]",
-            expectedBody: "User chose: Option 1 xss &lt;"
+            postData: ["input_1" => "option-1"],
+            bodyTemplate: "[resultsAll]",
+            expectedBody: "Choose one:\nOption 1 xss &lt;"
         );
     }
     public function testProcessSubmitHandlesMultiSelectInput(): void {
@@ -48,7 +48,7 @@ final class SendContactFormTest extends PluginTestCase {
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
-                    "name" => "chooseMany",
+                    "name" => "input_1",
                     "label" => "Choose many",
                     "options" => json_encode([
                         ["text" => "Option 1 xss <", "value" => "option-1"],
@@ -58,12 +58,12 @@ final class SendContactFormTest extends PluginTestCase {
                     "multiple" => 1,
                 ])
             ],
-            postData: ["chooseMany" => ["option-1", "option-3"]],
-            bodyTemplate: "User chose:\n[chooseMany]\n\n",
-            expectedBody: "User chose:\n" .
+            postData: ["input_1" => ["option-1", "option-3"]],
+            bodyTemplate: "[resultsAll]\nafter",
+            expectedBody: "Choose many:\n" .
                 "[x] Option 1 xss &lt;\n" .
                 "[ ] Option 2\n" .
-                "[x] Option 3\n\n"
+                "[x] Option 3\nafter"
         );
     }
     private function runSendFormTest(\Closure $inputs,

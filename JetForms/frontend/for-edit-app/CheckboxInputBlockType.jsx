@@ -1,6 +1,7 @@
 import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+import services from './services.js';
 
 class CheckboxInputBlockEditForm extends preact.Component {
     // nameInput;
@@ -57,17 +58,14 @@ class CheckboxInputBlockEditForm extends preact.Component {
     }
 }
 
-const initialData = {
-    name: __('inputName'),
-    label: __('Text'),
-};
-
 const blockTypeName = 'JetFormsCheckboxInput';
 const checkboxInputBlockType = {
     name: blockTypeName,
     friendlyName: 'Checkbox input (JetForms)',
-    ownPropNames: Object.keys(initialData),
-    initialData,
+    initialData: () => ({
+        name: services.idGen.getNextId(),
+        label: __('Text'),
+    }),
     defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
     icon: 'checkbox',
     reRender({name, label, id, styleClasses}, renderChildren) {
