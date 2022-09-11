@@ -2,8 +2,7 @@
 
 namespace SitePlugins\JetIcons;
 
-use Sivujetti\Auth\ACL;
-use Sivujetti\Auth\ACLRulesBuilder;
+use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 final class JetIcons implements UserPluginInterface {
@@ -14,7 +13,7 @@ final class JetIcons implements UserPluginInterface {
         $api->registerHttpRoute("GET", "/plugins/jet-icons/icons-pack-icons/default",
             MainController::class, "getIconPackIcons",
             ["consumes" => "application/json",
-             "identifiedBy" => ["list", "icons"]]
+             "identifiedBy" => ["list", "iconPackIcons"]]
         );
         //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
@@ -30,7 +29,7 @@ final class JetIcons implements UserPluginInterface {
      */
     public function defineAclRules(ACLRulesBuilder $builder): ACLRulesBuilder {
         return $builder
-            ->defineResource("icons", ["list"])
+            ->defineResource("iconPackIcons", ["list"])
             ->setPermissions(ACL::ROLE_ADMIN, ["list"])
             ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["list"])
             ->setPermissions(ACL::ROLE_EDITOR, ["list"])
