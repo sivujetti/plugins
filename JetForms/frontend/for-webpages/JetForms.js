@@ -45,6 +45,10 @@ class JetForms {
         document.head.appendChild(style);
         //
         forms.forEach(formEl => {
+            const state = {
+                isSubmitting: false,
+                submitBtn: formEl.querySelector('button[type="submit"]') || formEl.querySelector('button:not([type="button"])'),
+            };
             const validator = new window.Pristine(formEl, {
                 // class of the parent element where the error/success class is added
                 classTo: errorParentCls,
@@ -66,11 +70,20 @@ class JetForms {
                 });
             });
             formEl.addEventListener('submit', e => {
+                if (state.isSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
                 t.forEach(inputEl => {
                     inputEl.parentElement.classList.add('blurred');
                 });
-                if (!validator.validate())
+                if (!validator.validate()) {
                     e.preventDefault();
+                    return;
+                }
+                state.isSubmitting = true;
+                if (state.submitBtn)
+                    state.submitBtn.setAttribute.setAttribute('disabled', true);
             });
             //
             const formId = formEl.getAttribute('data-form-id');

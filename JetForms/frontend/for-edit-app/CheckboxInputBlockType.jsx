@@ -2,8 +2,9 @@ import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGro
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 import services from './services.js';
+import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 
-class CheckboxInputBlockEditForm extends preact.Component {
+class CheckboxInputBlockEditForm extends InputEditFormAbstract {
     // nameInput;
     /**
      * @access protected
@@ -49,11 +50,11 @@ class CheckboxInputBlockEditForm extends preact.Component {
                 <Input vm={ this } prop="label"/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
-            <FormGroupInline>
+            { this.showTechnicalInputs ? <FormGroupInline>
                 <label htmlFor="name" class="form-label">Id</label>
                 <Input vm={ this } prop="name" ref={ this.nameInput }/>
                 <InputErrors vm={ this } prop="name"/>
-            </FormGroupInline>
+            </FormGroupInline> : null }
         </div>;
     }
 }

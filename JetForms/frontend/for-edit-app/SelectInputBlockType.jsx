@@ -5,8 +5,9 @@ import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-fo
 import CrudList from './CrudList.jsx';
 import SelectInputOptionEditForm from './SelectInputOptionEditForm.jsx';
 import services from './services.js';
+import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 
-class SelectInputBlockEditForm extends preact.Component {
+class SelectInputBlockEditForm extends InputEditFormAbstract {
     // nameInput;
     /**
      * @access protected
@@ -70,11 +71,11 @@ class SelectInputBlockEditForm extends preact.Component {
                         class="form-input"/><i class="form-icon"></i>
                 </label>
             </FormGroupInline>
-            <FormGroupInline>
+            { this.showTechnicalInputs ? <FormGroupInline>
                 <label htmlFor="name" class="form-label">Id</label>
                 <Input vm={ this } prop="name" ref={ this.nameInput }/>
                 <InputErrors vm={ this } prop="name"/>
-            </FormGroupInline>
+            </FormGroupInline> : null }
         </div>,
         <FormGroup>
             <label htmlFor="options" class="form-label pt-0 pb-1">{ __('Options') }</label>
