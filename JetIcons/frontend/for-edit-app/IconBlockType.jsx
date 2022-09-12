@@ -15,7 +15,11 @@ class IconBlockEditForm extends preact.Component {
         super(props);
         const {getBlockCopy, grabChanges} = this.props;
         const iconIdInitial = getBlockCopy().iconId;
-        const createState = (iconId, allIcons) => ({iconId: iconId || '', visibleIcons: allIcons ? allIcons.slice(0, PAGE_SIZE):  null});
+        const createState = (iconId, allIcons = null) => ({
+            iconId: iconId || '',
+            visibleIcons: allIcons ? allIcons.slice(0, PAGE_SIZE) : null,
+            curPageIdx: 0,
+        });
         if (!cachedAvailableIcons) {
             this.state = createState(iconIdInitial);
             //
@@ -35,6 +39,58 @@ class IconBlockEditForm extends preact.Component {
         grabChanges((block, _origin, _isUndo) => {
             if (this.state.iconId !== block.iconId)
                 this.setState({iconId: block.iconId});
+        });
+    }
+    /**
+     * @access protected
+     */
+    componentDidMount() {
+        const scrollEl = env.document.querySelector('#inspector-panel');
+        const scroller = (function (el) {
+            const state = {trig: null, currentSlots: []};
+            return {
+                /**
+                 * @returns {Boolean}
+                 */
+                isReady() {
+                    state.currentSlots = el.querySelectorAll('.item-grid .btn.with-icon');
+                    return state.currentSlots.length > 0;
+                },
+                /**
+                 */
+                invalidate() {
+                    state.currentSlots = [];
+                    state.trig = null;
+                },
+                /**
+                 * @returns {Number}
+                 */
+                getNextLoadPoint() {
+                    if (!state.currentSlots.length) return;
+
+                    if (state.trig !== null)
+                        return state.trig;
+
+                    const lastSlot = state.currentSlots[state.currentSlots.length - 1];
+                    const lastSlotRect = lastSlot.getBoundingClientRect();
+                    const diff = lastSlotRect.top - state.currentSlots[0].getBoundingClientRect().top;
+                    const twoRowsFromBottomAbs = diff - lastSlotRect.height * 2;
+                    state.trig = twoRowsFromBottomAbs - el.getBoundingClientRect().top;
+                    return state.trig;
+                }
+            };
+        })(scrollEl);
+        scrollEl.addEventListener('scroll', e => {
+            if (!scroller.isReady()) return;
+            if (e.target.scrollTop > scroller.getNextLoadPoint()) {
+                scroller.invalidate();
+                //
+                const nextIdx = this.state.curPageIdx + 1;
+                this.setState({
+                    visibleIcons: cachedAvailableIcons.slice(0, (nextIdx + 1) * PAGE_SIZE),
+                    curPageIdx: nextIdx,
+                });
+            }
         });
     }
     /**
