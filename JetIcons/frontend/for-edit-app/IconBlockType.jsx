@@ -1,4 +1,4 @@
-import {__, env, http, LoadingSpinner} from '@sivujetti-commons-for-edit-app';
+import {__, env, http, stringUtils, timingUtils, Icon, LoadingSpinner} from '@sivujetti-commons-for-edit-app';
 
 const PAGE_SIZE = 40;
 
@@ -8,6 +8,10 @@ let cachedAvailableIcons;
 let cachedIconIndices;
 
 class IconBlockEditForm extends preact.Component {
+    // gridEl;
+    // throttledReceiveFilterTerm;
+    // scroller;
+    // unregisterScroller;
     /**
      * @param {BlockEditFormProps} props
      */
@@ -15,10 +19,12 @@ class IconBlockEditForm extends preact.Component {
         super(props);
         const {getBlockCopy, grabChanges} = this.props;
         const iconIdInitial = getBlockCopy().iconId;
-        const createState = (iconId, allIcons = null) => ({
-            iconId: iconId || '',
-            visibleIcons: allIcons ? allIcons.slice(0, PAGE_SIZE) : null,
+        this.gridEl = preact.createRef();
+        const createState = (iconId = '', allIcons = null) => ({
+            iconId: iconId,
+            visibleIcons: getInitialPage(allIcons),
             curPageIdx: 0,
+            searchTerm: '',
         });
         if (!cachedAvailableIcons) {
             this.state = createState(iconIdInitial);
@@ -40,21 +46,41 @@ class IconBlockEditForm extends preact.Component {
             if (this.state.iconId !== block.iconId)
                 this.setState({iconId: block.iconId});
         });
+        this.throttledReceiveFilterTerm = timingUtils.debounce(e => {
+            if (!cachedAvailableIcons) return;
+            this.setState({searchTerm: e.target.value});
+            const trimmed = e.target.value.trim();
+            if (trimmed.length > 1) {
+                const slugified = stringUtils.slugify(trimmed);
+                this.setState({visibleIcons: cachedAvailableIcons.filter(({iconId}) => iconId.indexOf(slugified) > -1)});
+                this.scroller.setIsDisabled(true);
+            } else if (!trimmed.length) {
+                this.clearSearchTerm();
+            }
+        }, env.normalTypingDebounceMillis);
     }
     /**
      * @access protected
      */
     componentDidMount() {
         const scrollEl = env.document.querySelector('#inspector-panel');
-        const scroller = (function (el) {
+        this.scroller = (function (el) {
             const state = {trig: null, currentSlots: []};
             return {
                 /**
                  * @returns {Boolean}
                  */
                 isReady() {
+                    if (state.isDisabled) return false;
                     state.currentSlots = el.querySelectorAll('.item-grid .btn.with-icon');
                     return state.currentSlots.length > 0;
+                },
+                /**
+                 * @param {Boolean} isDisabled
+                 */
+                setIsDisabled(isDisabled) {
+                    state.isDisabled = isDisabled;
+                    this.invalidate();
                 },
                 /**
                  */
@@ -67,10 +93,10 @@ class IconBlockEditForm extends preact.Component {
                  */
                 getNextLoadPoint() {
                     if (!state.currentSlots.length) return;
-
+                    //
                     if (state.trig !== null)
                         return state.trig;
-
+                    //
                     const lastSlot = state.currentSlots[state.currentSlots.length - 1];
                     const lastSlotRect = lastSlot.getBoundingClientRect();
                     const diff = lastSlotRect.top - state.currentSlots[0].getBoundingClientRect().top;
@@ -80,41 +106,63 @@ class IconBlockEditForm extends preact.Component {
                 }
             };
         })(scrollEl);
-        scrollEl.addEventListener('scroll', e => {
-            if (!scroller.isReady()) return;
-            if (e.target.scrollTop > scroller.getNextLoadPoint()) {
-                scroller.invalidate();
-                //
-                const nextIdx = this.state.curPageIdx + 1;
-                this.setState({
-                    visibleIcons: cachedAvailableIcons.slice(0, (nextIdx + 1) * PAGE_SIZE),
-                    curPageIdx: nextIdx,
-                });
-            }
-        });
+        this.unregisterScroller = (function (el, cmp) {
+            const onScroll = e => {
+                if (!cmp.scroller.isReady()) return;
+                if (e.target.scrollTop > cmp.scroller.getNextLoadPoint()) {
+                    cmp.scroller.invalidate();
+                    //
+                    const nextIdx = cmp.state.curPageIdx + 1;
+                    cmp.setState({
+                        visibleIcons: cachedAvailableIcons.slice(0, (nextIdx + 1) * PAGE_SIZE),
+                        curPageIdx: nextIdx,
+                    });
+                }
+            };
+            el.addEventListener('scroll', onScroll);
+            return () => { el.removeEventListener('scroll', onScroll); };
+        })(scrollEl, this);
     }
     /**
      * @access protected
      */
-    render(_, {iconId, visibleIcons}) {
-        let visible;
+    componentWillUnmount() {
+        this.unregisterScroller();
+    }
+    /**
+     * @access protected
+     */
+    render(_, {iconId, visibleIcons, searchTerm}) {
+        let iconsArr;
         if (visibleIcons !== null) {
-            if (iconId) visible = [cachedAvailableIcons[cachedIconIndices.get(iconId)]].concat(visibleIcons.filter(i => i.iconId !== iconId));
-            else visible = visibleIcons;
+            iconsArr = iconId ? [cachedAvailableIcons[cachedIconIndices.get(iconId)]].concat(visibleIcons.filter(i => i.iconId !== iconId)) : visibleIcons;
         }
+        const input = <input
+            class="form-input mb-2"
+            placeholder={ __('Filter') }
+            value={ searchTerm }
+            onInput={ this.throttledReceiveFilterTerm }/>;
         return [
-            <input class="form-input mb-2" placeholder={ __('Filter') } disabled/>,
-            visible ? <div
+            searchTerm.length ? <div class="has-icon-right">
+            { input }
+            <button
+                onClick={ this.clearSearchTerm.bind(this) }
+                class="sivujetti-form-icon btn no-color"
+                type="button">
+                <Icon iconId="x" className="size-xs"/>
+            </button>
+        </div> : input,
+            iconsArr ? <div
                 class={ `item-grid large-buttons medium-buttons selectable-items${!iconId ? '' : ' has-first-item-selected'}` }
-                ref={ this.gridEl }>{ visible.map(icon =>
+                ref={ this.gridEl }>{ iconsArr.length ? iconsArr.map(icon =>
                     <button
                         dangerouslySetInnerHTML={ {
                             __html: iconToSvg(icon).concat(['<span class="text-tiny text-ellipsis">', icon.iconId, '</span>']).join('')
                         } }
                         onClick={ () => this.selectIcon(icon) }
                         class="btn with-icon btn-link text-ellipsis"
-                        title={ iconId }></button>
-            ) }</div>
+                        title={ icon.iconId }></button>
+            ) : <div class="pl-1" style="grid-column: 1/-1">{ __('No results for term ') } <b>{ searchTerm }</b></div> }</div>
             : <LoadingSpinner/>
         ];
     }
@@ -122,11 +170,26 @@ class IconBlockEditForm extends preact.Component {
      * @param {IconPackIcon} icon
      * @access private
      */
-    selectIcon(icon) {
-        if (icon.iconId === this.state.iconId) return;
-        this.props.emitValueChanged(icon.iconId, 'iconId', false);
+    selectIcon({iconId}) {
+        if (iconId === this.state.iconId) return;
+        this.props.emitValueChanged(iconId, 'iconId', false);
         setTimeout(() => { this.gridEl.current.querySelector('.btn').focus(); }, 10);
     }
+    /**
+     * @access private
+     */
+    clearSearchTerm() {
+        this.setState({searchTerm: '', visibleIcons: getInitialPage(cachedAvailableIcons)});
+        this.scroller.setIsDisabled(false);
+    }
+}
+
+/**
+ * @param {Array<IconPackIcon>} allIcons
+ * @retuns {Array<IconPackIcon>}
+ */
+function getInitialPage(allIcons) {
+    return allIcons ? allIcons.slice(0, PAGE_SIZE) : null;
 }
 
 /**
@@ -154,7 +217,9 @@ export default {
         ['<span class="j-', name, styleClasses ? ` ${styleClasses}` : '',
             '" data-block-type="', name, '" data-block="', id, '">'].concat(iconId
                 ? iconToSvg(cachedAvailableIcons[cachedIconIndices.get(iconId)])
-                : [__('Waits for configuration ...')]).concat([
+                : ['<span',
+                   ' title="', __('Waits for configuration ...'), '"',
+                   ' style="border: 1px dashed;display: inline-block;padding: 11px;"></span>']).concat([
             renderChildren(),
         '</span>']).join('')
     ,
