@@ -1,11 +1,10 @@
-import {__, env, http, Icon, floatingDialog} from '@sivujetti-commons-for-edit-app';
-import LoadingSpinner from '../../../../../frontend/edit-app/src/commons/LoadingSpinner.jsx';
-import RenderArticleDialog, {supportServerIndexUrl} from './RenderArticleDialog.jsx';
+import {__, env, http, Icon, LoadingSpinner, floatingDialog} from '@sivujetti-commons-for-edit-app';
+import RenderArticleDialog, {supportServerBaseUrl} from './RenderArticleDialog.jsx';
 
 /**
  * SjorgSupporClient's main main menu section.
  */
-class EditAppMainPanelSection extends preact.Component {
+class EditAppLeftColumnSection extends preact.Component {
     /**
      * @param {Object} props
      */
@@ -21,10 +20,10 @@ class EditAppMainPanelSection extends preact.Component {
         if (featuredArticles === undefined)
             content = null;
         else if (featuredArticles === null)
-            content = <LoadingSpinner className="pb-2"/>;
+            content = <LoadingSpinner className="mb-1"/>;
         else
-            content = featuredArticles.map((art, i) =>
-                <div class={ i > 0 ? 'mt-1' : '' }>
+            content = featuredArticles.map(art =>
+                <div class="mt-1">
                     <a
                         href={ `#${art.slug}` }
                         onClick={ e => this.openArticleToPopup(e, art) }>
@@ -33,14 +32,20 @@ class EditAppMainPanelSection extends preact.Component {
                 </div>
             );
         return <section class={ `panel-section${isCollapsed ? '' : ' open'}` }>
-            <button class="d-flex col-12 flex-centered pr-2" onClick={ this.toggleIsCollapsed.bind(this) }>
-                <Icon iconId="lifebuoy" className="size-sm mr-2 color-purple"/>
-                <span class="pl-1 color-default">{ __('Support') }</span>
-                <Icon iconId="chevron-right" className="col-ml-auto size-xs"/>
+            <button
+                class="flex-centered pr-2 pl-1 section-title col-12"
+                onClick={ this.toggleIsCollapsed.bind(this) }
+                type="button">
+                <Icon iconId="lifebuoy" className="p-absolute size-sm mr-2 color-purple"/>
+                <span class="pl-1 d-block col-12 color-default">
+                    { __('Support') }
+                    <span class="text-ellipsis text-tiny col-12">{ __('Instructions') }</span>
+                </span>
+                <Icon iconId="chevron-right" className="p-absolute size-xs"/>
             </button>
             <div>
                 { content }
-                <div><a
+                <div class="pt-2"><a
                     href="https://www.sivujetti.org/tuki"
                     onClick={ e => (e.preventDefault(), alert('This feature is currently disabled.')) }
                     class="with-icon mt-1">
@@ -57,9 +62,7 @@ class EditAppMainPanelSection extends preact.Component {
         const newState = {isCollapsed: !this.state.isCollapsed};
         if (newState.isCollapsed === false && this.state.featuredArticles === undefined) {
             newState.featuredArticles = null;
-            http.fetchFn(`${supportServerIndexUrl}plugins/sjorg-support-server/articles/featured`,
-                         {method: 'GET'})
-                .then(resp => resp.json())
+            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`, {method: 'GET'})
                 .then(arts => this.setState({featuredArticles: arts}))
                 .catch(env.window.console.error);
         }
@@ -81,4 +84,4 @@ class EditAppMainPanelSection extends preact.Component {
     }
 }
 
-export default EditAppMainPanelSection;
+export default EditAppLeftColumnSection;

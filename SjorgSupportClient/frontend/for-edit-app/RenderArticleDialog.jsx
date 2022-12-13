@@ -1,7 +1,7 @@
 import {__, Icon} from '@sivujetti-commons-for-edit-app';
 
-const supportServerAssetUrl = 'https://www.sivujetti.org/';
-const supportServerIndexUrl = supportServerAssetUrl;
+const supportServerBaseUrl = 'https://www.sivujetti.org/early-access/';
+const supportServerAssetBaseUrl = supportServerBaseUrl;
 
 let accordionCounter = 0;
 
@@ -12,7 +12,7 @@ class RenderArticleDialog extends preact.Component {
     render({article}) {
         return <form onSubmit={ this.closePopup.bind(this) } class="sjorg-support-article">
             <div>{ article.blocks.map(block =>
-                (block.cssClass || '').indexOf('accordion') < 0
+                (block.styleClasses || '').indexOf('accordion') < 0
                     ? renderNormalSection(block)
                     : renderAccordionSection(block)
             ) }</div>
@@ -33,7 +33,7 @@ class RenderArticleDialog extends preact.Component {
  * @returns {preact.Component}
  */
 function renderNormalSection(block) {
-    return <section>{ block.children.map(renderBlock) }</section>;
+    return <section class={ block.styleClasses }>{ block.children.map(renderBlock) }</section>;
 }
 
 /**
@@ -61,14 +61,16 @@ function renderAccordionSection(block) {
  */
 function renderBlock(block) {
     if (block.type === 'Paragraph')
-        return <p dangerouslySetInnerHTML={ {__html: block.text} } class={ block.cssClass }></p>;
-    else if (block.type === 'Heading')
-        return <h1 class={ block.cssClass }>{ block.text }</h1>;
+        return <p dangerouslySetInnerHTML={ {__html: block.text} } class={ block.styleClasses }></p>;
+    else if (block.type === 'Heading') {
+        const T = `h${block.level}`;
+        return <T class={ block.styleClasses }>{ block.text }</T>;
+    }
     else if (block.type === 'RichText')
-        return <div dangerouslySetInnerHTML={ {__html: block.html} } class={ block.cssClass }></div>;
+        return <div dangerouslySetInnerHTML={ {__html: block.html} } class={ block.styleClasses }></div>;
     else if (block.type === 'Image')
-        return <img src={ `${supportServerAssetUrl}${block.src}` } class={ block.cssClass } title="todo"/>;
+        return <img src={ `${supportServerAssetBaseUrl}public/uploads/${block.src}` } class={ block.styleClasses } title=""/>;
 }
 
 export default RenderArticleDialog;
-export {supportServerIndexUrl};
+export {supportServerBaseUrl};
