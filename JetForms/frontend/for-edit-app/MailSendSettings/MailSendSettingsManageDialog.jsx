@@ -2,14 +2,12 @@ import {__, http, env, LoadingSpinner, hookForm, unhookForm, FormGroupInline, In
 import {validationConstraints} from '../../../../../../frontend/edit-app/src/constants.js';
 
 class MailSendSettingsManageDialog extends preact.Component {
-    // boundHandleSubmit;
     /**
      * @param {{floatingDialog: FloatingDialog;}} props
      */
     constructor(props) {
         super(props);
         this.state = {settings: null};
-        this.boundHandleSubmit = this.applyCreateGlobalBlockTree.bind(this);
         http.get('/plugins/jet-forms/settings/mailSendSettings')
             .then(settings => { this.createState(settings); })
             .catch(env.window.console.error);
@@ -43,7 +41,7 @@ class MailSendSettingsManageDialog extends preact.Component {
      * @access protected
      */
     render(_, {sendingMethod, formIsSubmittingClass}) {
-        return <form onSubmit={ e => handleSubmit(this, this.boundHandleSubmit, e) }>
+        return <form onSubmit={ e => handleSubmit(this, this.applyCreateGlobalBlockTree.bind(this), e) }>
             <div class="mb-1">{ __('jetFormsTodo1') }</div>
             { sendingMethod ? [<div>
                 <div class="form-label">{ __('Send method') }</div>

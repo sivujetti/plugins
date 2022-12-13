@@ -23,7 +23,7 @@ api.registerTranslationStrings({
     // CrudList.jsx
     'Drag': 'Raahaa',
     'Add %s': 'Lisää %s',
-    // EditAppMainPanelSection.jsx
+    // EditAppLeftColumnSection.jsx
     'Manage forms': 'Sivuston lomakkeet',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx

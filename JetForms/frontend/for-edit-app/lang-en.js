@@ -23,7 +23,7 @@ api.registerTranslationStrings({
     // CrudList.jsx
     'Drag': 'Drag',
     'Add %s': 'Add %s',
-    // EditAppMainPanelSection.jsx
+    // EditAppLeftColumnSection.jsx
     'Manage forms': 'Manage forms',
     'Send mail settings': 'Send mail settings',
     // EmailInputBlockType.jsx
