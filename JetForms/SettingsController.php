@@ -62,7 +62,8 @@ final class SettingsController {
         $res->json((object) ["ok" => $numRows === 1 ? "ok" : "err"]);
     }
     /**
-     * @access private
+     * @param object $input
+     * @return string[] Error messages or []
      */
     private static function validateAsd(object $input): array {
         return Validation::makeObjectValidator()

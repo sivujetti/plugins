@@ -110,7 +110,8 @@ final class SubmitsController {
         }, $form->behaviours);
     }
     /**
-     * @access private
+     * @param object $input
+     * @return string[] Error messages or []
      */
     private static function validateSubmitInput(object $input): array {
         return Validation::makeObjectValidator()

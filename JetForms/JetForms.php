@@ -38,8 +38,6 @@ final class JetForms implements UserPluginInterface {
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
             $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(SubscriptionFormBlockType::NAME, new SubscriptionFormBlockType);
-            $api->registerBlockRenderer(SubscriptionFormBlockType::DEFAULT_RENDERER);
             //
             $api->registerBlockRenderer(InlineInputBlockType::DEFAULT_RENDERER);
             $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
@@ -56,11 +54,12 @@ final class JetForms implements UserPluginInterface {
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
-            if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME ||
-                                                                $b->type === SubscriptionFormBlockType::NAME))
+            if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))
                 return;
             if (!$api->isJsFileEnqueued("sivujetti/vendor/pristine.min.js"))
                 $api->enqueueJsFile("sivujetti/vendor/pristine.min.js");
+            if (!$api->isJsFileEnqueued("sivujetti/sivujetti-commons-for-web-pages.js"))
+                $api->enqueueJsFile("sivujetti/sivujetti-commons-for-web-pages.js");
             if (!$api->isJsFileEnqueued("plugin-jet-forms-bundle.js"))
                 $api->enqueueJsFile("plugin-jet-forms-bundle.js");
         });
