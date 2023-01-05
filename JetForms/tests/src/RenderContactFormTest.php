@@ -230,6 +230,7 @@ final class RenderContactFormTest extends PluginTestCase {
             ],
             "wantsReply" => (object) [
                 "name" => "wantsReply",
+                "isRequired" => 0,
                 "label" => "Test escape>",
             ],
             "default" => ""

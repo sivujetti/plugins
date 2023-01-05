@@ -1,3 +1,5 @@
+import {urlUtils} from '@sivujetti-commons-for-web-pages';
+
 let formsHooked = false;
 
 /**
@@ -28,6 +30,7 @@ class JetForms {
     }
     /**
      * @param {HTMLElement} parentElement
+     * @returns {Array<{getEl: () => HTMLFormElement; setIsSubmitting: (isSubmitting: Boolean) => void; setOnSubmit: (fn: (e: Event) => void) => void;}>}
      * @access public
      */
     hookAllForms(parentElement) {
@@ -44,9 +47,10 @@ class JetForms {
         style.innerHTML = `.${errorParentCls} .form-input-hint { display: none; } .${errorParentCls}.blurred .form-input-hint { display: block; }`;
         document.head.appendChild(style);
         //
-        forms.forEach(formEl => {
+        const out = forms.map(formEl => {
             const state = {
                 isSubmitting: false,
+                onSubmitFn: null,
                 submitBtn: formEl.querySelector('button[type="submit"]') || formEl.querySelector('button:not([type="button"])'),
             };
             const validator = new window.Pristine(formEl, {
@@ -61,7 +65,7 @@ class JetForms {
                 // class of the error text element
                 errorTextClass: 'form-input-hint',
             });
-            const t = Array.from(formEl.querySelectorAll('.form-input, .form-select'));
+            const t = Array.from(formEl.querySelectorAll('.form-input, .form-select, .form-checkbox'));
             t.forEach(inputEl => {
                 if (!inputEl.parentElement.classList.contains(errorParentCls))
                     inputEl.parentElement.classList.add(errorParentCls);
@@ -81,9 +85,11 @@ class JetForms {
                     e.preventDefault();
                     return;
                 }
+                if (state.onSubmitFn)
+                    state.onSubmitFn(e);
                 state.isSubmitting = true;
                 if (state.submitBtn)
-                    state.submitBtn.setAttribute.setAttribute('disabled', true);
+                    state.submitBtn.setAttribute('disabled', true);
             });
             //
             const formId = formEl.getAttribute('data-form-id');
@@ -91,8 +97,19 @@ class JetForms {
                 showFormSentMessage(formEl);
                 history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
             }
+            //
+            return {
+                getEl() { return formEl; },
+                setIsSubmitting(isSubmitting) {
+                    state.isSubmitting = isSubmitting;
+                    if (isSubmitting) state.submitBtn.setAttribute('disabled', true);
+                    else state.submitBtn.removeAttribute('disabled');
+                },
+                setOnSubmit(fn) { state.onSubmitFn = fn; },
+            };
         });
         formsHooked = true;
+        return out;
     }
 }
 

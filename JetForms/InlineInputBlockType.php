@@ -13,6 +13,7 @@ abstract class InlineInputBlockType implements BlockTypeInterface {
     public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
         return $builder
             ->newProperty("name", $builder::DATA_TYPE_TEXT)
+            ->newProperty("isRequired", $builder::DATA_TYPE_UINT)
             ->newProperty("label", $builder::DATA_TYPE_TEXT)
             ->getResult();
     }

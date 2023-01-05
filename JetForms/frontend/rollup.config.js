@@ -18,5 +18,6 @@ module.exports = ({selectedLang}) => [{
     input: 'backend/plugins/JetForms/frontend/for-webpages/main.js',
     output: {
         file: 'public/plugin-jet-forms-bundle.js',
+        name: 'JetForms',
     }
 }];

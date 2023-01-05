@@ -10,7 +10,7 @@ Temporary manual steps.
 
 ```
 
-INSERT INTO `storedObjects` (`itemName`,`data`) VALUES ('JetForms:mailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}');
+INSERT INTO `storedObjects` (`objectName`,`data`) VALUES ('JetForms:mailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}');
 ```
 
 ## Copy validation lib to public directory
@@ -62,6 +62,33 @@ class Site implements UserSiteInterface {
 
 - `cd plugins/JetForms/`
 - `"../../../backend/vendor/bin/phpunit" --bootstrap ./tests/bootstrap.php ./tests`
+
+# Docs
+
+How to's.
+
+## Frontend api
+
+`const form = window.JetForms[0]`
+
+```
+interface JetForm {
+    getEl(): HTMLFormElement;
+    setIsSubmitting(isSubmitting: Boolean) void;
+    setOnSubmit(fn: (e: Event) => void): void;
+}
+```
+
+## How to register custom script to handle submits
+
+```
+const form = env.window.JetForms[0];
+form.getEl().removeAttribute('action');
+form.onSubmit(e => {
+    e.preventDefault();
+    /* Do something */
+});
+```
 
 # License
 
