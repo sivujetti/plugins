@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
+use Sivujetti\ValidationUtils;
 
 final class SelectInputBlockType implements BlockTypeInterface {
     public const NAME = "JetFormsSelectInput";
@@ -14,7 +15,9 @@ final class SelectInputBlockType implements BlockTypeInterface {
         return $builder
             ->newProperty("name", $builder::DATA_TYPE_TEXT)
             ->newProperty("label", $builder::DATA_TYPE_TEXT)
-            ->newProperty("options", $builder::DATA_TYPE_TEXT)
+            ->newProperty("options")->dataType($builder::DATA_TYPE_TEXT, validationRules: [
+                ["maxLength", ValidationUtils::HARD_LONG_TEXT_MAX_LEN]
+            ])
             ->newProperty("multiple", $builder::DATA_TYPE_UINT)
             ->getResult();
     }

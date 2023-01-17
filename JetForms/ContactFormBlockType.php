@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
+use Sivujetti\ValidationUtils;
 
 final class ContactFormBlockType implements BlockTypeInterface {
     public const NAME = "JetFormsContactForm";
@@ -12,7 +13,9 @@ final class ContactFormBlockType implements BlockTypeInterface {
      */
     public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
         return $builder
-            ->newProperty("behaviours", $builder::DATA_TYPE_TEXT)
+            ->newProperty("behaviours")->dataType($builder::DATA_TYPE_TEXT, validationRules: [
+                ["maxLength", ValidationUtils::HARD_LONG_TEXT_MAX_LEN]
+            ])
             ->getResult();
     }
 }

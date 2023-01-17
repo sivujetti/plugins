@@ -23,10 +23,7 @@ setTimeout(() => {
     const el = document.createElement('style');
     el.setAttribute('data-injected-by', 'jet-forms-plugin');
     el.innerHTML = (
-`h4, .h4 {
-    font: 800 1rem/1rem "Fira Sans";
-}
-ul.table-list > li {
+`ul.table-list > li {
     border-bottom: 1px solid rgba(var(--components-color-fb-default),.14);
     margin: 0;
     padding: .4rem 0;
