@@ -62,7 +62,7 @@ class EditAppLeftColumnSection extends preact.Component {
         const newState = {isCollapsed: !this.state.isCollapsed};
         if (newState.isCollapsed === false && this.state.featuredArticles === undefined) {
             newState.featuredArticles = null;
-            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`, {method: 'GET'})
+            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`, {headers: {}})
                 .then(arts => this.setState({featuredArticles: arts}))
                 .catch(env.window.console.error);
         }

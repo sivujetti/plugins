@@ -11,7 +11,7 @@ final class SjorgSupportServer implements UserPluginInterface {
     public function __construct(UserPluginAPI $api) {
         $api->registerHttpRoute("GET", "/plugins/sjorg-support-server/articles/featured",
             ArticlesController::class, "listFeaturedArticles",
-            ["skipAuth" => true]
+            ["skipAuth" => true, "allowMissingRequestedWithHeader" => true]
         );
     }
 }
