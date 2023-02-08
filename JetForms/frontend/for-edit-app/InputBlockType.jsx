@@ -106,9 +106,9 @@ export default settings => ({
     defaultRenderer: 'plugins/JetForms:block-input-auto',
     icon: settings.icon || 'box',
     reRender({name, isRequired, label, placeholder, id, styleClasses}, renderChildren) {
-        const [startTag, closingTag, inputModeStr] = settings.type !== 'textarea'
-            ? ['input', '', !settings.inputMode ? '' : ` inputmode="${settings.inputMode}"`]
-            : ['textarea', '</textarea>', ''];
+        const [startTag, closingTag, typeStr, inputModeStr] = settings.type !== 'textarea'
+            ? ['input',    '',            ` type="${settings.type}"`, !settings.inputMode ? '' : ` inputmode="${settings.inputMode}"`]
+            : ['textarea', '</textarea>', '',                         ''];
         const blockTypeName = `JetForms${settings.name}`;
         return [
             '<div class="j-', blockTypeName,
@@ -117,8 +117,9 @@ export default settings => ({
                 !label
                     ? ''
                     : `<label class="form-label" for="${name}">${label}</label>`,
-                '<', startTag, ' name="', name, '" id="', name,
-                    '" type="', settings.type, '" class="form-input"',
+                '<', startTag, ' name="', name, '" id="', name, '"',
+                    typeStr,
+                    ' class="form-input"',
                     inputModeStr,
                     placeholder ? ` placeholder="${placeholder}"` : '',
                     isRequired ? ' data-pristine-required' : '',

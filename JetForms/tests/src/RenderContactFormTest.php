@@ -101,14 +101,14 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("form-input", $inputEl->getAttribute("class"));
         $this->assertEquals("", $inputEl->getAttribute("data-pristine-required"));
         // <div class="j-JetFormsTextareaInput" ...>
-        //    <textarea name="message" id="message" type="textarea" class="form-input" placeholder="Message"></textarea>
+        //    <textarea name="message" id="message" class="form-input" placeholder="Message"></textarea>
         // </div>
         $textareaOuter = $all[4];
         $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
         $textareaEl = $textareaOuter->childNodes[0];
         $this->assertEquals("message", $textareaEl->getAttribute("name"));
         $this->assertEquals("message", $textareaEl->getAttribute("id"));
-        $this->assertEquals("textarea", $textareaEl->getAttribute("type"));
+        $this->assertFalse($textareaEl->hasAttribute("type"));
         $this->assertEquals("form-input", $textareaEl->getAttribute("class"));
         $this->assertEquals("Message", $textareaEl->getAttribute("placeholder"));
         // <div class="j-JetFormsSelectInput" ...>

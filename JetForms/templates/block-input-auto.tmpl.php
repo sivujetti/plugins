@@ -1,11 +1,11 @@
 <?php if (($settings = ([
-    "JetFormsEmailInput" => ["type" => "email", "startTag" => "input", "closingTag" => "",
+    "JetFormsEmailInput" => ["typeStr" => " type=\"email\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => ""],
-    "JetFormsNumberInput" => ["type" => "text", "startTag" => "input", "closingTag" => "",
+    "JetFormsNumberInput" => ["typeStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => " inputmode=\"numeric\""],
-    "JetFormsTextareaInput" => ["type" => "textarea", "startTag" => "textarea", "closingTag" => "</textarea>",
+    "JetFormsTextareaInput" => ["typeStr" => "", "startTag" => "textarea", "closingTag" => "</textarea>",
         "inputModeStr" => ""],
-    "JetFormsTextInput" => ["type" => "text", "startTag" => "input", "closingTag" => "",
+    "JetFormsTextInput" => ["typeStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => ""],
 ][$props->type] ?? null))):
     echo "<div class=\"j-", $props->type,
@@ -14,8 +14,9 @@
             !$props->label
                 ? ""
                 : "<label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>",
-        "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name),
-            "\" type=\"", $settings["type"], "\" class=\"form-input\"",
+        "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name), "\"",
+            $settings["typeStr"],
+            " class=\"form-input\"",
             $settings["inputModeStr"],
             $props->placeholder ? " placeholder=\"{$this->e($props->placeholder)}\"" : "",
             $props->isRequired ? " data-pristine-required" : "",
