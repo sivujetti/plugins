@@ -33,7 +33,7 @@ final class SubmitsController {
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
         $page = $pagesRepo->select(fields: ["@blocks"])
-            ->where("slug = ?", "/{$req->params->pageSlug}")
+            ->where("slug = ?", $req->params->pageSlug !== "-" ? $req->params->pageSlug : "/")
             ->fetch();
         if (!$page) throw new PikeException("Invalid input (not such page)",
                                             PikeException::BAD_INPUT);
