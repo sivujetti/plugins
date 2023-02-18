@@ -2,8 +2,8 @@
 
 namespace SitePlugins\JetForms;
 
-use Pike\{PikeException, Request, Response, Validation};
-use SitePlugins\JetForms\Internal\SendMailBehaviour;
+use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
+use SitePlugins\JetForms\Internal\{SendMailBehaviour, StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
@@ -13,6 +13,7 @@ use Sivujetti\Page\PagesRepository2;
  * Contains handlers for "/plugins/jet-forms/submits/*".
  *
  * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SubmitsController {
     /**
@@ -32,8 +33,9 @@ final class SubmitsController {
         if (($errors = self::validateSubmitInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
+        $pageSlug = $req->params->pageSlug !== "-" ? "/{$req->params->pageSlug}" : "/";
         $page = $pagesRepo->select(fields: ["@blocks"])
-            ->where("slug = ?", $req->params->pageSlug !== "-" ? $req->params->pageSlug : "/")
+            ->where("slug = ?", $pageSlug)
             ->fetch();
         if (!$page) throw new PikeException("Invalid input (not such page)",
                                             PikeException::BAD_INPUT);
@@ -43,15 +45,19 @@ final class SubmitsController {
                                     PikeException::BAD_INPUT);
         if (!($form->behaviours = json_decode($form->behaviours, flags: JSON_THROW_ON_ERROR)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
-        $clsStrings = self::createValidBehaviourClsStrings($form, $apiCtx->getPlugin("JetForms"));
-        $meta = self::createInputsMeta($form);
         //
+        $meta = self::createInputsMeta($form);
+        if (($errors = self::validateAnswers($req->body, $meta)))
+            $res->status(400)->plain(implode("\n", $errors));
+        $answers = self::createAnswers($meta, $req->body);
+        //
+        $clsStrings = self::createValidBehaviourClsStrings($form, $apiCtx->getPlugin("JetForms"));
+        $errors = [];
         for ($i = 0; $i < count($clsStrings); ++$i)
-            // @allow \Pike\PikeException
-            $errors = App::$adi->execute([$clsStrings[$i], "run"], [
+            App::$adi->execute([$clsStrings[$i], "run"], [
                 $form->behaviours[$i]->data,
                 $req->body,
-                $meta,
+                ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "blockId" => $form->id],
             ]);
         //
         if ($errors) $errors = array_map("urlencode", $errors);
@@ -89,6 +95,45 @@ final class SubmitsController {
         return $out;
     }
     /**
+     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @param object $reqBody
+     * @psalm-return array<int, FormInputAnswer>
+     */
+    private static function createAnswers(array $inputsMeta, object $reqBody): array {
+        return array_map(function (array $meta) use ($reqBody) {
+            $label = "";
+            if (strlen($meta["label"])) $label = $meta["label"];
+            else if (strlen($meta["placeholder"])) $label = $meta["placeholder"];
+            else $label = $meta["name"];
+            return ["label" => $label, "value" => self::getResultSingle($meta, $reqBody)];
+        }, $inputsMeta);
+    }
+    /**
+     * @psalm-param InputMeta $meta
+     * @param object $reqBody
+     * @return string
+     */
+    private static function getResultSingle(array $meta, object $reqBody): string {
+        ["name" => $name, "type" => $type] = $meta;
+        //
+        if ($type === CheckboxInputBlockType::NAME)
+            return property_exists($reqBody, $name) ? "Checked" : "Not checked";
+        //
+        if ($type === SelectInputBlockType::NAME) {
+            $opts = $meta["details"]["options"];
+            if (!$meta["details"]["multiple"]) {
+                $selected = $reqBody->{$name} ?? "-";
+                return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
+            }
+            //
+            $selected = $reqBody->{$name} ?? [];
+            return implode("\n", array_map(fn($opt) =>
+                "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
+            , $opts));
+        }
+        return ($reqBody->{$name} ?? "") ?: "- None provided";
+    }
+    /**
      * @param \Sivujetti\Block\Entities\Block $block Form block from db
      * @param \SitePlugins\JetForms\JetForms $plugin
      * @return class-string[]
@@ -99,6 +144,7 @@ final class SubmitsController {
             $ClassString = match ($behaviour->name) {
                 // Default executors
                 "SendMail" => SendMailBehaviour::class,
+                "StoreSubmissionToLocalDb" => StoreSubmissionToLocalDbBehaviour::class,
                 "NotifyUser" => "todo",
                 // User-defined executors
                 default => $plugin->getBehaviourExecutor($behaviour->name),
@@ -108,6 +154,32 @@ final class SubmitsController {
                                         PikeException::BAD_INPUT);
             return $ClassString;
         }, $form->behaviours);
+    }
+    /**
+     * @param object $reqBody
+     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @return string[] A list of error messages or []
+     */
+    private static function validateAnswers(object $reqBody, array $inputsMeta): array {
+        $v = Validation::makeObjectValidator();
+        foreach ($inputsMeta as $meta) {
+            if ($meta["type"] === CheckboxInputBlockType::NAME)
+                ; // ??
+            elseif ($meta["type"] === SelectInputBlockType::NAME) {
+                $validValues = array_merge(array_column($meta["details"]["options"], "value"), ["-"]);
+                if (!$meta["details"]["multiple"]) {
+                    $v->rule($meta["name"], "in", $validValues);
+                } else {
+                    $v->rule("{$meta["name"]}?", "type", "array");
+                    $v->rule("{$meta["name"]}?.*", "in", $validValues);
+                }
+            } else {
+                $propPath = $meta["name"] . ($meta["isRequired"] ? "" : "?");
+                $v->rule($propPath, "type", "string");
+                $v->rule($propPath, "maxLength", 6000);
+            }
+        }
+        return $v->validate($reqBody);
     }
     /**
      * @param object $input

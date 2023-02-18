@@ -3,13 +3,15 @@
 namespace SitePlugins\JetForms\Tests;
 
 use Pike\{Injector, PhpMailerMailer};
+use Pike\Db\FluentDb;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
                           SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
+use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
 
 final class SendContactFormTest extends PluginTestCase {
-    public function testProcessSubmitSendsMailUsingDataFromAContactFormBlock(): void {
-        $this->runSendFormTest(
+    public function testProcessSubmitWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
+        $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
@@ -21,11 +23,16 @@ final class SendContactFormTest extends PluginTestCase {
             )],
             postData: ["input_1" => "Bob xss >"],
             bodyTemplate: "All results:\n\n[resultsAll]",
-            expectedBody: "All results:\n\nName:\nBob xss &gt;",
+            expectedEmailBody: "All results:\n\nName:\nBob xss &gt;",
         );
     }
-    public function testProcessSubmitHandlesSingleSelectInput(): void {
-        $this->runSendFormTest(
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    public function testProcessSubmitWithSendMailBehaviourHandlesSingleSelectInput(): void {
+        $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
@@ -40,11 +47,16 @@ final class SendContactFormTest extends PluginTestCase {
             ],
             postData: ["input_1" => "option-1"],
             bodyTemplate: "[resultsAll]",
-            expectedBody: "Choose one:\nOption 1 xss &lt;"
+            expectedEmailBody: "Choose one:\nOption 1 xss &lt;"
         );
     }
-    public function testProcessSubmitHandlesMultiSelectInput(): void {
-        $this->runSendFormTest(
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    public function testProcessSubmitWithSendMailBehaviourHandlesMultiSelectInput(): void {
+        $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
@@ -60,17 +72,63 @@ final class SendContactFormTest extends PluginTestCase {
             ],
             postData: ["input_1" => ["option-1", "option-3"]],
             bodyTemplate: "[resultsAll]\nafter",
-            expectedBody: "Choose many:\n" .
+            expectedEmailBody: "Choose many:\n" .
                 "[x] Option 1 xss &lt;\n" .
                 "[ ] Option 2\n" .
                 "[x] Option 3\nafter"
         );
     }
-    private function runSendFormTest(\Closure $inputs,
-                                     array $postData,
-                                     string $bodyTemplate,
-                                     string $expectedBody): void {
-        $response = $this
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    public function testProcessSubmitWithStoreToLocalDbBehaviourSavesAnswersToDb(): void {
+        $this->sendSendFormRequest(
+            inputs: fn() => [
+                $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
+                    renderer: TextInputBlockType::DEFAULT_RENDERER,
+                    propsData: RenderContactFormTest::createDataForTestInputBlock("name"),
+                ),
+                $this->blockTestUtils->makeBlockData(EmailInputBlockType::NAME,
+                    renderer: EmailInputBlockType::DEFAULT_RENDERER,
+                    propsData: RenderContactFormTest::createDataForTestInputBlock("email"),
+                ),
+            ],
+            postData: ["name" => "Harry Potter", "email" => "e@ministfyofmagic.hm"],
+            behaviours: ["StoreSubmissionToLocalDb"]
+        );
+        $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->getEntries("JetForms:submissions");
+        $this->assertCount(1, $all);
+        $this->assertEquals([
+            ["label" => "Test escape<", "value" => "Harry Potter"],
+            ["label" => "Email", "value" => "e@ministfyofmagic.hm"],
+        ], $all[0]->data["answers"]);
+        $this->assertEquals("/hello", $all[0]->data["sentFromPage"]);
+        $actualFormBlock = $this->state->testPageData->blocks[count($this->state->testPageData->blocks)-1];
+        $this->assertEquals($actualFormBlock->id, $all[0]->data["sentFromBlock"]);
+        $this->assertGreaterThan(time() - 10, $all[0]->data["sentAt"]);
+    }
+    private function runSendFormWithSendMailBehaviour(\Closure $inputs,
+                                                      array $postData,
+                                                      string $bodyTemplate,
+                                                      string $expectedEmailBody): void {
+        $this->sendSendFormRequest($inputs, $postData, emailBodyTemplate: $bodyTemplate);
+        $conf = $this->state->actualFinalSendMailArg;
+        $expected = $this->state->testSendFormBehaviourData;
+        $this->assertEquals($expected["fromAddress"], $conf->fromAddress);
+        $this->assertEquals($expected["fromName"], $conf->fromName);
+        $this->assertEquals($expected["toAddress"], $conf->toAddress);
+        $this->assertEquals($expected["toName"], $conf->toName);
+        $expectedSubject = str_replace("[siteName]", "Test suit&ouml; website xss &gt;", $expected["subjectTemplate"]);
+        $this->assertEquals($expectedSubject, $conf->subject);
+        $this->assertEquals($expectedEmailBody, $conf->body);
+    }
+    private function sendSendFormRequest(\Closure $inputs,
+                                         array $postData,
+                                         array $behaviours = ["SendMail"],
+                                         string $emailBodyTemplate = ""): void {
+        $this
             ->setupPageTest()
             ->usePlugin("JetForms")
             ->useBlockType(ContactFormBlockType::NAME, new ContactFormBlockType)
@@ -79,27 +137,29 @@ final class SendContactFormTest extends PluginTestCase {
             ->useBlockType(SelectInputBlockType::NAME, new SelectInputBlockType)
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->useBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType)
-            ->withPageData(function (object $testPageData) use ($inputs, $bodyTemplate) {
+            ->withPageData(function (object $testPageData) use ($behaviours, $inputs, $emailBodyTemplate) {
                 $this->state->testSendFormBehaviourData = [
                     "subjectTemplate" => "New mail from [siteName]",
                     "toAddress" => "owner@mysite.com",
                     "toName" => "Site Owner",
                     "fromAddress" => "noreply@mysite.com",
                     "fromName" => "My site",
-                    "bodyTemplate" => $bodyTemplate,
+                    "bodyTemplate" => $emailBodyTemplate,
                 ];
                 $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
                     renderer: ContactFormBlockType::DEFAULT_RENDERER,
                     propsData: (object) [
-                        "behaviours" => json_encode([
-                            ["name" => "SendMail", "data" => $this->state->testSendFormBehaviourData],
-                        ])
+                        "behaviours" => json_encode(array_map(fn($name) => [
+                            "name" => $name,
+                            "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
+                        ], $behaviours))
                     ],
                     children: $inputs(),
                     id: "@auto"
                 );
-            })
-            ->withBootModuleAlterer(function (TestEnvBootstrapper $bootModule) {
+            });
+        if (in_array("SendMail", $behaviours, true))
+            $this->withBootModuleAlterer(function (TestEnvBootstrapper $bootModule) {
                 $bootModule->useMockAlterer(function (Injector $di) {
                     $di->delegate(PhpMailerMailer::class, function () {
                         $stub = $this->createMock(PhpMailerMailer::class);
@@ -112,34 +172,24 @@ final class SendContactFormTest extends PluginTestCase {
                         return $stub;
                     });
                 });
-            })
-            ->execute(function () use ($postData) {
-                $this->dbDataHelper->insertData((object) [
-                    "objectName" => "JetForms:mailSendSettings",
-                    "data" => json_encode([
-                        "sendingMethod" => "mail",
-                        "SMTP_host" => "",
-                        "SMTP_port" => "",
-                        "SMTP_username" => "",
-                        "SMTP_password" => "",
-                        "SMTP_secureProtocol" => "",
-                    ])
-                ], "storedObjects");
-                $state = $this->state;
-                $pageContainingFormSlug = $state->testPageData->slug;
-                $formBlockId = $state->testPageData->blocks[count($state->testPageData->blocks)-1]->id;
-                return $this->createApiRequest("/plugins/jet-forms/submits/{$formBlockId}{$pageContainingFormSlug}", "POST",
-                    (object) array_merge($postData, ["_returnTo" => "foo"]));
             });
+        $response = $this->execute(function () use ($postData) {
+            $this->dbDataHelper->insertData((object) [
+                "objectName" => "JetForms:mailSendSettings",
+                "data" => json_encode([
+                    "sendingMethod" => "mail",
+                    "SMTP_host" => "",
+                    "SMTP_port" => "",
+                    "SMTP_username" => "",
+                    "SMTP_password" => "",
+                    "SMTP_secureProtocol" => "",
+                ])
+            ], "storedObjects");
+            $pageData = $this->state->testPageData;
+            $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
+            return $this->createApiRequest("/plugins/jet-forms/submits/{$formBlockId}{$pageData->slug}", "POST",
+                (object) array_merge($postData, ["_returnTo" => "foo"]));
+        });
         $this->verifyResponseMetaEquals(200, "text/html", $response);
-        $conf = $this->state->actualFinalSendMailArg;
-        $expected = $this->state->testSendFormBehaviourData;
-        $this->assertEquals($expected["fromAddress"], $conf->fromAddress);
-        $this->assertEquals($expected["fromName"], $conf->fromName);
-        $this->assertEquals($expected["toAddress"], $conf->toAddress);
-        $this->assertEquals($expected["toName"], $conf->toName);
-        $expectedSubject = str_replace("[siteName]", "Test suit&ouml; website xss &gt;", $expected["subjectTemplate"]);
-        $this->assertEquals($expectedSubject, $conf->subject);
-        $this->assertEquals($expectedBody, $conf->body);
     }
 }

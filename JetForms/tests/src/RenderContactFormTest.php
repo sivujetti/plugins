@@ -76,7 +76,7 @@ final class RenderContactFormTest extends PluginTestCase {
         // <div ... class="j-JetFormsEmailInput">
         //     <input name="email" id="email" type="email" class="form-input" placeholder="Email" data-pristine-required>
         // </div>
-        $emailInputOuter = $all[2];
+        $emailInputOuter = $all[1];
         $this->assertEquals("j-JetFormsEmailInput form-group", $emailInputOuter->getAttribute("class"));
         $emailInputEl = $emailInputOuter->childNodes[0];
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
@@ -89,7 +89,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-label" for="name">Test escape&lt;</label>
         //     <input name="name" id="name" type="text" class="form-input" data-pristine-required>
         // </div>
-        $textInputOuter = $all[3];
+        $textInputOuter = $all[2];
         $this->assertEquals("j-JetFormsTextInput form-group", $textInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $textInputOuter->childNodes;
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
@@ -103,7 +103,7 @@ final class RenderContactFormTest extends PluginTestCase {
         // <div class="j-JetFormsTextareaInput" ...>
         //    <textarea name="message" id="message" class="form-input" placeholder="Message"></textarea>
         // </div>
-        $textareaOuter = $all[4];
+        $textareaOuter = $all[3];
         $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
         $textareaEl = $textareaOuter->childNodes[0];
         $this->assertEquals("message", $textareaEl->getAttribute("name"));
@@ -118,7 +118,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <option value="-">-</option>
         //     </select>
         // </div>
-        $selectElOuter = $all[5];
+        $selectElOuter = $all[4];
         $this->assertEquals("j-JetFormsSelectInput form-group", $selectElOuter->getAttribute("class"));
         $selectEl = $selectElOuter->childNodes[0];
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
@@ -137,7 +137,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-label" for="age">Age</label>
         //     <input name="age" id="age" type="text" class="form-input" inputmode="numeric">
         // </div>
-        $numberInputOuter = $all[6];
+        $numberInputOuter = $all[5];
         $this->assertEquals("j-JetFormsNumberInput form-group", $numberInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $numberInputOuter->childNodes;
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
@@ -154,7 +154,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <i class="form-icon"></i> Test escape&gt;
         //    </label>
         // </div>
-        $checkboxInputOuter = $all[7];
+        $checkboxInputOuter = $all[6];
         $this->assertEquals("j-JetFormsCheckboxInput form-group", $checkboxInputOuter->getAttribute("class"));
         $labelEl = $checkboxInputOuter->childNodes[0];
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
@@ -164,18 +164,18 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
         $this->assertEquals(" Test escape%gt;", rtrim($textNode->nodeValue));
         // <button class="j-Button btn" type="submit" ...>Send</button>
-        $buttonEl = $all[8];
+        $buttonEl = $all[7];
         $this->assertTrue(str_starts_with($buttonEl->getAttribute("class"), "j-Button"));
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
         $this->assertEquals("Send", $buttonEl->nodeValue);
         // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
-        $returnToInput = $all[11];
+        $returnToInput = $all[9];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
         // <input type="hidden" name="_csrf" value="todo">
-        $returnToInput = $all[12];
+        $returnToInput = $all[10];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
         $this->assertEquals("todo", $returnToInput->getAttribute("value"));
@@ -192,7 +192,7 @@ final class RenderContactFormTest extends PluginTestCase {
             ])
         ];
     }
-    private static function createDataForTestInputBlock(string $which): object {
+    public static function createDataForTestInputBlock(string $which): object {
         return match ($which) {
             "email" => (object) [
                 "name" => "email",

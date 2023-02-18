@@ -2,19 +2,19 @@
 
 namespace SitePlugins\JetForms\Internal;
 
-use Pike\{ArrayUtils, PhpMailerMailer, PikeException, Validation};
+use Pike\{PhpMailerMailer, PikeException};
 use Pike\Auth\Crypto;
-use SitePlugins\JetForms\{BehaviourExecutorInterface, CheckboxInputBlockType, JetForms,
-                            SelectInputBlockType, SettingsController};
+use SitePlugins\JetForms\{BehaviourExecutorInterface, JetForms, SettingsController};
 use Sivujetti\SharedAPIContext;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
 
 /**
- * Validates and runs a {type: "SendMail" ...} behaviour.
+ * Runs a {type: "SendMail" ...} behaviour.
  *
  * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
- * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @psalm-import-type SubmissionInfo from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\PhpMailerMailer */
@@ -46,16 +46,9 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
         $this->crypto = $crypto;
     }
     /**
-     * @param object $behaviour Data from the database
-     * @param object $reqBody Data from the form (plugins/JetForms/templates/block-contact-form.tmpl.php)
-     * @throws \Pike\PikeException If $behaviours or $reqBody wasn't valid
-     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @inheritdoc
      */
-    public function run(object $behaviour, object $reqBody, array $inputsMeta): void {
-        $errors = [];
-        if (($errors = self::validateReqBodyForTemplate($reqBody, $inputsMeta)))
-            throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
-        //
+    public function run(object $behaviour, object $reqBody, array $submissionInfo): void {
         $vars = $this->makeTemplateVars();
         $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
@@ -65,7 +58,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
             "toAddress" => $behaviour->toAddress,
             "toName" => is_string($behaviour->toName ?? null) ? $behaviour->toName : "",
             "subject" => self::renderConstantTags($behaviour->subjectTemplate, $vars),
-            "body" => self::renderDynamicTags(self::renderConstantTags($behaviour->bodyTemplate, $vars), $inputsMeta, $reqBody),
+            "body" => self::renderDynamicTags(self::renderConstantTags($behaviour->bodyTemplate, $vars), $submissionInfo["answers"]),
             "configureMailer" => function ($mailer) use ($mailSettings) {
                 if ($mailSettings["sendingMethod"] === "mail") {
                     $mailer->isMail();
@@ -84,32 +77,6 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                 $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer, $mailSettings);
             },
         ]);
-    }
-    /**
-     * @param object $reqBody
-     * @psalm-param array<int, InputMeta> $inputsMeta
-     * @return string[] A list of error messages or []
-     */
-    private static function validateReqBodyForTemplate(object $reqBody, array $inputsMeta): array {
-        $v = Validation::makeObjectValidator();
-        foreach ($inputsMeta as $meta) {
-            if ($meta["type"] === CheckboxInputBlockType::NAME)
-                ; // ??
-            elseif ($meta["type"] === SelectInputBlockType::NAME) {
-                $validValues = array_merge(array_column($meta["details"]["options"], "value"), ["-"]);
-                if (!$meta["details"]["multiple"]) {
-                    $v->rule($meta["name"], "in", $validValues);
-                } else {
-                    $v->rule("{$meta["name"]}?", "type", "array");
-                    $v->rule("{$meta["name"]}?.*", "in", $validValues);
-                }
-            } else {
-                $propPath = $meta["name"] . ($meta["isRequired"] ? "" : "?");
-                $v->rule($propPath, "type", "string");
-                $v->rule($propPath, "maxLength", 6000);
-            }
-        }
-        return $v->validate($reqBody);
     }
     /**
      * @psalm-return JetFormsMailSendSettings
@@ -138,56 +105,23 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param string $tmpl The template defined by the site developer
-     * @psalm-param array<int, InputMeta> $inputsMeta
-     * @param object $reqBody
+     * @psalm-param array<int, FormInputAnswer> $answers
      * @return string
      */
-    private static function renderDynamicTags(string $tmpl, array $inputsMeta, object $reqBody): string {
+    private static function renderDynamicTags(string $tmpl, array $answers): string {
         if (str_contains($tmpl, "[resultsAll]"))
-            return str_replace("[resultsAll]", self::renderResultsAll($inputsMeta, $reqBody), $tmpl);
+            return str_replace("[resultsAll]", self::renderResultsAll($answers), $tmpl);
         return $tmpl;
-
     }
     /**
-     * @psalm-param array<int, InputMeta> $inputsMeta
-     * @param object $reqBody
+     * @psalm-param array<int, FormInputAnswer> $answers
      * @return string
      */
-    private static function renderResultsAll(array $inputsMeta, object $reqBody): string {
-        $lines = [];
-        foreach ($inputsMeta as $meta) {
-            $label = "";
-            if (strlen($meta["label"])) $label = $meta["label"];
-            else if (strlen($meta["placeholder"])) $label = $meta["placeholder"];
-            else $label = $meta["name"];
-            $lines[] = "{$label}:";
-            $lines[] = htmlentities(self::getResultSingle($meta, $reqBody));
-        }
-        return $lines ? implode("\n", $lines) : "-";
-    }
-    /**
-     * @psalm-param InputMeta $meta
-     * @param object $reqBody
-     * @return string
-     */
-    private static function getResultSingle(array $meta, object $reqBody): string {
-        ["name" => $name, "type" => $type] = $meta;
-        //
-        if ($type === CheckboxInputBlockType::NAME)
-            return property_exists($reqBody, $name) ? "Checked" : "Not checked";
-        //
-        if ($type === SelectInputBlockType::NAME) {
-            $opts = $meta["details"]["options"];
-            if (!$meta["details"]["multiple"]) {
-                $selected = $reqBody->{$name} ?? "-";
-                return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
-            }
-            //
-            $selected = $reqBody->{$name} ?? [];
-            return implode("\n", array_map(fn($opt) =>
-                "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
-            , $opts));
-        }
-        return ($reqBody->{$name} ?? "") ?: "- None provided";
+    private static function renderResultsAll(array $answers): string {
+        return $answers
+            ? implode("\n", array_map(fn($ans) =>
+                "{$ans["label"]}:\n" . htmlentities($ans["value"])
+            , $answers))
+            : "-";
     }
 }
