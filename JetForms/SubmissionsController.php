@@ -6,31 +6,32 @@ use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
-use Sivujetti\Block\Entities\Block;
 use Sivujetti\Page\PagesRepository2;
 
 /**
- * Contains handlers for "/plugins/jet-forms/submits/*".
+ * Contains handlers for "/plugins/jet-forms/submissions/*".
  *
  * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
  * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
-final class SubmitsController {
+final class SubmissionsController {
     /**
-     * POST /plugins/jet-forms/submits/:blockId/:pageSlug: fetches $params->pageSlug
+     * POST /plugins/jet-forms/submissions/:blockId/:pageSlug: fetches $params->pageSlug
      * from the database, finds $foundPage->blocks->find($params->blockId) and runs
-     * each behaviour configured to it ([{type: "SendMail", ...}] by default).
+     * each behaviour configured to it ([{type: "SendMail", ...} ...]).
      *
      * @param \Pike\Request $req
      * @param \Pike\Response $res
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
+     * @param string $errorLogFn = "error_log" Mainly for tests
      */
-    public function handleSubmit(Request $req,
-                                 Response $res,
-                                 SharedAPIContext $apiCtx,
-                                 PagesRepository2 $pagesRepo): void {
-        if (($errors = self::validateSubmitInput($req->body)))
+    public function handleSubmission(Request $req,
+                                     Response $res,
+                                     SharedAPIContext $apiCtx,
+                                     PagesRepository2 $pagesRepo,
+                                     string $errorLogFn = "error_log"): void {
+        if (($errors = self::validateSubmissionInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
         $pageSlug = $req->params->pageSlug !== "-" ? "/{$req->params->pageSlug}" : "/";
@@ -47,22 +48,26 @@ final class SubmitsController {
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         //
         $meta = self::createInputsMeta($form);
-        if (($errors = self::validateAnswers($req->body, $meta)))
+        if (($errors = self::validateAnswers($req->body, $meta))) {
             $res->status(400)->plain(implode("\n", $errors));
+            return;
+        }
         $answers = self::createAnswers($meta, $req->body);
         //
-        $clsStrings = self::createValidBehaviourClsStrings($form, $apiCtx->getPlugin("JetForms"));
-        $errors = [];
-        for ($i = 0; $i < count($clsStrings); ++$i)
-            App::$adi->execute([$clsStrings[$i], "run"], [
-                $form->behaviours[$i]->data,
-                $req->body,
-                ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "blockId" => $form->id],
-            ]);
+        $clsStrings = self::createValidBehaviourClsStrings($form->behaviours, $apiCtx->getPlugin("JetForms"));
+        for ($i = 0; $i < count($clsStrings); ++$i) {
+            try {
+                App::$adi->execute([$clsStrings[$i], "run"], [
+                    $form->behaviours[$i]->data,
+                    $req->body,
+                    ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "sentFromBlock" => $form->id],
+                ]);
+            } catch (\Exception $e) {
+                call_user_func($errorLogFn, "JetForms: behaviour {$i} failed: " . self::formatError($e));
+            }
+        }
         //
-        if ($errors) $errors = array_map("urlencode", $errors);
-        $asJson = $errors ? json_encode($errors, JSON_UNESCAPED_UNICODE) : null;
-        $res->redirect($req->body->_returnTo . ($asJson ? "&errors={$asJson}" : ""));
+        $res->redirect($req->body->_returnTo);
     }
     /**
      * @psalm-return array<int, InputMeta>
@@ -134,12 +139,12 @@ final class SubmitsController {
         return ($reqBody->{$name} ?? "") ?: "- None provided";
     }
     /**
-     * @param \Sivujetti\Block\Entities\Block $block Form block from db
+     * @param array $block->behaviours
      * @param \SitePlugins\JetForms\JetForms $plugin
      * @return class-string[]
      * @throws \Pike\PikeException
      */
-    private static function createValidBehaviourClsStrings(Block $form, JetForms $plugin): array {
+    private static function createValidBehaviourClsStrings(array $behaviours, JetForms $plugin): array {
         return array_map(function (object $behaviour) use ($plugin) {
             $ClassString = match ($behaviour->name) {
                 // Default executors
@@ -153,7 +158,7 @@ final class SubmitsController {
                 throw new PikeException("No executor found for behaviour `{$behaviour->name}`",
                                         PikeException::BAD_INPUT);
             return $ClassString;
-        }, $form->behaviours);
+        }, $behaviours);
     }
     /**
      * @param object $reqBody
@@ -185,10 +190,23 @@ final class SubmitsController {
      * @param object $input
      * @return string[] Error messages or []
      */
-    private static function validateSubmitInput(object $input): array {
+    private static function validateSubmissionInput(object $input): array {
         return Validation::makeObjectValidator()
             ->rule("_returnTo", "type", "string")
             ->rule("_returnTo", "maxLength", 512)
             ->validate($input);
+    }
+    /**
+     * @param \Exception $e
+     * @return string
+     */
+    private static function formatError(\Exception $e): string {
+        return "<<error_start>>\n" .
+            "At `{$e->getFile()}` line {$e->getLine()}\n" .
+            "-- Message ---\n" .
+            "{$e->getMessage()}\n" .
+            "-- Trace ---\n" .
+            "{$e->getTraceAsString()}\n" .
+        "<<error_end>>";
     }
 }

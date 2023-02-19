@@ -84,7 +84,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     private function getSendMailSettingsOrThrow(): array {
         $dataBag = $this->storedObjectsRepo->getEntry("JetForms:mailSendSettings");
         if (!$dataBag)
-            throw new PikeException("", PikeException::ERROR_EXCEPTION);
+            throw new PikeException("JetForms:mailSendSettings missing", PikeException::ERROR_EXCEPTION);
         return SettingsController::withDecryptedValues($dataBag->data, $this->crypto);
     }
     /**
@@ -119,7 +119,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      */
     private static function renderResultsAll(array $answers): string {
         return $answers
-            ? implode("\n", array_map(fn($ans) =>
+            ? implode("\n", array_map(fn(array $ans) =>
                 "{$ans["label"]}:\n" . htmlentities($ans["value"])
             , $answers))
             : "-";

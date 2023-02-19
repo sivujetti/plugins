@@ -79,7 +79,7 @@ interface JetForm {
 }
 ```
 
-## How to register custom script to handle submits
+## How to register custom script to handle submissions
 
 ```
 const form = env.window.JetForms[0];

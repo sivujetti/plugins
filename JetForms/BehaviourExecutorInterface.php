@@ -12,7 +12,7 @@ namespace SitePlugins\JetForms;
  */
 interface BehaviourExecutorInterface {
     /**
-     * @param object $behaviourData Valid data from the database (behaviour.data)
+     * @param object $behaviourData Valid data from the database (block.behaviours[*].data)
      * @param object $reqBody Validated data from the form (plugins/JetForms/templates/block-some-form.tmpl.php)
      * @psalm-param SubmissionInfo $submissionInfo
      */

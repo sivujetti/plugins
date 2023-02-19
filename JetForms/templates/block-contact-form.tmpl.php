@@ -1,5 +1,5 @@
 <form
-    action="<?= $this->url("/plugins/jet-forms/submits/{$props->id}" . ($currentPage->slug !== "/" ? $currentPage->slug : "/-")) ?>"
+    action="<?= $this->url("/plugins/jet-forms/submissions/{$props->id}" . ($currentPage->slug !== "/" ? $currentPage->slug : "/-")) ?>"
     method="post"
     class="j-<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?> jet-form<?= /* see also public/plugin-jet-forms-bundle.js */ $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "" ?>"
     data-form-sent-message="<?= $this->__("Thank you for your message!") ?>"

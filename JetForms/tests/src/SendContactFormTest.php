@@ -10,7 +10,7 @@ use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
 
 final class SendContactFormTest extends PluginTestCase {
-    public function testProcessSubmitWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
+    public function testProcessSubmissionWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
@@ -31,7 +31,7 @@ final class SendContactFormTest extends PluginTestCase {
     ////////////////////////////////////////////////////////////////////////////
 
 
-    public function testProcessSubmitWithSendMailBehaviourHandlesSingleSelectInput(): void {
+    public function testProcessSubmissionWithSendMailBehaviourHandlesSingleSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
@@ -55,7 +55,7 @@ final class SendContactFormTest extends PluginTestCase {
     ////////////////////////////////////////////////////////////////////////////
 
 
-    public function testProcessSubmitWithSendMailBehaviourHandlesMultiSelectInput(): void {
+    public function testProcessSubmissionWithSendMailBehaviourHandlesMultiSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
@@ -83,7 +83,7 @@ final class SendContactFormTest extends PluginTestCase {
     ////////////////////////////////////////////////////////////////////////////
 
 
-    public function testProcessSubmitWithStoreToLocalDbBehaviourSavesAnswersToDb(): void {
+    public function testProcessSubmissionWithStoreToLocalDbBehaviourSavesAnswersToDb(): void {
         $this->sendSendFormRequest(
             inputs: fn() => [
                 $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
@@ -187,7 +187,7 @@ final class SendContactFormTest extends PluginTestCase {
             ], "storedObjects");
             $pageData = $this->state->testPageData;
             $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
-            return $this->createApiRequest("/plugins/jet-forms/submits/{$formBlockId}{$pageData->slug}", "POST",
+            return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}", "POST",
                 (object) array_merge($postData, ["_returnTo" => "foo"]));
         });
         $this->verifyResponseMetaEquals(200, "text/html", $response);

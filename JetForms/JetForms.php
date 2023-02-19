@@ -3,7 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
-use Sivujetti\Auth\ACLRulesBuilder;
+use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
@@ -20,8 +20,8 @@ final class JetForms implements UserPluginInterface {
      * @inheritdoc
      */
     public function __construct(UserPluginAPI $api) {
-        $api->registerHttpRoute("POST", "/plugins/jet-forms/submits/[w:blockId]/[w:pageSlug]",
-            SubmitsController::class, "handleSubmit",
+        $api->registerHttpRoute("POST", "/plugins/jet-forms/submissions/[w:blockId]/[w:pageSlug]",
+            SubmissionsController::class, "handleSubmission",
             ["allowMissingRequestedWithHeader" => true, "skipAuth" => true]
         );
         $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
