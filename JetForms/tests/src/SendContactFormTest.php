@@ -3,9 +3,12 @@
 namespace SitePlugins\JetForms\Tests;
 
 use Pike\{Injector, PhpMailerMailer};
+use Pike\Auth\Crypto;
 use Pike\Db\FluentDb;
+use Pike\TestUtils\MockCrypto;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
                           SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
+use Sivujetti\JsonUtils;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
 
@@ -100,10 +103,13 @@ final class SendContactFormTest extends PluginTestCase {
         );
         $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->getEntries("JetForms:submissions");
         $this->assertCount(1, $all);
+        $mockEncryptedAnswers = $all[0]->data["answers"];
+        $decryptedAnswers = MockCrypto::mockDecrypt($mockEncryptedAnswers, SIVUJETTI_SECRET);
+        $parsed = JsonUtils::parse($decryptedAnswers);
         $this->assertEquals([
-            ["label" => "Test escape<", "value" => "Harry Potter"],
-            ["label" => "Email", "value" => "e@ministfyofmagic.hm"],
-        ], $all[0]->data["answers"]);
+            (object) ["label" => "Test escape<", "value" => "Harry Potter"],
+            (object) ["label" => "Email", "value" => "e@ministfyofmagic.hm"],
+        ], $parsed);
         $this->assertEquals("/hello", $all[0]->data["sentFromPage"]);
         $actualFormBlock = $this->state->testPageData->blocks[count($this->state->testPageData->blocks)-1];
         $this->assertEquals($actualFormBlock->id, $all[0]->data["sentFromBlock"]);
@@ -128,7 +134,7 @@ final class SendContactFormTest extends PluginTestCase {
                                          array $postData,
                                          array $behaviours = ["SendMail"],
                                          string $emailBodyTemplate = ""): void {
-        $this
+        $response = $this
             ->setupPageTest()
             ->usePlugin("JetForms")
             ->useBlockType(ContactFormBlockType::NAME, new ContactFormBlockType)
@@ -157,39 +163,41 @@ final class SendContactFormTest extends PluginTestCase {
                     children: $inputs(),
                     id: "@auto"
                 );
-            });
-        if (in_array("SendMail", $behaviours, true))
-            $this->withBootModuleAlterer(function (TestEnvBootstrapper $bootModule) {
-                $bootModule->useMockAlterer(function (Injector $di) {
-                    $di->delegate(PhpMailerMailer::class, function () {
-                        $stub = $this->createMock(PhpMailerMailer::class);
-                        $stub->method("sendMail")
-                            ->with($this->callBack(function ($actual) {
-                                $this->state->actualFinalSendMailArg = $actual;
-                                return true;
-                            }))
-                            ->willReturn(true);
-                        return $stub;
-                    });
+            })
+            ->withBootModuleAlterer(function (TestEnvBootstrapper $bootModule) use ($behaviours) {
+                $hasSendMailBehaviour = in_array("SendMail", $behaviours, true);
+                $bootModule->useMockAlterer(function (Injector $di) use ($hasSendMailBehaviour) {
+                    $di->delegate(Crypto::class, fn() => new MockCrypto);
+                    if ($hasSendMailBehaviour)
+                        $di->delegate(PhpMailerMailer::class, function () {
+                            $stub = $this->createMock(PhpMailerMailer::class);
+                            $stub->method("sendMail")
+                                ->with($this->callBack(function ($actual) {
+                                    $this->state->actualFinalSendMailArg = $actual;
+                                    return true;
+                                }))
+                                ->willReturn(true);
+                            return $stub;
+                        });
                 });
+            })
+            ->execute(function () use ($postData) {
+                $this->dbDataHelper->insertData((object) [
+                    "objectName" => "JetForms:mailSendSettings",
+                    "data" => json_encode([
+                        "sendingMethod" => "mail",
+                        "SMTP_host" => "",
+                        "SMTP_port" => "",
+                        "SMTP_username" => "",
+                        "SMTP_password" => "",
+                        "SMTP_secureProtocol" => "",
+                    ])
+                ], "storedObjects");
+                $pageData = $this->state->testPageData;
+                $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
+                return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}", "POST",
+                    (object) array_merge($postData, ["_returnTo" => "foo"]));
             });
-        $response = $this->execute(function () use ($postData) {
-            $this->dbDataHelper->insertData((object) [
-                "objectName" => "JetForms:mailSendSettings",
-                "data" => json_encode([
-                    "sendingMethod" => "mail",
-                    "SMTP_host" => "",
-                    "SMTP_port" => "",
-                    "SMTP_username" => "",
-                    "SMTP_password" => "",
-                    "SMTP_secureProtocol" => "",
-                ])
-            ], "storedObjects");
-            $pageData = $this->state->testPageData;
-            $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
-            return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}", "POST",
-                (object) array_merge($postData, ["_returnTo" => "foo"]));
-        });
         $this->verifyResponseMetaEquals(200, "text/html", $response);
     }
 }
