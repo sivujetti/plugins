@@ -23,7 +23,7 @@ final class SettingsController {
     public function getMailSendSettings(Response $res,
                                         StoredObjectsRepository $storedObjectsRepo,
                                         Crypto $crypto): void {
-        $entry = $storedObjectsRepo->getEntry("JetForms:mailSendSettings");
+        $entry = $storedObjectsRepo->find("JetForms:mailSendSettings")->fetch() ?? null;
         if (!$entry) {
             $res->status(404)->json(null);
             return;
@@ -37,18 +37,18 @@ final class SettingsController {
      *
      * @param \Pike\Request $req
      * @param \Pike\Response $res
-     * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storedObjectsRepo 
+     * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storage
      * @param \Pike\Auth\Crypto $crypto
      */
     public function updateMailSendSettings(Request $req,
                                            Response $res,
-                                           StoredObjectsRepository $storedObjectsRepo,
+                                           StoredObjectsRepository $storage,
                                            Crypto $crypto): void {
         if (($errors = self::validateAsd($req->body))) {
             $res->status(400)->json($errors);
             return;
         }
-        $numRows = $storedObjectsRepo->updateEntryData("JetForms:mailSendSettings", (object) [
+        $numRows = $storage->updateEntry("JetForms:mailSendSettings", [
             "sendingMethod" => $req->body->sendingMethod,
             "SMTP_host" => $req->body->SMTP_host ?? null,
             "SMTP_port" => $req->body->SMTP_port ?? null,
@@ -57,7 +57,7 @@ final class SettingsController {
                 ? $crypto->encrypt($req->body->SMTP_password, SIVUJETTI_SECRET)
                 : null,
             "SMTP_secureProtocol" => $req->body->SMTP_secureProtocol ?? null,
-        ]);
+        ])->execute();
         //
         $res->json((object) ["ok" => $numRows === 1 ? "ok" : "err"]);
     }

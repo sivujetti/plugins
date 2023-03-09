@@ -82,7 +82,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @psalm-return JetFormsMailSendSettings
      */
     private function getSendMailSettingsOrThrow(): array {
-        $dataBag = $this->storedObjectsRepo->getEntry("JetForms:mailSendSettings");
+        $dataBag = $this->storedObjectsRepo->find("JetForms:mailSendSettings")->fetch() ?? null;
         if (!$dataBag)
             throw new PikeException("JetForms:mailSendSettings missing", PikeException::ERROR_EXCEPTION);
         return SettingsController::withDecryptedValues($dataBag->data, $this->crypto);

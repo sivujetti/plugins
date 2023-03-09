@@ -101,14 +101,14 @@ final class SendContactFormTest extends PluginTestCase {
             postData: ["name" => "Harry Potter", "email" => "e@ministfyofmagic.hm"],
             behaviours: ["StoreSubmissionToLocalDb"]
         );
-        $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->getEntries("JetForms:submissions");
+        $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->find("JetForms:submissions")->fetchAll();
         $this->assertCount(1, $all);
         $mockEncryptedAnswers = $all[0]->data["answers"];
         $decryptedAnswers = MockCrypto::mockDecrypt($mockEncryptedAnswers, SIVUJETTI_SECRET);
         $parsed = JsonUtils::parse($decryptedAnswers);
         $this->assertEquals([
-            (object) ["label" => "Test escape<", "value" => "Harry Potter"],
-            (object) ["label" => "Email", "value" => "e@ministfyofmagic.hm"],
+            (object) ["label" => "Test escape<", "answer" => "Harry Potter"],
+            (object) ["label" => "Email", "answer" => "e@ministfyofmagic.hm"],
         ], $parsed);
         $this->assertEquals("/hello", $all[0]->data["sentFromPage"]);
         $actualFormBlock = $this->state->testPageData->blocks[count($this->state->testPageData->blocks)-1];

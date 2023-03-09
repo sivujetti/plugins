@@ -30,8 +30,10 @@ class ContactFormEditForm extends preact.Component {
     }
 }
 
-const initialData = {
-    behaviours: JSON.stringify([
+const createBehavioursMutators = [];
+
+function createBehaviours() {
+    return createBehavioursMutators.reduce((out, fn) => fn(out), [
         {name: 'SendMail', data: {
             subjectTemplate: __('New contact form entry on [siteName]'),
             toAddress: 'sivuston-omistaja@mail.com',
@@ -48,13 +50,13 @@ const initialData = {
                 ``,
             ].join('\n')
         }}
-    ])
-};
+    ]);
+}
 
 export default {
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form (JetForms)',
-    ownPropNames: Object.keys(initialData),
+    ownPropNames: ['behaviours'],
     initialChildren: [
         {blockType: 'JetFormsTextInput', initialOwnData: {name: 'input_1', isRequired: 1, label: '',
             placeholder: __('Name')}, initialDefaultsData: null},
@@ -65,7 +67,12 @@ export default {
         {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
             initialDefaultsData: null},
     ],
-    initialData: initialData,
+    configureBehavioursWith(fn) {
+        createBehavioursMutators.push(fn);
+    },
+    initialData: () => ({
+        behaviours: JSON.stringify(createBehaviours())
+    }),
     defaultRenderer: 'plugins/JetForms:block-contact-form',
     icon: 'message-2',
     reRender(block, _renderChildren) {

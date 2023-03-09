@@ -1,8 +1,8 @@
 import {__, api, Icon, hookForm, unhookForm, reHookValues, Input, Textarea, FormGroupInline,
         FormGroup, InputErrors} from '@sivujetti-commons-for-edit-app';
 import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
+import {createTrier} from '../../../../../frontend/edit-app/src/block/dom-commons.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
-import {createTrier} from '../../../../../frontend/webpage/src/EditAppAwareWebPage.js';
 
 class SendFormBehaviourConfigurer extends preact.Component {
     // subjectInputEl;
