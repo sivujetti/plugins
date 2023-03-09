@@ -61,8 +61,7 @@
         "type": {
           "type": "string",
           "enum": [
-            "Paragraph",
-            "Heading",
+            "Text",
             "Section"
           ]
         },

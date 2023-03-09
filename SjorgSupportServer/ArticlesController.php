@@ -29,7 +29,7 @@ final class ArticlesController {
 
         // @todo remove this when pages have updatedAt
         $temp = true;
-        $latestMod = $temp ? 1660545828 : max(array_map(fn($page) => $page->lastUpdatedAt, $pages));
+        $latestMod = $temp ? 1678452042 : max(array_map(fn($page) => $page->lastUpdatedAt, $pages));
 
         // https://github.com/php/web-php/blob/57dd39fcb2c4206acd64ccfd2dfa45ef93a01c9b/index.php#L34
         $tsstring = gmdate("D, d M Y H:i:s ", $latestMod) . "GMT";

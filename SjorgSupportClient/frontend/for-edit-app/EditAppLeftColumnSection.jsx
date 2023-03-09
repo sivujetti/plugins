@@ -1,4 +1,4 @@
-import {__, env, http, Icon, LoadingSpinner, floatingDialog} from '@sivujetti-commons-for-edit-app';
+import {__, env, http, Icon, LoadingSpinner, floatingDialog, urlUtils} from '@sivujetti-commons-for-edit-app';
 import RenderArticleDialog, {supportServerBaseUrl} from './RenderArticleDialog.jsx';
 
 /**
@@ -62,7 +62,8 @@ class EditAppLeftColumnSection extends preact.Component {
         const newState = {isCollapsed: !this.state.isCollapsed};
         if (newState.isCollapsed === false && this.state.featuredArticles === undefined) {
             newState.featuredArticles = null;
-            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`, {headers: {}})
+            const b = `${supportServerBaseUrl.indexOf('?') < 0 ? '?' : '&'}v=${urlUtils.cacheBustStr}`;
+            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured${b}`, {headers: {}})
                 .then(arts => this.setState({featuredArticles: arts}))
                 .catch(env.window.console.error);
         }

@@ -17,14 +17,26 @@ form.sjorg-support-article {
     font-size: .8rem;
     line-height: 1.2rem;
 }
-form.sjorg-support-article section {
-    padding: 1rem 0;
+form.sjorg-support-article section h2 {
+    font-size: 1.1rem;
+}
+form.sjorg-support-article > div > section {
+    margin: 4rem 0;
+}
+form.sjorg-support-article > div > section:nth-of-type(2) {
+    margin-top: .4rem;
+}
+form.sjorg-support-article > div > section:last-of-type {
+    margin-bottom: 0;
 }
 form.sjorg-support-article > div > section:first-child {
     display: none;
 }
-form.sjorg-support-article section h2 {
-    font-size: 1.1rem;
+form.sjorg-support-article > div > section section {
+    margin-bottom: 2rem;
+}
+form.sjorg-support-article > div > section section:last-of-type {
+    margin-bottom: 0;
 }
 form.sjorg-support-article img {
     max-width: 448px;
@@ -58,7 +70,7 @@ form.sjorg-support-article img {
 .message-box p {
     margin: 0;
 }
-.j-RichText-unit-1 {
+.j-Text-unit-1, .j-RichText-unit-1 {
     background-color: rgba(0, 10, 71, .03);
     border-radius: 4px;
     padding: .4rem .6rem;
@@ -70,6 +82,7 @@ form.sjorg-support-article img {
     font-family: "SF Mono","Segoe UI Mono","Roboto Mono",Menlo,Courier,monospace;
     white-space: pre;
 }
+.j-Text-unit-1 > p,
 .j-RichText-unit-1 > p {
     font-family: inherit;
     line-height: inherit;
