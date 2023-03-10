@@ -69,8 +69,10 @@ final class JetForms implements UserPluginInterface {
      */
     public function defineAclRules(ACLRulesBuilder $builder): ACLRulesBuilder {
         return $builder
-            ->defineResource("mailSendSettings", ["read", "update"]);
-            // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
+            ->defineResource("mailSendSettings", ["read", "update"])
+                // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
+            ->defineResource("submissions", ["list"]);
+                // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
     }
     /**
      * @param string $name

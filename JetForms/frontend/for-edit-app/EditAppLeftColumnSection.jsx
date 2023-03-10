@@ -1,4 +1,4 @@
-import {__, Icon, floatingDialog, MenuSection} from '@sivujetti-commons-for-edit-app';
+import {__, floatingDialog, MenuSection, Icon} from '@sivujetti-commons-for-edit-app';
 import MailSendSettingsManageDialog from './MailSendSettings/MailSendSettingsManageDialog.jsx';
 
 class EditAppLeftColumnSection extends MenuSection {
@@ -9,7 +9,7 @@ class EditAppLeftColumnSection extends MenuSection {
         return <MenuSection
             title="JetForms"
             subtitle={ __('Manage forms') }
-            iconId="box"
+            iconId="send"
             colorClass="color-purple">
             <nav>
                 <a onClick={ this.openManageMailSendSettingsDialog.bind(this) } class="with-icon">
