@@ -5,14 +5,14 @@ import services from './services.js';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 
 class CheckboxInputBlockEditForm extends InputEditFormAbstract {
-    // nameInput;
+    // labelInput;
     /**
      * @access protected
      */
     componentWillMount() {
         const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
         const {name, isRequired, label} = getBlockCopy();
-        this.nameInput = preact.createRef();
+        this.labelInput = preact.createRef();
         this.setState(hookForm(this, [
             {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
@@ -34,7 +34,7 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
      * @access protected
      */
     componentDidMount() {
-        setFocusTo(this.nameInput);
+        setFocusTo(this.labelInput);
     }
     /**
      * @access protected
@@ -51,7 +51,7 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
                 <label htmlFor="label" class="form-label">{ __('Text') }</label>
-                <Input vm={ this } prop="label"/>
+                <Input vm={ this } prop="label" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
@@ -66,7 +66,7 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
             </FormGroupInline>
             { this.showTechnicalInputs ? <FormGroupInline>
                 <label htmlFor="name" class="form-label">Id</label>
-                <Input vm={ this } prop="name" ref={ this.nameInput }/>
+                <Input vm={ this } prop="name"/>
                 <InputErrors vm={ this } prop="name"/>
             </FormGroupInline> : null }
         </div>;

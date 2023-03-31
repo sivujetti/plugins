@@ -14,12 +14,12 @@
             " form-group\" data-block-type=\"", $props->type, "\" data-block=\"", $props->id, "\">",
             !$props->label
                 ? ""
-                : "<label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>",
-        "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name), "\"",
+                : "<label class=\"form-label\" for=\"{$this->escAttr($props->name)}\">{$this->e($props->label)}</label>",
+        "<", $settings["startTag"], " name=\"", $this->escAttr($props->name), "\" id=\"", $this->escAttr($props->name), "\"",
             $settings["attrsStr"],
             " class=\"form-input\"",
             $settings["inputModeStr"],
-            $props->placeholder ? " placeholder=\"{$this->e($props->placeholder)}\"" : "",
+            $props->placeholder ? " placeholder=\"{$this->escAttr($props->placeholder)}\"" : "",
             $props->isRequired ? " data-pristine-required" : "",
         ">", $settings["closingTag"], // @allow raw html
         $this->renderChildren($props),

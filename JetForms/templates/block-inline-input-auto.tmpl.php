@@ -5,7 +5,7 @@
         " data-block-type=\"JetFormsCheckboxInput\"",
         " data-block=\"", $props->id, "\">",
         "<label class=\"form-checkbox\">",
-            "<input name=\"", $this->e($props->name), "\" type=\"checkbox\"",
+            "<input name=\"", $this->escAttr($props->name), "\" type=\"checkbox\"",
                 $props->isRequired ? " data-pristine-required" : "",
             ">",
             "<i class=\"form-icon\"></i> ", $this->e($props->label),
