@@ -63,7 +63,7 @@ export default {
         {blockType: 'JetFormsEmailInput', initialOwnData: {name: 'input_2', isRequired: 1, label: '',
             placeholder: __('Email')}, initialDefaultsData: null},
         {blockType: 'JetFormsTextareaInput', initialOwnData: {name: 'input_3', isRequired: 0, label: '',
-            placeholder: __('Message')}, initialDefaultsData: null},
+            placeholder: __('Message'), numRows: 0}, initialDefaultsData: null},
         {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
             initialDefaultsData: null},
     ],

@@ -17,6 +17,9 @@ api.registerTranslationStrings({
     'Text': 'Teksti',
     // ContactFormBlockType.jsx
     'Contact form (JetForms)': 'Yhteydenottolomake (JetForms)',
+    'Name': 'Nimi',
+    'Email': 'Sähköposti',
+    'Message': 'Viesti',
     'New contact form entry on [siteName]': 'Uusi yhteydenotto sivustolla [siteName]',
     'Sent by JetForms': 'Lähetetty JetFormsilla',
     'Send': 'Lähetä',
@@ -31,6 +34,7 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Label_with_descr': 'Nimike (label)',
     'Placeholder_with_descr': 'Vihje (placeholder)',
+    'Rows': 'Rivejä',
     'Required': 'Vaaditaan',
     // NumberInputBlockType.jsx
     'Number input (JetForms)': 'Numero-kenttä (JetForms)',

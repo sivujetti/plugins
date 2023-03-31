@@ -17,6 +17,9 @@ api.registerTranslationStrings({
     'Text': 'Text',
     // ContactFormBlockType.jsx
     'Contact form (JetForms)': 'Contact form (JetForms)',
+    'Name': 'Name',
+    'Email': 'Email',
+    'Message': 'Message',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',
     'Sent by JetForms': 'Sent by JetForms',
     'Send': 'Send',
@@ -31,6 +34,7 @@ api.registerTranslationStrings({
     // InputBlockType.jsx
     'Label_with_descr': 'Label',
     'Placeholder_with_descr': 'Label',
+    'Rows': 'Rows',
     'Required': 'Required',
     // NumberInputBlockType.jsx
     'Number input (JetForms)': 'Number input (JetForms)',

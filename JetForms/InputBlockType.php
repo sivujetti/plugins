@@ -11,11 +11,17 @@ abstract class InputBlockType implements BlockTypeInterface {
      * @inheritdoc
      */
     public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
-        return $builder
-            ->newProperty("name", $builder::DATA_TYPE_TEXT)
-            ->newProperty("isRequired", $builder::DATA_TYPE_UINT)
-            ->newProperty("label", $builder::DATA_TYPE_TEXT)
-            ->newProperty("placeholder", $builder::DATA_TYPE_TEXT)
-            ->getResult();
+        return self::addDefaultProperties($builder)->getResult();
+    }
+    /**
+     * @param \Sivujetti\BlockType\PropertiesBuilder $to
+     * @return \Sivujetti\BlockType\PropertiesBuilder
+     */
+    public static function addDefaultProperties(PropertiesBuilder $to): PropertiesBuilder {
+        return $to
+            ->newProperty("name", $to::DATA_TYPE_TEXT)
+            ->newProperty("isRequired", $to::DATA_TYPE_UINT)
+            ->newProperty("label", $to::DATA_TYPE_TEXT)
+            ->newProperty("placeholder", $to::DATA_TYPE_TEXT);
     }
 }

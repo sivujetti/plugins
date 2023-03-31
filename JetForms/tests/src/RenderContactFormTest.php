@@ -39,6 +39,13 @@ final class RenderContactFormTest extends PluginTestCase {
                             renderer: TextareaInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("message"),
                         ),
+                        $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
+                            renderer: TextareaInputBlockType::DEFAULT_RENDERER,
+                            propsData: (object) array_merge(
+                                (array) self::createDataForTestInputBlock("message"),
+                                ["name" => "messageTaller", "numRows" => 4]
+                            ),
+                        ),
                         $this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                             renderer: SelectInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("wizardLevel"),
@@ -103,14 +110,17 @@ final class RenderContactFormTest extends PluginTestCase {
         // <div class="j-JetFormsTextareaInput" ...>
         //    <textarea name="message" id="message" class="form-input" placeholder="Message"></textarea>
         // </div>
-        $textareaOuter = $all[3];
-        $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
-        $textareaEl = $textareaOuter->childNodes[0];
-        $this->assertEquals("message", $textareaEl->getAttribute("name"));
-        $this->assertEquals("message", $textareaEl->getAttribute("id"));
-        $this->assertFalse($textareaEl->hasAttribute("type"));
-        $this->assertEquals("form-input", $textareaEl->getAttribute("class"));
-        $this->assertEquals("Message", $textareaEl->getAttribute("placeholder"));
+        foreach ([[3, "message"], [4, "messageTaller"]] as [$idx, $name]) {
+            $textareaOuter = $all[$idx];
+            $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
+            $textareaEl = $textareaOuter->childNodes[0];
+            $this->assertEquals($name, $textareaEl->getAttribute("name"));
+            $this->assertEquals($name, $textareaEl->getAttribute("id"));
+            $this->assertFalse($textareaEl->hasAttribute("type"));
+            $this->assertEquals("form-input", $textareaEl->getAttribute("class"));
+            $this->assertEquals("Message", $textareaEl->getAttribute("placeholder"));
+            if ($name === "messageTaller") $this->assertEquals("4", $textareaEl->getAttribute("rows"));
+        }
         // <div class="j-JetFormsSelectInput" ...>
         //     <select class="form-select" name="wizardLevel">
         //         <option value="value">text</option>
@@ -118,7 +128,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <option value="-">-</option>
         //     </select>
         // </div>
-        $selectElOuter = $all[4];
+        $selectElOuter = $all[5];
         $this->assertEquals("j-JetFormsSelectInput form-group", $selectElOuter->getAttribute("class"));
         $selectEl = $selectElOuter->childNodes[0];
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
@@ -137,7 +147,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-label" for="age">Age</label>
         //     <input name="age" id="age" type="text" class="form-input" inputmode="numeric">
         // </div>
-        $numberInputOuter = $all[5];
+        $numberInputOuter = $all[6];
         $this->assertEquals("j-JetFormsNumberInput form-group", $numberInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $numberInputOuter->childNodes;
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
@@ -154,7 +164,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <i class="form-icon"></i> Test escape&gt;
         //    </label>
         // </div>
-        $checkboxInputOuter = $all[6];
+        $checkboxInputOuter = $all[7];
         $this->assertEquals("j-JetFormsCheckboxInput form-group", $checkboxInputOuter->getAttribute("class"));
         $labelEl = $checkboxInputOuter->childNodes[0];
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
@@ -164,18 +174,18 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
         $this->assertEquals(" Test escape%gt;", rtrim($textNode->nodeValue));
         // <button class="j-Button btn" type="submit" ...>Send</button>
-        $buttonEl = $all[7];
+        $buttonEl = $all[8];
         $this->assertTrue(str_starts_with($buttonEl->getAttribute("class"), "j-Button"));
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
         $this->assertEquals("Send", $buttonEl->nodeValue);
         // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
-        $returnToInput = $all[9];
+        $returnToInput = $all[10];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
         // <input type="hidden" name="_csrf" value="todo">
-        $returnToInput = $all[10];
+        $returnToInput = $all[11];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
         $this->assertEquals("todo", $returnToInput->getAttribute("value"));
@@ -211,6 +221,7 @@ final class RenderContactFormTest extends PluginTestCase {
                 "isRequired" => 0,
                 "label" => "",
                 "placeholder" => "Message",
+                "numRows" => 0,
             ],
             "wizardLevel" => (object) [
                 "name" => "wizardLevel",

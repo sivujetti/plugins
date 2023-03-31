@@ -1,13 +1,14 @@
-<?php if (($settings = ([
-    "JetFormsEmailInput" => ["typeStr" => " type=\"email\"", "startTag" => "input", "closingTag" => "",
+<?php if (($settings = match ($props->type) {
+    "JetFormsEmailInput" => ["attrsStr" => " type=\"email\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => ""],
-    "JetFormsNumberInput" => ["typeStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
+    "JetFormsNumberInput" => ["attrsStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => " inputmode=\"numeric\""],
-    "JetFormsTextareaInput" => ["typeStr" => "", "startTag" => "textarea", "closingTag" => "</textarea>",
+    "JetFormsTextareaInput" => ["attrsStr" => !$props->numRows ? "" : " rows=\"{$this->escAttr($props->numRows)}\"",
+        "startTag" => "textarea", "closingTag" => "</textarea>", "inputModeStr" => ""],
+    "JetFormsTextInput" => ["attrsStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => ""],
-    "JetFormsTextInput" => ["typeStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",
-        "inputModeStr" => ""],
-][$props->type] ?? null))):
+    default => null,
+})):
     echo "<div class=\"j-", $props->type,
             $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
             " form-group\" data-block-type=\"", $props->type, "\" data-block=\"", $props->id, "\">",
@@ -15,7 +16,7 @@
                 ? ""
                 : "<label class=\"form-label\" for=\"{$this->e($props->name)}\">{$this->e($props->label)}</label>",
         "<", $settings["startTag"], " name=\"", $this->e($props->name), "\" id=\"", $this->e($props->name), "\"",
-            $settings["typeStr"],
+            $settings["attrsStr"],
             " class=\"form-input\"",
             $settings["inputModeStr"],
             $props->placeholder ? " placeholder=\"{$this->e($props->placeholder)}\"" : "",
