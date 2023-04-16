@@ -1,5 +1,5 @@
-import {__, http, env, LoadingSpinner, hookForm, unhookForm, FormGroupInline, Input, InputErrors, handleSubmit} from '@sivujetti-commons-for-edit-app';
-import {validationConstraints} from '../../../../../../frontend/edit-app/src/constants.js';
+import {__, http, env, LoadingSpinner, hookForm, unhookForm, FormGroupInline, Input,
+        InputErrors, handleSubmit, Icon, validationConstraints} from '@sivujetti-commons-for-edit-app';
 
 class MailSendSettingsManageDialog extends preact.Component {
     /**
@@ -29,6 +29,7 @@ class MailSendSettingsManageDialog extends preact.Component {
         ], {
             sendingMethod: settings.sendingMethod || 'mail',
             SMTP_secureProtocol: settings.SMTP_secureProtocol || 'tls',
+            showPasswordVisually: false,
         }));
     }
     /**
@@ -40,32 +41,26 @@ class MailSendSettingsManageDialog extends preact.Component {
     /**
      * @access protected
      */
-    render(_, {sendingMethod, formIsSubmittingClass}) {
+    render(_, {sendingMethod, formIsSubmittingClass, showPasswordVisually}) {
         return <form onSubmit={ e => handleSubmit(this, this.applyCreateGlobalBlockTree.bind(this), e) }>
             <div class="mb-1">{ __('jetFormsTodo1') }</div>
             { sendingMethod ? [<div>
                 <div class="form-label">{ __('Send method') }</div>
                 <div class="button-options">
-                    <label class={ `form-radio box${sendingMethod === 'mail' ? ' selected' : ''}` }>
+                    <button class={ `form-radio btn${sendingMethod === 'mail' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('mail') } type="button">
                         <span class="d-block mb-2">
-                            <input type="radio" name="sendingMethod"
-                                checked={ sendingMethod === 'mail' }
-                                onClick={ this.handleSendMethodRadioClicked.bind(this) }
-                                value="mail"/>
+                            <input type="radio" name="sendingMethod" checked={ sendingMethod === 'mail' } tabIndex="-1"/>
                             <i class="form-icon"></i><b class="h4">mail()</b>
                         </span>
                         <span>{ __('jetFormsTodo2') }</span>
-                    </label>
-                    <label class={ `form-radio box${sendingMethod === 'smtp' ? ' selected' : ''}` }>
+                    </button>
+                    <button class={ `form-radio btn${sendingMethod === 'smtp' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('smtp') } type="button">
                         <span class="d-block mb-2">
-                            <input type="radio" name="sendingMethod"
-                                checked={ sendingMethod === 'smtp' }
-                                onClick={ this.handleSendMethodRadioClicked.bind(this) }
-                                value="smtp"/>
+                            <input type="radio" name="sendingMethod" checked={ sendingMethod === 'smtp' } tabIndex="-1"/>
                             <i class="form-icon"></i><b class="h4">SMTP</b>
                         </span>
                         <span>{ __('jetFormsTodo3') }</span>
-                    </label>
+                    </button>
                 </div>
             </div>,
             sendingMethod === 'smtp' ? <div class="form-horizontal">
@@ -86,7 +81,15 @@ class MailSendSettingsManageDialog extends preact.Component {
                 </FormGroupInline>
                 <FormGroupInline>
                     <label htmlFor="SMTP_password" class="form-label">{ __('Password') }</label>
-                    <Input vm={ this } prop="SMTP_password"/>
+                    <div class="has-icon-right">
+                        <Input vm={ this } prop="SMTP_password" type={ !showPasswordVisually ? 'password' : 'text' }/>
+                        <button
+                            onClick={ () => this.setState({showPasswordVisually: !showPasswordVisually}) }
+                            class="sivujetti-form-icon btn no-color"
+                            type="button">
+                            <Icon iconId={ !showPasswordVisually ? 'eye' : 'eye-off' } className="size-sm color-dimmed3"/>
+                        </button>
+                    </div>
                     <InputErrors vm={ this } prop="SMTP_password"/>
                 </FormGroupInline>
                 <FormGroupInline>
@@ -110,11 +113,10 @@ class MailSendSettingsManageDialog extends preact.Component {
         </form>;
     }
     /**
-     * @param {Event} e
+     * @param {'mail'|'smtp'} newValue
      * @access private
      */
-    handleSendMethodRadioClicked(e) {
-        const newValue = e.target.value;
+    handleSendMethodRadioClicked(newValue) {
         if (this.state.sendingMethod !== newValue)
             this.setState({sendingMethod: newValue});
     }

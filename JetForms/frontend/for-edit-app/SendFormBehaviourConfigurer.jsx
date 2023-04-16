@@ -1,6 +1,5 @@
 import {__, api, Icon, hookForm, unhookForm, reHookValues, Input, Textarea, FormGroupInline,
-        FormGroup, InputErrors} from '@sivujetti-commons-for-edit-app';
-import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
+        FormGroup, InputErrors, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import {createTrier} from '../../../../../frontend/edit-app/src/block/dom-commons.js';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 

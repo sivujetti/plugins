@@ -1,6 +1,5 @@
 import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
-        FormGroup, FormGroupInline} from '@sivujetti-commons-for-edit-app';
-import {validationConstraints} from '../../../../../frontend/edit-app/src/constants.js';
+        FormGroup, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 import CrudList from './CrudList.jsx';
 import SelectInputOptionEditForm from './SelectInputOptionEditForm.jsx';
