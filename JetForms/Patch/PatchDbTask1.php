@@ -21,7 +21,7 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
      * @param \Pike\Db\FluentDb $db
      */
     function __construct(string $toVersion, string $currentVersion, FluentDb $db) {
-        $this->doSkip = !($toVersion === "0.14.0" && $currentVersion === "0.13.0");
+        $this->doSkip = !($toVersion === "0.14.0" && ($currentVersion === "0.13.0" || $currentVersion === "0.14.0"));
         $this->db = $db;
         $this->logFn = function ($str) { /**/ };
     }
@@ -30,9 +30,9 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
      */
     public function exec(): void {
         if ($this->doSkip) return;
-        $pages = $this->db->select("Pages", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
-        $gbts = $this->db->select("globalBlockTrees", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
-        $reusables = $this->db->select("reusableBranches", "stdClass")->fields(["blockBlueprints as blockBlueprintsJson", "id"])->fetchAll();
+        $pages = $this->db->select("\${p}Pages", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
+        $gbts = $this->db->select("\${p}globalBlockTrees", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
+        $reusables = $this->db->select("\${p}reusableBranches", "stdClass")->fields(["blockBlueprints as blockBlueprintsJson", "id"])->fetchAll();
         $this->patchPagesOrGbts($gbts, "globalBlockTrees");
         $this->patchPagesOrGbts($pages, "Pages");
         $this->patchReusables($reusables);
@@ -56,7 +56,7 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
             });
             $entitity->blocksJson = JsonUtils::stringify($tree);
             if ($entitity->blocksJson !== $bef) {
-                $numRows = $this->db->update($tableName)
+                $numRows = $this->db->update("\${p}{$tableName}")
                     ->values((object)["blocks" => $entitity->blocksJson])
                     ->where("id=?", [$entitity->id])
                     ->execute();
@@ -77,7 +77,7 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
             });
             $reusable->blockBlueprintsJson = JsonUtils::stringify($tree);
             if ($reusable->blockBlueprintsJson !== $bef) {
-                $numRows = $this->db->update("reusableBranches")
+                $numRows = $this->db->update("\${p}reusableBranches")
                     ->values((object)["blockBlueprints" => $reusable->blockBlueprintsJson])
                     ->where("id=?", [$reusable->id])
                     ->execute();

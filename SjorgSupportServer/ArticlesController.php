@@ -23,7 +23,7 @@ final class ArticlesController {
     public function listFeaturedArticles(Request $req,
                                          Response $res,
                                          PagesRepository2 $pagesRepo): void {
-        $pages = $pagesRepo->select("Pages", ["@blocks"])
+        $pages = $pagesRepo->select("\${p}Pages", ["@blocks"])
             ->where("slug LIKE ? AND status = ?", ["/tuki-%", Page::STATUS_PUBLISHED])
             ->fetchAll();
 
