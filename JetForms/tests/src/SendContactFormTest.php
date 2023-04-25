@@ -195,7 +195,7 @@ final class SendContactFormTest extends PluginTestCase {
                 ], "storedObjects");
                 $pageData = $this->state->testPageData;
                 $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
-                return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}", "POST",
+                return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}/main", "POST",
                     (object) array_merge($postData, ["_returnTo" => "foo"]));
             });
         $this->verifyResponseMetaEquals(200, "text/html", $response);

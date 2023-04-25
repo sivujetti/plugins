@@ -73,7 +73,7 @@ final class RenderContactFormTest extends PluginTestCase {
         /** @var ?\DOMElement */
         $formEl = $dom->execute(".jet-form")[0] ?? null;
         $this->assertNotNull($formEl);
-        $this->assertEquals(Template::makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello"),
+        $this->assertEquals(Template::makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello/main"),
                             $formEl->getAttribute("action"));
         $this->assertEquals("post", $formEl->getAttribute("method"));
         $this->assertEquals("Thank you for your message!", $formEl->getAttribute("data-form-sent-message"));

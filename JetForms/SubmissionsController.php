@@ -6,6 +6,8 @@ use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
+use Sivujetti\Block\Entities\Block;
+use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
 use Sivujetti\Page\PagesRepository2;
 
 /**
@@ -16,7 +18,7 @@ use Sivujetti\Page\PagesRepository2;
  */
 final class SubmissionsController {
     /**
-     * POST /plugins/jet-forms/submissions/:blockId/:pageSlug: fetches $params->pageSlug
+     * POST /plugins/jet-forms/submissions/:blockId/:pageSlug/:isPartOfTreeId: fetches $params->pageSlug
      * from the database, finds $foundPage->blocks->find($params->blockId) and runs
      * each behaviour configured to it ([{type: "SendMail", ...} ...]).
      *
@@ -24,12 +26,14 @@ final class SubmissionsController {
      * @param \Pike\Response $res
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
+     * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
      * @param string $errorLogFn = "error_log" Mainly for tests
      */
     public function handleSubmission(Request $req,
                                      Response $res,
                                      SharedAPIContext $apiCtx,
                                      PagesRepository2 $pagesRepo,
+                                     GlobalBlockTreesRepository2 $gbtRepo,
                                      string $errorLogFn = "error_log"): void {
         if (($errors = self::validateSubmissionInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
@@ -38,11 +42,15 @@ final class SubmissionsController {
         $page = $pagesRepo->select(fields: ["@blocks"])
             ->where("slug = ?", $pageSlug)
             ->fetch();
-        if (!$page) throw new PikeException("Invalid input (not such page)",
+        if (!$page) throw new PikeException("Invalid input (no such page)",
                                             PikeException::BAD_INPUT);
         //
-        if (!($form = BlockTree::findBlockById($req->params->blockId, $page->blocks)))
-            throw new PikeException("Invalid input (not such block)",
+        $trid = $req->params->isPartOfTreeId;
+        $form = $trid === "main"
+            ? BlockTree::findBlockById($req->params->blockId, $page->blocks)
+            : self::findFormFromGbt($req->params->blockId, $trid, $gbtRepo);
+        if (!$form)
+            throw new PikeException("Invalid input (no such block)",
                                     PikeException::BAD_INPUT);
         if (!($form->behaviours = json_decode($form->behaviours, flags: JSON_THROW_ON_ERROR)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
@@ -68,6 +76,18 @@ final class SubmissionsController {
         }
         //
         $res->redirect($req->body->_returnTo);
+    }
+    /**
+     * @param string $blockId
+     * @param string $globalBlockTreeId
+     * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
+     * @return \Sivujetti\Block\Entities\Block|null
+     */
+    private static function findFormFromGbt(string $blockId,
+                                            string $globalBlockTreeId,
+                                            GlobalBlockTreesRepository2 $gbtRepo): ?Block {
+        $gbt = $gbtRepo->select()->where("id = ?", [$globalBlockTreeId])->fetch();
+        return $gbt ? BlockTree::findBlockById($blockId, $gbt->blocks) : null;
     }
     /**
      * @psalm-return array<int, InputMeta>
