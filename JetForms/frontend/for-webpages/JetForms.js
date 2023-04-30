@@ -1,5 +1,3 @@
-import {urlUtils} from '@sivujetti-commons-for-web-pages';
-
 let formsHooked = false;
 
 /**
@@ -118,10 +116,11 @@ class JetForms {
  */
 function showFormSentMessage(formEl) {
     const messageEl = document.createElement('div');
-    messageEl.className = 'jetforms-form-sent-message';
+    messageEl.className = 'sent-message';
     messageEl.textContent = formEl.getAttribute('data-form-sent-message');
-    formEl.parentElement.insertBefore(messageEl, formEl); // or formEl.replaceWith(messageEl)
-    formEl.scrollIntoView(true);
+    formEl.classList.add('sent-and-processed');
+    formEl.insertBefore(messageEl, formEl.firstElementChild);
+    messageEl.scrollIntoView(true);
 }
 
 export default JetForms;
