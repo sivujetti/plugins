@@ -4,7 +4,7 @@ namespace SitePlugins\JetForms;
 
 use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, StoreSubmissionToLocalDbBehaviour};
-use Sivujetti\{App, SharedAPIContext};
+use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
@@ -17,6 +17,7 @@ use Sivujetti\Page\PagesRepository2;
  * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SubmissionsController {
+    private const NO_ANSWER = "- None provided";
     /**
      * POST /plugins/jet-forms/submissions/:blockId/:pageSlug/:isPartOfTreeId: fetches $params->pageSlug
      * from the database, finds $foundPage->blocks->find($params->blockId) and runs
@@ -71,7 +72,7 @@ final class SubmissionsController {
                     ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "sentFromBlock" => $form->id],
                 ]);
             } catch (\Exception $e) {
-                call_user_func($errorLogFn, "JetForms: behaviour {$i} failed: " . self::formatError($e));
+                call_user_func($errorLogFn, "JetForms: behaviour {$i} failed: " . LogUtils::formatError($e));
             }
         }
         //
@@ -97,24 +98,29 @@ final class SubmissionsController {
         $inputs = [
             CheckboxInputBlockType::NAME,
             EmailInputBlockType::NAME,
+            RadioGroupInputBlockType::NAME,
+            SelectInputBlockType::NAME,
             TextareaInputBlockType::NAME,
             TextInputBlockType::NAME,
         ];
         BlockTree::traverse($form->children, function ($block) use ($inputs, &$out) {
-            $isSelect = $block->type === SelectInputBlockType::NAME;
-            if ($isSelect || in_array($block->type, $inputs, true))
+            if (in_array($block->type, $inputs, true))
                 $out[] = [
                     "type" => $block->type,
                     "name" => $block->name,
                     "label" => $block->label,
                     "placeholder" => $block->placeholder ?? "",
                     "isRequired" => ($block->isRequired ?? null) === 1,
-                    "details" => !$isSelect ? [] : [
-                        "options" => json_decode($block->options,
-                                                 associative: true,
-                                                 flags: JSON_THROW_ON_ERROR),
-                        "multiple" => $block->multiple === 1,
-                    ]
+                    "details" => match ($block->type) {
+                        RadioGroupInputBlockType::NAME => [
+                            "radios" => JsonUtils::parse($block->radios, asObject: false),
+                        ],
+                        SelectInputBlockType::NAME => [
+                            "options" => JsonUtils::parse($block->options, asObject: false),
+                            "multiple" => $block->multiple === 1,
+                        ],
+                        default =>  [],
+                    }
                 ];
         });
         return $out;
@@ -125,38 +131,51 @@ final class SubmissionsController {
      * @psalm-return array<int, FormInputAnswer>
      */
     private static function createAnswers(array $inputsMeta, object $reqBody): array {
-        return array_map(function (array $meta) use ($reqBody) {
+        $out = [];
+        foreach ($inputsMeta as $meta) {
             $label = "";
             if (strlen($meta["label"])) $label = $meta["label"];
             else if (strlen($meta["placeholder"])) $label = $meta["placeholder"];
             else $label = $meta["name"];
-            return ["label" => $label, "value" => self::getResultSingle($meta, $reqBody)];
-        }, $inputsMeta);
+            //
+            $out[$label] = ["label" => $label, "answer" => self::getAnswerSingle($meta, $reqBody)];
+        }
+        return array_values($out);
     }
     /**
      * @psalm-param InputMeta $meta
      * @param object $reqBody
-     * @return string
+     * @return string|array
      */
-    private static function getResultSingle(array $meta, object $reqBody): string {
+    private static function getAnswerSingle(array $meta, object $reqBody): string|array {
         ["name" => $name, "type" => $type] = $meta;
-        //
+
         if ($type === CheckboxInputBlockType::NAME)
             return property_exists($reqBody, $name) ? "Checked" : "Not checked";
-        //
+
+        if ($type === RadioGroupInputBlockType::NAME) {
+            $selected = $reqBody->{$name} ?? null;
+            return ["type" => "singleSelect", "entries" => array_map(fn($opt) =>
+                ["text" => $opt["text"], "isSelected" => $opt["value"] === $selected]
+            , $meta["details"]["radios"])];
+        }
+
         if ($type === SelectInputBlockType::NAME) {
-            $opts = $meta["details"]["options"];
-            if (!$meta["details"]["multiple"]) {
+            $selectInputDetails = $meta["details"];
+            $opts = $selectInputDetails["options"];
+            //
+            if (!$selectInputDetails["multiple"]) {
                 $selected = $reqBody->{$name} ?? "-";
                 return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
             }
             //
             $selected = $reqBody->{$name} ?? [];
-            return implode("\n", array_map(fn($opt) =>
-                "[" . (in_array($opt["value"], $selected, true) ? "x" : " ") . "] {$opt["text"]}"
-            , $opts));
+            return ["type" => "multiSelect", "entries" => array_map(fn($opt) =>
+                ["text" => $opt["text"], "isSelected" => in_array($opt["value"], $selected, true)]
+            , $opts)];
         }
-        return ($reqBody->{$name} ?? "") ?: "- None provided";
+
+        return ($reqBody->{$name} ?? "") ?: self::NO_ANSWER;
     }
     /**
      * @param array $block->behaviours
@@ -189,11 +208,14 @@ final class SubmissionsController {
         $v = Validation::makeObjectValidator();
         foreach ($inputsMeta as $meta) {
             if ($meta["type"] === CheckboxInputBlockType::NAME)
-                ; // ??
-            elseif ($meta["type"] === SelectInputBlockType::NAME) {
-                $validValues = array_merge(array_column($meta["details"]["options"], "value"), ["-"]);
-                if (!$meta["details"]["multiple"]) {
-                    $v->rule($meta["name"], "in", $validValues);
+                continue; // ??
+            $isSelect = $meta["type"] === SelectInputBlockType::NAME;
+            if ($isSelect || $meta["type"] === RadioGroupInputBlockType::NAME) {
+                $k = $isSelect ? "options" : "radios";
+                $validValues = array_merge(array_column($meta["details"][$k], "value"), ["-"]);
+                if (!$isSelect || !$meta["details"]["multiple"]) {
+                    $propPath = $meta["name"] . (!$isSelect && !$meta["isRequired"] ? "?" : "");
+                    $v->rule($propPath, "in", $validValues);
                 } else {
                     $v->rule("{$meta["name"]}?", "type", "array");
                     $v->rule("{$meta["name"]}?.*", "in", $validValues);
@@ -215,18 +237,5 @@ final class SubmissionsController {
             ->rule("_returnTo", "type", "string")
             ->rule("_returnTo", "maxLength", 512)
             ->validate($input);
-    }
-    /**
-     * @param \Exception $e
-     * @return string
-     */
-    private static function formatError(\Exception $e): string {
-        return "<<error_start>>\n" .
-            "At `{$e->getFile()}` line {$e->getLine()}\n" .
-            "-- Message ---\n" .
-            "{$e->getMessage()}\n" .
-            "-- Trace ---\n" .
-            "{$e->getTraceAsString()}\n" .
-        "<<error_end>>";
     }
 }

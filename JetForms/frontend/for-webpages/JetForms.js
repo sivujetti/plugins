@@ -51,6 +51,24 @@ class JetForms {
                 onSubmitFn: null,
                 submitBtn: formEl.querySelector('button[type="submit"]') || formEl.querySelector('button:not([type="button"])'),
             };
+
+            const inputEls = Array.from(formEl.querySelectorAll('.form-input, .form-select, .form-checkbox > input, .form-radio > input'));
+            const radioGroups = inputEls.reduce((groups, el) => {
+                if (el.type === 'radio') { if (!groups[el.name]) groups[el.name] = []; groups[el.name].push(el); }
+                return groups;
+            }, {});
+
+            //
+            addClickHandlersThatRemovesValidationErrors(radioGroups);
+            inputEls.forEach(el => {
+                if (!el.parentElement.classList.contains(errorParentCls))
+                    el.parentElement.classList.add(errorParentCls);
+                el.addEventListener('blur', e => {
+                    e.target.parentElement.classList.add('blurred');
+                });
+            });
+
+            //
             const validator = new window.Pristine(formEl, {
                 // class of the parent element where the error/success class is added
                 classTo: errorParentCls,
@@ -63,24 +81,17 @@ class JetForms {
                 // class of the error text element
                 errorTextClass: 'form-input-hint',
             });
-            const t = Array.from(formEl.querySelectorAll('.form-input, .form-select, .form-checkbox'));
-            t.forEach(inputEl => {
-                if (!inputEl.parentElement.classList.contains(errorParentCls))
-                    inputEl.parentElement.classList.add(errorParentCls);
-                inputEl.addEventListener('blur', e => {
-                    e.target.parentElement.classList.add('blurred');
-                });
-            });
             formEl.addEventListener('submit', e => {
                 if (state.isSubmitting) {
                     e.preventDefault();
                     return;
                 }
-                t.forEach(inputEl => {
-                    inputEl.parentElement.classList.add('blurred');
+                inputEls.forEach(el => {
+                    el.parentElement.classList.add('blurred');
                 });
                 if (!validator.validate()) {
                     e.preventDefault();
+                    removeRadioErrorMessagesExceptTheLastOne(radioGroups);
                     return;
                 }
                 if (state.onSubmitFn)
@@ -89,12 +100,14 @@ class JetForms {
                 if (state.submitBtn)
                     state.submitBtn.setAttribute('disabled', true);
             });
+
             //
             const formId = formEl.getAttribute('data-form-id');
             if (formId && formId === sentFormBlockId) {
                 showFormSentMessage(formEl);
                 history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
             }
+
             //
             return {
                 getEl() { return formEl; },
@@ -108,6 +121,43 @@ class JetForms {
         });
         formsHooked = true;
         return out;
+    }
+}
+
+/**
+ * @param {{[key: String]: Array<HTMLInputElement>;}} radioGroups
+ */
+function addClickHandlersThatRemovesValidationErrors(radioGroups) {
+    for (const name in radioGroups) {
+        if (!radioGroups[name][0].hasAttribute('data-pristine-required')) continue;
+
+        let l = radioGroups[name].length - 1;
+        while (l > -1) {
+            const el = radioGroups[name][l--];
+            el.setAttribute('data-pristine-required', '');
+            el.addEventListener('click', () => {
+                radioGroups[name].forEach(el2 => {
+                    const label = el2.closest('.form-radio');
+                    label.classList.remove('is-error');
+                    const errEl = label.querySelector('.pristine-error');
+                    if (errEl) errEl.parentElement.removeChild(errEl);
+                });
+            });
+        }
+    }
+}
+
+/**
+ * @param {{[key: String]: Array<HTMLInputElement>;}} radioGroups
+ */
+function removeRadioErrorMessagesExceptTheLastOne(radioGroups) {
+    for (const name in radioGroups) {
+        let l = radioGroups[name].length - 2;
+        while (l > -1) {
+            const label = radioGroups[name][l--].closest('.form-radio');
+            const errEl = label.querySelector('.pristine-error');
+            if (errEl) errEl.parentElement.removeChild(errEl);
+        }
     }
 }
 

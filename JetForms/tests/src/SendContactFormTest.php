@@ -7,7 +7,7 @@ use Pike\Auth\Crypto;
 use Pike\Db\FluentDb;
 use Pike\TestUtils\MockCrypto;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
-                          SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
+    RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
 use Sivujetti\JsonUtils;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
@@ -16,7 +16,7 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
-                renderer: TextInputBlockType::DEFAULT_RENDERER,
+                renderer: TextInputBlockType::DEFAULT_RENDERER, // Doesn't matter
                 propsData: (object) [
                     "name" => "input_1",
                     "isRequired" => 1,
@@ -86,6 +86,34 @@ final class SendContactFormTest extends PluginTestCase {
     ////////////////////////////////////////////////////////////////////////////
 
 
+    public function testProcessSubmissionWithSendMailBehaviourHandlesRadioGroupInput(): void {
+        $this->runSendFormWithSendMailBehaviour(
+            inputs: fn() => [$this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
+                renderer: TextInputBlockType::DEFAULT_RENDERER,
+                propsData: (object) [
+                    "name" => "input_1",
+                    "label" => "Choose single",
+                    "radios" => json_encode([
+                        ["text" => "Option 1 xss <", "value" => "option-1"],
+                        ["text" => "Option 2", "value" => "option-2"],
+                        ["text" => "Option 3", "value" => "option-3"],
+                    ]),
+                    "isRequired" => 0,
+                ])
+            ],
+            postData: ["input_1" => "option-2"],
+            bodyTemplate: "[resultsAll]\nafter",
+            expectedEmailBody: "Choose single:\n" .
+                "( ) Option 1 xss &lt;\n" .
+                "(o) Option 2\n" .
+                "( ) Option 3\nafter"
+        );
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
     public function testProcessSubmissionWithStoreToLocalDbBehaviourSavesAnswersToDb(): void {
         $this->sendSendFormRequest(
             inputs: fn() => [
@@ -140,6 +168,7 @@ final class SendContactFormTest extends PluginTestCase {
             ->useBlockType(ContactFormBlockType::NAME, new ContactFormBlockType)
             ->useBlockType(EmailInputBlockType::NAME, new EmailInputBlockType)
             ->useBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType)
+            ->useBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType)
             ->useBlockType(SelectInputBlockType::NAME, new SelectInputBlockType)
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->useBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType)

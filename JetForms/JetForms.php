@@ -39,7 +39,7 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
             $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
             //
-            $api->registerBlockRenderer(InlineInputBlockType::DEFAULT_RENDERER);
+            $api->registerBlockRenderer(CheckboxInputBlockType::DEFAULT_RENDERER);
             $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
             $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
@@ -47,6 +47,8 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
             //
+            $api->registerBlockRenderer(RadioGroupInputBlockType::DEFAULT_RENDERER);
+            $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
             $api->registerBlockRenderer(SelectInputBlockType::DEFAULT_RENDERER);
             $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             //

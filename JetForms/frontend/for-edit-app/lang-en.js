@@ -8,7 +8,7 @@ api.registerTranslationStrings({
     'Password': 'Password',
     'jetFormsTodo1': 'todo1', // fi = 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
     'Send method': 'Send method',
-    'jetFormsTodo2': 'todo2', // fi = 'Käytä webhotellisi oletussähköpostiserveriä.',
+    'jetFormsTodo2': 'todo2', // fi = 'Käytä webhotellisi oletussähköpostiserveriasetuksia.',
     'jetFormsTodo3': 'todo3', // fi = 'Käytä SMTP-palveluntarjoajaa (esim. Office 365, Gmail, tai webhotellisi oma järjestelmä).',
     'Encryption': 'Encryption',
     'Save send mail settings': 'Save send mail settings',
@@ -38,13 +38,15 @@ api.registerTranslationStrings({
     'Required': 'Required',
     // NumberInputBlockType.jsx
     'Number input (JetForms)': 'Number input (JetForms)',
+    // RadioGroupInputBlockType.jsx
+    'Radio group (JetForms)': 'Radio group (JetForms)',
     // SelectInputBlockType.jsx
     'Select input (JetForms)': 'Select input (JetForms)',
     'Multiple': 'Multiple',
     'Options': 'Options',
     'Option text': 'Option text',
     'option': 'option',
-    // SelectInputOptionEditForm.jsx
+    // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Done',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Subject',

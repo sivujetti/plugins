@@ -8,7 +8,7 @@ api.registerTranslationStrings({
     'Password': 'Salasana',
     'jetFormsTodo1': 'Määrittele asetukset, jolla JetForms lähettää sähköpostit oletuksena.',
     'Send method': 'Lähetystapa',
-    'jetFormsTodo2': 'Käytä webhotellisi oletussähköpostiserveriä.',
+    'jetFormsTodo2': 'Käytä webhotellisi oletussähköpostiserveriasetuksia.',
     'jetFormsTodo3': 'Käytä SMTP-palveluntarjoajaa (esim. Office 365, Gmail, tai webhotellisi oma järjestelmä).',
     'Encryption': 'Salaus',
     'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
@@ -38,13 +38,15 @@ api.registerTranslationStrings({
     'Required': 'Vaaditaan',
     // NumberInputBlockType.jsx
     'Number input (JetForms)': 'Numero-kenttä (JetForms)',
+    // RadioGroupInputBlockType.jsx
+    'Radio group (JetForms)': 'Radio-valinta (JetForms)',
     // SelectInputBlockType.jsx
     'Select input (JetForms)': 'Alasvetovalikko/monivalinta (JetForms)',
     'Multiple': 'Monivalinta',
     'Options': 'Vaihtoehdot',
     'Option text': 'Vaihtoehdon teksti',
     'option': 'vaihtoehto',
-    // SelectInputOptionEditForm.jsx
+    // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Valmis',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Aihe',

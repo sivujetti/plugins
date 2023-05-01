@@ -3,6 +3,7 @@ import ContactFormBlockType from './ContactFormBlockType.jsx';
 import CheckboxInputBlockType from './CheckboxInputBlockType.jsx';
 import EmailInputBlockType from './EmailInputBlockType.jsx';
 import NumberInputBlockType from './NumberInputBlockType.jsx';
+import RadioGroupInputBlockType from './RadioGroupInputBlockType.jsx';
 import SelectInputBlockType from './SelectInputBlockType.jsx';
 import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
@@ -17,6 +18,7 @@ api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
 api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
 api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
 api.blockTypes.register(CheckboxInputBlockType.name, () => CheckboxInputBlockType);
+api.blockTypes.register(RadioGroupInputBlockType.name, () => RadioGroupInputBlockType);
 api.blockTypes.register(NumberInputBlockType.name, () => NumberInputBlockType);
 
 setTimeout(() => {

@@ -6,14 +6,14 @@ import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm from './SelectOrRadioGroupInputOptionEditForm.jsx';
 import services from './services.js';
 
-class SelectInputBlockEditForm extends InputEditFormAbstract {
+class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
     // labelInput;
     /**
      * @access protected
      */
     componentWillMount() {
         const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
-        const {name, label, multiple, options} = getBlockCopy();
+        const {name, label, radios, isRequired} = getBlockCopy();
         this.labelInput = preact.createRef();
         this.setState(hookForm(this, [
             {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
@@ -21,19 +21,19 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
             {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
         ], {
-            multiple,
-            optionsJson: options,
-            optionsParsed: JSON.parse(options),
+            radios,
+            radiosParsed: JSON.parse(radios),
+            isRequired,
         }));
         grabChanges((block, _origin, isUndo) => {
             if (isUndo && (this.state.values.name !== block.name ||
                            this.state.values.label !== block.label))
                 reHookValues(this, [{name: 'name', value: block.name},
                                     {name: 'label', value: block.label}]);
-            if (this.state.multiple !== block.multiple)
-                this.setState({multiple: block.multiple});
-            if (this.state.optionsJson !== block.options)
-                this.setState({optionsJson: block.options, optionsParsed: JSON.parse(block.options)});
+            if (this.state.radios !== block.radios)
+                this.setState({radios: block.radios, radiosParsed: JSON.parse(block.radios)});
+            if (this.state.isRequired !== block.isRequired)
+                this.setState({isRequired: block.isRequired});
         });
     }
     /**
@@ -52,7 +52,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render(_, {multiple, optionsParsed}) {
+    render(_, {radiosParsed, isRequired}) {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
@@ -61,11 +61,11 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
-                <span class="form-label">{ __('Multiple') }?</span>
+                <span class="form-label">{ __('Required') }?</span>
                 <label class="form-checkbox mt-0">
                     <input
-                        onClick={ this.emitMultiple.bind(this) }
-                        checked={ multiple === 1 }
+                        onClick={ this.emitIsRequired.bind(this) }
+                        checked={ isRequired }
                         type="checkbox"
                         class="form-input"/><i class="form-icon"></i>
                 </label>
@@ -77,69 +77,66 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
             </FormGroupInline> : null }
         </div>,
         <FormGroup>
-            <label htmlFor="options" class="form-label pt-0 pb-1">{ __('Options') }</label>
+            <label htmlFor="radios" class="form-label pt-0 pb-1">{ __('Options') }</label>
             <CrudList
-                items={ optionsParsed }
+                items={ radiosParsed }
                 itemTitleKey="text"
-                onListMutated={ this.emitOptions.bind(this) }
+                onListMutated={ this.emitRadios.bind(this) }
                 createNewItem={ () => ({text: __('Option text')}) }
                 editForm={ SelectOrRadioGroupInputOptionEditForm }
                 itemTypeFriendlyName={ __('option') }/>
         </FormGroup>];
     }
     /**
-     * @param {Event} e
-     * @access private
-     */
-    emitMultiple(e) {
-        const multiple = e.target.checked ? 1 : 0;
-        this.props.emitValueChanged(multiple, 'multiple', false, env.normalTypingDebounceMillis);
-    }
-    /**
      * @param {Array<{text: String;}>} list
      * @access private
      */
-    emitOptions(list) {
+    emitRadios(list) {
         const withReAssignedValues = list.map((item, i) =>
             Object.assign({}, item, {value: `option-${i + 1}`}))
         ;
-        this.props.emitValueChanged(JSON.stringify(withReAssignedValues), 'options', false, env.normalTypingDebounceMillis);
+        this.props.emitValueChanged(JSON.stringify(withReAssignedValues), 'radios', false, env.normalTypingDebounceMillis);
+    }
+    /**
+     * @param {Event} e
+     * @access private
+     */
+    emitIsRequired(e) {
+        const isRequired = e.target.checked ? 1 : 0;
+        this.props.emitValueChanged(isRequired, 'isRequired', false, env.normalTypingDebounceMillis);
     }
 }
 
-const blockTypeName = 'JetFormsSelectInput';
+const blockTypeName = 'JetFormsRadioGroupInput';
 
 export default {
     name: blockTypeName,
-    friendlyName: 'Select input (JetForms)',
+    friendlyName: 'Radio group (JetForms)',
     initialData: () => ({
         name: services.idGen.getNextId(),
         label: '',
-        options: JSON.stringify([
-            {text: __('Option text'), value: 'option-1'},
-        ]),
-        multiple: 0,
+        radios: JSON.stringify([{text: __('Option text'), value: 'option-1'},]),
+        isRequired: 1,
     }),
-    defaultRenderer: 'plugins/JetForms:block-input-select',
-    icon: 'selector',
-    reRender({name, label, options, multiple, id, styleClasses}, renderChildren) {
+    defaultRenderer: 'plugins/JetForms:block-input-radio-group',
+    icon: 'circle',
+    reRender({name, label, radios, isRequired, id, styleClasses}, renderChildren) {
         return ['<div class="j-', blockTypeName,
             styleClasses ? ` ${styleClasses}` : '',
             ' form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
-            !label ? '' : `<label class="form-label" for="${name}">${label}</label>`,
-            '<select class="form-select" name="', name, !multiple ? '"' : '[]" multiple', '>',
-                ...JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>
-                    ['<option value="', value , '">', __(text), '</option>']
-                ).flat(),
-            '</select>',
+            '<div class="form-label">', label, '</div>',
+            ...JSON.parse(radios).map(radio => ['<label class="form-radio">',
+                '<input name="', name, '" value="', radio.value, '" type="radio"', isRequired ? ' data-pristine-required' : '', '>',
+                '<i class="form-icon"></i> ', radio.text,
+            '</label>']).flat(),
             renderChildren(),
         '</div>'].join('');
     },
     createSnapshot: from => ({
         name: from.name,
         label: from.label,
-        options: from.options,
-        multiple: from.multiple,
+        radios: from.radios,
+        isRequired: from.isRequired,
     }),
-    editForm: SelectInputBlockEditForm,
+    editForm: RadioGroupInputBlockEditForm,
 };

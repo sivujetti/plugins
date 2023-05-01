@@ -5,7 +5,8 @@ namespace SitePlugins\JetForms\Tests;
 use Laminas\Dom\Query;
 use Pike\TestUtils\MutedSpyingResponse;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
-    NumberInputBlockType, SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
+    NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
+    TextInputBlockType};
 use Sivujetti\Block\Entities\Block;
 use Sivujetti\Template;
 use Sivujetti\Tests\Utils\{PluginTestCase};
@@ -19,6 +20,7 @@ final class RenderContactFormTest extends PluginTestCase {
             ->useBlockType(ContactFormBlockType::NAME, new ContactFormBlockType)
             ->useBlockType(EmailInputBlockType::NAME, new EmailInputBlockType)
             ->useBlockType(NumberInputBlockType::NAME, new NumberInputBlockType)
+            ->useBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType)
             ->useBlockType(SelectInputBlockType::NAME, new SelectInputBlockType)
             ->useBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType)
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
@@ -57,6 +59,10 @@ final class RenderContactFormTest extends PluginTestCase {
                         $this->blockTestUtils->makeBlockData(CheckboxInputBlockType::NAME,
                             renderer: CheckboxInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("wantsReply"),
+                        ),
+                        $this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
+                            renderer: RadioGroupInputBlockType::DEFAULT_RENDERER,
+                            propsData: self::createDataForTestInputBlock("gender"),
                         ),
                         $this->blockTestUtils->makeBlockData(Block::TYPE_BUTTON,
                             propsData: (object) ["html" => "Send", "linkTo" => "", "tagType" => "submit", "cssClass" => ""],
@@ -173,22 +179,38 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals("checkbox", $inputEl->getAttribute("type"));
         $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
         $this->assertEquals(" Test escape%gt;", rtrim($textNode->nodeValue));
+        // <div class="j-JetFormsRadioGroupInput form-group" ...>
+        //     <label class="form-label">Test escape&gt;</label>
+        //     <label class="form-radio"><input name="gender" value="gender-1" type="radio"><i class="form-icon"></i> Gender 1</label>
+        //     <label class="form-radio"><input name="gender" value="gender-2" type="radio"><i class="form-icon"></i> Gender 2</label>
+        //     <label class="form-radio"><input name="gender" value="gender-2" type="radio"><i class="form-icon"></i> Test escape2&gt;</label>
+        // </div>
+        $radioGroupOuter = $all[8];
+        $this->assertEquals("j-JetFormsRadioGroupInput form-group", $radioGroupOuter->getAttribute("class"));
+        [$mainLabelEl, $radioLabelEl1, $radioLabelEl2, $radioLabelEl3] = $radioGroupOuter->childNodes;
+        $this->assertEquals("form-label", $mainLabelEl->getAttribute("class"));
+        $this->assertEquals("Test escape%lt;", $mainLabelEl->nodeValue);
+        $expectedLabels = [" Gender 1", " Gender 2", " Test escape2%gt;"];
+        foreach ([$radioLabelEl1, $radioLabelEl2, $radioLabelEl3] as $i => $labelEl) {
+            $this->assertEquals("form-radio", $labelEl->getAttribute("class"));
+            [$inputEl, $iconEl, $textNode] = $labelEl->childNodes;
+            $this->assertEquals("gender", $inputEl->getAttribute("name"));
+            $this->assertEquals("gender-" . ($i + 1), $inputEl->getAttribute("value"));
+            $this->assertEquals("radio", $inputEl->getAttribute("type"));
+            $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
+            $this->assertEquals($expectedLabels[$i], rtrim($textNode->nodeValue));
+        }
         // <button class="j-Button btn" type="submit" ...>Send</button>
-        $buttonEl = $all[8];
+        $buttonEl = $all[9];
         $this->assertTrue(str_starts_with($buttonEl->getAttribute("class"), "j-Button"));
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
         $this->assertEquals("Send", $buttonEl->nodeValue);
         // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
-        $returnToInput = $all[10];
+        $returnToInput = $all[11];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
-        // <input type="hidden" name="_csrf" value="todo">
-        $returnToInput = $all[11];
-        $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
-        $this->assertEquals("_csrf", $returnToInput->getAttribute("name"));
-        $this->assertEquals("todo", $returnToInput->getAttribute("value"));
     }
     public static function createDataForTestContactFormBlock(): object {
         return (object) [
@@ -243,6 +265,16 @@ final class RenderContactFormTest extends PluginTestCase {
                 "name" => "wantsReply",
                 "isRequired" => 0,
                 "label" => "Test escape>",
+            ],
+            "gender" => (object) [
+                "name" => "gender",
+                "isRequired" => 1,
+                "label" => "Test escape<",
+                "radios" => json_encode([
+                    ["text" => "Gender 1", "value" => "gender-1"],
+                    ["text" => "Gender 2", "value" => "gender-2"],
+                    ["text" => "Test escape2>", "value" => "gender-3"],
+                ]),
             ],
             "default" => ""
         };

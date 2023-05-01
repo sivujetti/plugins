@@ -23,5 +23,4 @@
         ? $this->e($props->returnTo)
         : "{$this->url($currentUrl)}#contact-form-sent={$props->id}"
     ?>">
-    <input type="hidden" name="_csrf" value="todo">
 </form>

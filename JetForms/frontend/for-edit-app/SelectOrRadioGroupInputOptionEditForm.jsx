@@ -1,7 +1,7 @@
 import {__, hookForm, reHookValues, hasErrors, Textarea, InputErrors,
         FormGroupInline} from '@sivujetti-commons-for-edit-app';
 
-class SelectInputOptionEditForm extends preact.Component {
+class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
     /**
      * @param {{item: {text: String;}; onValueChanged: (value: String, key: 'text') => void; done: () => void;}} props
      */
@@ -38,4 +38,4 @@ class SelectInputOptionEditForm extends preact.Component {
     }
 }
 
-export default SelectInputOptionEditForm;
+export default SelectOrRadioGroupInputOptionEditForm;

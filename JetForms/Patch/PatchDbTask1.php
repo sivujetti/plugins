@@ -4,6 +4,7 @@ namespace SitePlugins\JetForms\Patch;
 
 use Pike\ArrayUtils;
 use Pike\Db\FluentDb;
+use SitePlugins\JetForms\RadioGroupInputBlockType;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\JsonUtils;
 use Sivujetti\Update\UpdateProcessTaskInterface;
@@ -26,25 +27,24 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
         $this->logFn = function ($str) { /**/ };
     }
     /**
-     * 
      */
     public function exec(): void {
         if ($this->doSkip) return;
         $pages = $this->db->select("\${p}Pages", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
         $gbts = $this->db->select("\${p}globalBlockTrees", "stdClass")->fields(["blocks as blocksJson", "id"])->fetchAll();
         $reusables = $this->db->select("\${p}reusableBranches", "stdClass")->fields(["blockBlueprints as blockBlueprintsJson", "id"])->fetchAll();
+        $theme = $this->db->select("\${p}themes", "stdClass")->fields(["generatedScopedStylesCss", "id"])->fetchAll()[0];
         $this->patchPagesOrGbts($gbts, "globalBlockTrees");
         $this->patchPagesOrGbts($pages, "Pages");
         $this->patchReusables($reusables);
+        $this->patchStyles($theme);
     }
     /**
-     * 
      */
     public function rollBack(): void {
         // Can't rollBack
     }
     /**
-     * 
      */
     private function patchPagesOrGbts(array $entities, string $tableName): void {
         foreach ($entities as $entitity) {
@@ -65,7 +65,6 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
         }
     }
     /**
-     * 
      */
     private function patchReusables(array $reusables): void {
         foreach ($reusables as $reusable) {
@@ -86,7 +85,28 @@ final class PatchDbTask1 implements UpdateProcessTaskInterface {
         }
     }
     /**
-     * 
+     */
+    private function patchStyles(object $theme): void {
+        $newBlockTypeName = RadioGroupInputBlockType::NAME;
+        $this->db->insert("\${p}themeStyles")->values((object) [
+            "units" => "[]",
+            "themeId" => $theme->id,
+            "blockTypeName" => $newBlockTypeName,
+        ])->execute();
+        //
+        $insertAfter = "/* -- .j-JetFormsNumberInput classes end -- */";
+        $patchedGeneratedCss = str_replace($insertAfter, implode("\n", [
+            $insertAfter,
+            "/* -- .j-{$newBlockTypeName} classes start -- */",
+            "/* nothing */",
+            "/* -- .j-{$newBlockTypeName} classes end -- */",
+        ]), $theme->generatedScopedStylesCss);
+        $this->db->update("\${p}themes")
+            ->values((object)["generatedScopedStylesCss" => $patchedGeneratedCss])
+            ->where("id=?", [$theme->id])
+            ->execute();
+    }
+    /**
      */
     private static function traverseReusables(array $reusables, \Closure $fn): void {
         foreach ($reusables as $reusable) {

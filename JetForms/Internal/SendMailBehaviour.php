@@ -119,9 +119,20 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      */
     private static function renderResultsAll(array $answers): string {
         return $answers
-            ? implode("\n", array_map(fn(array $ans) =>
-                "{$ans["label"]}:\n" . htmlentities($ans["value"])
-            , $answers))
+            ? implode("\n\n", array_map(function (array $ans) {
+                $asString = null;
+                if (is_string($ans["answer"]))
+                    $asString = $ans["answer"];
+                else {
+                    [$a, $b, $c] = $ans["answer"]["type"] === "singleSelect"
+                        ? ["(", "o", ")"]  // radio
+                        : ["[", "x", "]"]; // select[multiple]
+                    $asString = implode("\n", array_map(fn($itm) =>
+                        $a . ($itm["isSelected"] ? $b : " ") . "{$c} {$itm["text"]}"
+                    , $ans["answer"]["entries"]));
+                }
+                return "{$ans["label"]}:\n" . htmlentities($asString);
+            }, $answers))
             : "-";
     }
 }
