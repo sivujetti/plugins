@@ -98,6 +98,7 @@ final class SubmissionsController {
         $inputs = [
             CheckboxInputBlockType::NAME,
             EmailInputBlockType::NAME,
+            NumberInputBlockType::NAME,
             RadioGroupInputBlockType::NAME,
             SelectInputBlockType::NAME,
             TextareaInputBlockType::NAME,

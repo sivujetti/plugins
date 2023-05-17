@@ -7,7 +7,8 @@ use Pike\Auth\Crypto;
 use Pike\Db\FluentDb;
 use Pike\TestUtils\MockCrypto;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
-    RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType, TextInputBlockType};
+    NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
+    TextInputBlockType};
 use Sivujetti\JsonUtils;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
@@ -89,7 +90,7 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourHandlesRadioGroupInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: fn() => [$this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
-                renderer: TextInputBlockType::DEFAULT_RENDERER,
+                renderer: RadioGroupInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
                     "label" => "Choose single",
@@ -107,6 +108,27 @@ final class SendContactFormTest extends PluginTestCase {
                 "( ) Option 1 xss &lt;\n" .
                 "(o) Option 2\n" .
                 "( ) Option 3\nafter"
+        );
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    public function testProcessSubmissionWithSendMailBehaviourHandlesNumberInput(): void {
+        $this->runSendFormWithSendMailBehaviour(
+            inputs: fn() => [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
+                renderer: NumberInputBlockType::DEFAULT_RENDERER,
+                propsData: (object) [
+                    "name" => "phone_number",
+                    "label" => "Phone number",
+                    "isRequired" => 1,
+                    "placeholder" => "",
+                ])
+            ],
+            postData: ["phone_number" => "123456"],
+            bodyTemplate: "Results\r\n\r\n[resultsAll]\r\n\r\nsomething",
+            expectedEmailBody: "Results\r\n\r\nPhone number:\n123456\r\n\r\nsomething"
         );
     }
 
@@ -141,7 +163,7 @@ final class SendContactFormTest extends PluginTestCase {
         $this->assertEquals("/hello", $all[0]->data["sentFromPage"]);
         $actualFormBlock = $this->state->testPageData->blocks[count($this->state->testPageData->blocks)-1];
         $this->assertEquals($actualFormBlock->id, $all[0]->data["sentFromBlock"]);
-        $this->assertGreaterThan(time() - 10, $all[0]->data["sentAt"]);
+        $this->assertTrue($all[0]->data["sentAt"] > time() - 10);
     }
     private function runSendFormWithSendMailBehaviour(\Closure $inputs,
                                                       array $postData,
@@ -172,6 +194,7 @@ final class SendContactFormTest extends PluginTestCase {
             ->useBlockType(SelectInputBlockType::NAME, new SelectInputBlockType)
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->useBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType)
+            ->useBlockType(NumberInputBlockType::NAME, new NumberInputBlockType)
             ->withPageData(function (object $testPageData) use ($behaviours, $inputs, $emailBodyTemplate) {
                 $this->state->testSendFormBehaviourData = [
                     "subjectTemplate" => "New mail from [siteName]",
