@@ -208,8 +208,10 @@ final class SubmissionsController {
     private static function validateAnswers(object $reqBody, array $inputsMeta): array {
         $v = Validation::makeObjectValidator();
         foreach ($inputsMeta as $meta) {
-            if ($meta["type"] === CheckboxInputBlockType::NAME)
-                continue; // ??
+            if ($meta["type"] === CheckboxInputBlockType::NAME) {
+                if ($meta["isRequired"]) $v->rule($meta["name"], "in", ["on"]);
+                continue;
+            }
             $isSelect = $meta["type"] === SelectInputBlockType::NAME;
             if ($isSelect || $meta["type"] === RadioGroupInputBlockType::NAME) {
                 $k = $isSelect ? "options" : "radios";

@@ -56,10 +56,8 @@ final class JetForms implements UserPluginInterface {
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
-            if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type !== "GlobalBlockReference"
-                ? $b->type === ContactFormBlockType::NAME
-                : BlockTree::findBlock($b->__globalBlockTree->blocks, fn($b2) => $b2->type === ContactFormBlockType::NAME)
-            )) return;
+            if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))
+                return;
             if (!$api->isJsFileEnqueued("sivujetti/vendor/pristine.min.js"))
                 $api->enqueueJsFile("sivujetti/vendor/pristine.min.js");
             if (!$api->isJsFileEnqueued("sivujetti/sivujetti-commons-for-web-pages.js"))

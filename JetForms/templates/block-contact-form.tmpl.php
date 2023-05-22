@@ -2,14 +2,7 @@
     action="<?= $this->url(
         "/plugins/jet-forms/submissions/{$props->id}" .
         ($currentPage->slug !== "/" ? $currentPage->slug : "/-") .
-        ("/" . (
-            \Sivujetti\Block\BlockTree::findBlock($currentPage->blocks, fn($b) =>
-                $b->type === "GlobalBlockReference" &&
-                \Sivujetti\Block\BlockTree::findBlock($b->__globalBlockTree->blocks, fn($b2) => $b2->id === $props->id),
-            ) ?? (object) [
-                "__globalBlockTree" => (object) ["id" => "main"]
-            ]
-        )->__globalBlockTree->id)
+        "/{$this->findBlockAndTree($currentPage->blocks, fn($b) => $b->id === $props->id)[1]->id}"
     ) ?>"
     method="post"
     class="j-<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?> jet-form<?= /* see also public/plugin-jet-forms-bundle.js */ $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "" ?>"
