@@ -1,4 +1,4 @@
-import {__, env, http, stringUtils, timingUtils, Icon, LoadingSpinner} from '@sivujetti-commons-for-edit-app';
+import {__, api, env, http, stringUtils, timingUtils, Icon, LoadingSpinner} from '@sivujetti-commons-for-edit-app';
 
 const PAGE_SIZE = 40;
 
@@ -63,7 +63,7 @@ class IconBlockEditForm extends preact.Component {
      * @access protected
      */
     componentDidMount() {
-        const scrollEl = env.document.querySelector('#inspector-panel');
+        const scrollEl = api.inspectorPanel.getEl();
         this.scroller = (function (el) {
             const state = {trig: null, currentSlots: []};
             return {
