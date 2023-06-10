@@ -1,12 +1,19 @@
-import {http, __, env} from '@sivujetti-commons-for-edit-app';
+import {__, http, env, Icon} from '@sivujetti-commons-for-edit-app';
+import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl, customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
 import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
+const createBehavioursMutators = [];
+
+const useNaturalLangBuilderFeat = true;
+
 class ContactFormEditForm extends preact.Component {
+    // outerEl;
     /**
      * @access protected
      */
     componentWillMount() {
         const {getBlockCopy, grabChanges} = this.props;
+        if (!useNaturalLangBuilderFeat) {
         const updateState = behaviours => {
             this.setState({asJson: behaviours, parsed: JSON.parse(behaviours)});
         };
@@ -15,22 +22,69 @@ class ContactFormEditForm extends preact.Component {
             if (this.state.asJson !== block.behaviours)
                 updateState(block.behaviours);
         });
+        } else {
+        this.outerEl = preact.createRef();
+        const updateState = behaviours => {
+            this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
+                editPanelState: createEditPanelState()});
+        };
+        updateState(getBlockCopy().behaviours);
+        grabChanges((block, _origin, _isUndo) => {
+            if (this.state.asJson !== block.behaviours)
+                updateState(block.behaviours);
+        });
+        }
     }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({emitValueChanged}, {parsed}) {
-        return <SendFormBehaviourConfigurer
-            behaviour={ parsed[0] }
-            onConfigurationChanged={ vals => {
-                Object.assign(parsed[0].data, vals); // Mutates state temporarily
-                emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
-            } }/>;
+    render({emitValueChanged}, {parsed, editPanelState}) {
+        if (!useNaturalLangBuilderFeat)
+            return <SendFormBehaviourConfigurer
+                behaviour={ parsed[0] }
+                onConfigurationChanged={ vals => {
+                    Object.assign(parsed[0].data, vals); // Mutates state temporarily
+                    emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
+                } }/>;
+        if (!editPanelState) return;
+        return <div class="anim-outer pt-1">
+            <div class={ editPanelState.leftClass } ref={ this.outerEl }>
+                Kun käyttäjä lähettää lomakkeen niin
+                { parsed.map((behaviour, i) => {
+                    const impl = getBehaviourConfigurerImpl(behaviour.name);
+                    if (!impl) return <div>Unknown behaviour { behaviour.name }</div>;
+                    const {configurerLabel, getButtonLabel} = impl;
+                    return [i > 0 ? ', ja sitten' : '', <span>
+                        { configurerLabel }
+                        <button onClick={ () => this.showConfigurerPanel(behaviour) } class="with-icon">
+                            { getButtonLabel(behaviour.data) }<Icon iconId="settings" className="size-xs ml-1 mr-0"/>
+                        </button>
+                    </span>];
+                }).flat() }
+            </div>
+            <ConfigureBehaviourPanel
+                behaviour={ editPanelState.behaviour }
+                cssClass={ editPanelState.rightClass }
+                endEditMode={ () => {
+                    this.setState({editPanelState: createEditPanelState(null, 'reveal-from-left', 'fade-to-right')});
+                } }
+                panelHeight={  editPanelState.leftClass === ''
+                    ? 0
+                    : this.outerEl.current.getBoundingClientRect().height
+                }/>
+        </div>;
+    }
+    /**
+     * @param {Behaviour} behaviour
+     * @access private
+     */
+    showConfigurerPanel(behaviour) {
+        this.setState({editPanelState: createEditPanelState(behaviour,
+                                        'fade-to-left',
+                                        'reveal-from-right')});
     }
 }
-
-const createBehavioursMutators = [];
 
 function createBehaviours() {
     return createBehavioursMutators.reduce((out, fn) => fn(out), [
@@ -50,7 +104,10 @@ function createBehaviours() {
                 ``,
             ].join('\n')
         }}
-    ]);
+    ].concat(!useNaturalLangBuilderFeat
+        ? []
+        : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput'}}]
+    ));
 }
 
 export default {
@@ -67,6 +124,9 @@ export default {
         {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
             initialDefaultsData: null},
     ],
+    registerBehaviour(name, configurer) {
+        customBehaviourImpls.set(name, configurer);
+    },
     configureBehavioursWith(fn) {
         createBehavioursMutators.push(fn);
     },
