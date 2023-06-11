@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms\Internal;
 
 use Pike\Auth\Crypto;
+use Pike\Response;
 use SitePlugins\JetForms\BehaviourExecutorInterface;
 use Sivujetti\JsonUtils;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
@@ -28,13 +29,13 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
     /**
      * @inheritdoc
      */
-    public function run(object $behaviourData, object $reqBody, array $submissionInfo): void {
+    public function run(object $behaviourData, object $reqBody, Response $res, array $submissionInfo, array $runResultsArr): mixed {
         ["sentFromPage" => $pageSlug, "sentFromBlock" => $blockId, "answers" => $answers] = $submissionInfo;
-        $this->storage->putEntry("JetForms:submissions", [
+        return $this->storage->putEntry("JetForms:submissions", [
             "sentAt" => time(),
             "sentFromPage" => $pageSlug,
             "sentFromBlock" => $blockId,
             "answers" => $this->crypto->encrypt(JsonUtils::stringify($answers), SIVUJETTI_SECRET),
-        ]);
+        ]) ?? "";
     }
 }

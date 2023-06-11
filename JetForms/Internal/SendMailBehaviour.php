@@ -2,7 +2,7 @@
 
 namespace SitePlugins\JetForms\Internal;
 
-use Pike\{PhpMailerMailer, PikeException};
+use Pike\{PhpMailerMailer, PikeException, Response};
 use Pike\Auth\Crypto;
 use SitePlugins\JetForms\{BehaviourExecutorInterface, JetForms, SettingsController};
 use Sivujetti\SharedAPIContext;
@@ -48,7 +48,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     /**
      * @inheritdoc
      */
-    public function run(object $behaviour, object $reqBody, array $submissionInfo): void {
+    public function run(object $behaviour, object $reqBody, Response $res, array $submissionInfo, array $runResultsArr): mixed {
         $vars = $this->makeTemplateVars();
         $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
@@ -77,6 +77,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                 $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer, $mailSettings);
             },
         ]);
+        return "ok";
     }
     /**
      * @psalm-return JetFormsMailSendSettings

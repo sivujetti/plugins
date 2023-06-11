@@ -3,7 +3,8 @@
 namespace SitePlugins\JetForms;
 
 use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
-use SitePlugins\JetForms\Internal\{SendMailBehaviour, StoreSubmissionToLocalDbBehaviour};
+use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
+                                    StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
@@ -53,7 +54,7 @@ final class SubmissionsController {
         if (!$form)
             throw new PikeException("Invalid input (no such block)",
                                     PikeException::BAD_INPUT);
-        if (!($form->behaviours = json_decode($form->behaviours, flags: JSON_THROW_ON_ERROR)))
+        if (!($form->behaviours = JsonUtils::parse($form->behaviours)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         //
         $meta = self::createInputsMeta($form);
@@ -64,19 +65,24 @@ final class SubmissionsController {
         $answers = self::createAnswers($meta, $req->body);
         //
         $clsStrings = self::createValidBehaviourClsStrings($form->behaviours, $apiCtx->getPlugin("JetForms"));
+        $results = [];
         for ($i = 0; $i < count($clsStrings); ++$i) {
             try {
-                App::$adi->execute([$clsStrings[$i], "run"], [
+                $results[] = App::$adi->execute([$clsStrings[$i], "run"], [
                     $form->behaviours[$i]->data,
                     $req->body,
+                    $res,
                     ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "sentFromBlock" => $form->id],
+                    $results,
                 ]);
             } catch (\Exception $e) {
                 call_user_func($errorLogFn, "JetForms: behaviour {$i} failed: " . LogUtils::formatError($e));
             }
         }
         //
-        $res->redirect($req->body->_returnTo);
+        if (!defined("JET_FORMS_USE_FEAT_1"))
+            $res->redirect($req->body->_returnTo);
+        // else Do nothing
     }
     /**
      * @param string $blockId
@@ -179,7 +185,7 @@ final class SubmissionsController {
         return ($reqBody->{$name} ?? "") ?: self::NO_ANSWER;
     }
     /**
-     * @param array $block->behaviours
+     * @param array $behaviours $block->behaviours
      * @param \SitePlugins\JetForms\JetForms $plugin
      * @return class-string[]
      * @throws \Pike\PikeException
@@ -191,6 +197,7 @@ final class SubmissionsController {
                 "SendMail" => SendMailBehaviour::class,
                 "StoreSubmissionToLocalDb" => StoreSubmissionToLocalDbBehaviour::class,
                 "NotifyUser" => "todo",
+                "ShowSentMessage" => ShowSentMessageBehaviour::class,
                 // User-defined executors
                 default => $plugin->getBehaviourExecutor($behaviour->name),
             };
