@@ -101,7 +101,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      */
     private static function renderConstantTags(string $tmpl, array $vars): string {
         foreach ($vars as $key => $val)
-            $tmpl = str_replace("[{$key}]", htmlentities($val), $tmpl);
+            $tmpl = str_replace("[{$key}]", htmlspecialchars($val, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5), $tmpl);
         return $tmpl;
     }
     /**
@@ -132,7 +132,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                         $a . ($itm["isSelected"] ? $b : " ") . "{$c} {$itm["text"]}"
                     , $ans["answer"]["entries"]));
                 }
-                return "{$ans["label"]}:\n" . htmlentities($asString);
+                return "{$ans["label"]}:\n" . htmlspecialchars($asString, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5);
             }, $answers))
             : "-";
     }

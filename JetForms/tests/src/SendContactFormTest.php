@@ -176,7 +176,7 @@ final class SendContactFormTest extends PluginTestCase {
         $this->assertEquals($expected["fromName"], $conf->fromName);
         $this->assertEquals($expected["toAddress"], $conf->toAddress);
         $this->assertEquals($expected["toName"], $conf->toName);
-        $expectedSubject = str_replace("[siteName]", "Test suit&ouml; website xss &gt;", $expected["subjectTemplate"]);
+        $expectedSubject = str_replace("[siteName]", "Test suitö website xss &gt;", $expected["subjectTemplate"]);
         $this->assertEquals($expectedSubject, $conf->subject);
         $this->assertEquals($expectedEmailBody, $conf->body);
     }
