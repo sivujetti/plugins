@@ -24,14 +24,19 @@ class ContactFormEditForm extends preact.Component {
         });
         } else {
         this.outerEl = preact.createRef();
-        const updateState = behaviours => {
-            this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
-                editPanelState: createEditPanelState()});
-        };
-        updateState(getBlockCopy().behaviours);
-        grabChanges((block, _origin, _isUndo) => {
-            if (this.state.asJson !== block.behaviours)
-                updateState(block.behaviours);
+        const {behaviours} = getBlockCopy();
+        this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
+                        editPanelState: createEditPanelState()});
+        grabChanges((block, _origin, isUndo) => {
+            if (isUndo) return;
+            if (this.state.asJson !== block.behaviours) {
+                const parsed = JSON.parse(block.behaviours);
+                const openBehaviourName = this.state.editPanelState.behaviour.name;
+                const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
+                this.setState({asJson: block.behaviours, parsed,
+                    editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
+                                                            this.state.editPanelState.rightClass)});
+            }
         });
         }
     }
@@ -66,6 +71,13 @@ class ContactFormEditForm extends preact.Component {
             <ConfigureBehaviourPanel
                 behaviour={ editPanelState.behaviour }
                 cssClass={ editPanelState.rightClass }
+                onConfigurationChanged={ vals => {
+                    const parsedNew = parsed.map(beh => beh !== editPanelState.behaviour
+                        ? beh
+                        : {...beh, ...{data: {...beh.data, ...vals}}}
+                    );
+                    emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+                } }
                 endEditMode={ () => {
                     this.setState({editPanelState: createEditPanelState(null, 'reveal-from-left', 'fade-to-right')});
                 } }

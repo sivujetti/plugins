@@ -6,7 +6,7 @@ const customBehaviourImpls = new Map;
 
 class ConfigureBehaviourPanel extends preact.Component {
     /**
-     * @param {{behaviour: Behaviour; cssClass: String; endEditMode: () => void; panelHeight: Number;}} props
+     * @param {{behaviour: Behaviour; cssClass: String; onConfigurationChanged: (vals: {[propName: String]: any;}) => void; endEditMode: () => void; panelHeight: Number;}} props
      * @access protected
      */
     componentWillReceiveProps(props) {
@@ -24,11 +24,11 @@ class ConfigureBehaviourPanel extends preact.Component {
     /**
      * @access protected
      */
-    render({behaviour, panelHeight, cssClass, endEditMode}, {Renderer}) {
+    render({behaviour, panelHeight, cssClass, endEditMode, onConfigurationChanged}, {Renderer}) {
         return <div class={ cssClass } style={ `top: -${panelHeight + 8}px` }>{ Renderer ? [
             <button onClick={ endEditMode } class="btn btn-sm" type="button"> &lt; </button>,
             <div class="form-horizontal pt-0">
-                <Renderer { ...behaviour.data }/>
+                <Renderer { ...behaviour.data } onConfigurationChanged={ onConfigurationChanged }/>
             </div>
         ] : null }</div>;
     }

@@ -2,7 +2,7 @@ import {__} from '@sivujetti-commons-for-edit-app';
 
 class ShowSentMessageBehaviourConfigurer extends preact.Component {
     /**
-     * @param {Object} props
+     * @param {{at: 'beforeFirstInput'; onConfigurationChanged: (vals: {[propName: String]: any;}) => void;}} props
      * @access protected
      */
     render(props) {

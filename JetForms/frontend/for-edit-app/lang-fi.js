@@ -45,6 +45,7 @@ api.registerTranslationStrings({
     'Multiple': 'Monivalinta',
     'Options': 'Vaihtoehdot',
     'Option text': 'Vaihtoehdon teksti',
+    'Option value': 'Vaihtoehdon arvo',
     'option': 'vaihtoehto',
     // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Valmis',

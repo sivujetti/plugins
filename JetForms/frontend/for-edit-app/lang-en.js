@@ -45,6 +45,7 @@ api.registerTranslationStrings({
     'Multiple': 'Multiple',
     'Options': 'Options',
     'Option text': 'Option text',
+    'Option value': 'Option value',
     'option': 'option',
     // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Done',

@@ -1,5 +1,5 @@
 import {__} from '@sivujetti-commons-for-edit-app';
-import SendFormBehaviourConfigurer from '../SendFormBehaviourConfigurer.jsx';
+import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 export default () => ({
     configurerLabel: __('lähetä lomakkeen tiedot sähköpostiosoitteeseen'),
