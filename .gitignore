@@ -2,5 +2,6 @@
 .DS_Store
 .idea
 .vscode
+config.php
 
 _internal

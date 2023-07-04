@@ -11,7 +11,7 @@ use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInp
     TextInputBlockType};
 use Sivujetti\JsonUtils;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
-use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
+use Sivujetti\Tests\Utils\{PluginTestCase};
 
 final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
@@ -210,28 +210,27 @@ final class SendContactFormTest extends PluginTestCase {
                         "behaviours" => json_encode(array_map(fn($name) => [
                             "name" => $name,
                             "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
-                        ], $behaviours))
+                        ], $behaviours)),
+                        "useCaptcha" => 0
                     ],
                     children: $inputs(),
                     id: "@auto"
                 );
             })
-            ->withBootModuleAlterer(function (TestEnvBootstrapper $bootModule) use ($behaviours) {
+            ->withBootModuleAlterer(function (Injector $di) use ($behaviours) {
                 $hasSendMailBehaviour = in_array("SendMail", $behaviours, true);
-                $bootModule->useMockAlterer(function (Injector $di) use ($hasSendMailBehaviour) {
-                    $di->delegate(Crypto::class, fn() => new MockCrypto);
-                    if ($hasSendMailBehaviour)
-                        $di->delegate(PhpMailerMailer::class, function () {
-                            $stub = $this->createMock(PhpMailerMailer::class);
-                            $stub->method("sendMail")
-                                ->with($this->callBack(function ($actual) {
-                                    $this->state->actualFinalSendMailArg = $actual;
-                                    return true;
-                                }))
-                                ->willReturn(true);
-                            return $stub;
-                        });
-                });
+                $di->delegate(Crypto::class, fn() => new MockCrypto);
+                if ($hasSendMailBehaviour)
+                    $di->delegate(PhpMailerMailer::class, function () {
+                        $stub = $this->createMock(PhpMailerMailer::class);
+                        $stub->method("sendMail")
+                            ->with($this->callBack(function ($actual) {
+                                $this->state->actualFinalSendMailArg = $actual;
+                                return true;
+                            }))
+                            ->willReturn(true);
+                        return $stub;
+                    });
             })
             ->execute(function () use ($postData) {
                 $this->dbDataHelper->insertData((object) [

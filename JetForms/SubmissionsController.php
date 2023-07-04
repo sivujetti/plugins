@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
+use Pike\Auth\Crypto;
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
                                     StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
@@ -29,14 +30,14 @@ final class SubmissionsController {
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
      * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
-     * @param string $errorLogFn = "error_log" Mainly for tests
+     * @param ?\Closure $errorLogFn = null For tests
      */
     public function handleSubmission(Request $req,
                                      Response $res,
                                      SharedAPIContext $apiCtx,
                                      PagesRepository2 $pagesRepo,
                                      GlobalBlockTreesRepository2 $gbtRepo,
-                                     string $errorLogFn = "error_log"): void {
+                                     ?\Closure $errorLogFn = null): void {
         if (($errors = self::validateSubmissionInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
@@ -54,6 +55,11 @@ final class SubmissionsController {
         if (!$form)
             throw new PikeException("Invalid input (no such block)",
                                     PikeException::BAD_INPUT);
+        if ($form->useCaptcha &&
+            !is_string($req->myData->user?->id ?? null) && // is anon / is not logged in
+            !self::isValidCaptcha($req->body->_cChallenge ?? null)) {
+            throw new PikeException("Captcha challenge failed", PikeException::BAD_INPUT);
+        }
         if (!($form->behaviours = JsonUtils::parse($form->behaviours)))
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         //
@@ -76,13 +82,42 @@ final class SubmissionsController {
                     $results,
                 ]);
             } catch (\Exception $e) {
-                call_user_func($errorLogFn, "JetForms: behaviour {$i} failed: " . LogUtils::formatError($e));
+                $fn = $errorLogFn ?? fn($err) => error_log($err);
+                $fn("JetForms: behaviour {$i} failed: " . LogUtils::formatError($e));
             }
         }
         //
         if (!defined("JET_FORMS_USE_FEAT_1"))
             $res->redirect($req->body->_returnTo);
-        // else Do nothing
+        // else Do nothing (redirection has been handled by ShowSentMessageBehaviour)
+    }
+    /**
+     * @param ?string $input
+     * @return bool
+     */
+    private static function isValidCaptcha(?string $input): bool {
+        if (!is_string($input) || !strlen($input))
+            return false;
+        $now = time();
+        $decr = "";
+        $key = ContactFormBlockType::getSecret();
+        try {
+            $decr = (new Crypto)->decrypt($input, $key);
+        } catch (PikeException $e) {
+            return false;
+        }
+        if (!$decr)
+            return false; // empty or falsey
+        $asInt = (int) $decr;
+        if (strval($asInt) !== $decr)
+            return false; // not an integer
+        $diff = $now - $asInt;
+        $twoDays = 60 * 60 * 24;
+        if ($diff > $twoDays) // User spent more than 2 days filling the form (unlikely > reject it)
+            return false;
+        $minimumFormFillTimeSeconds = 10;
+        $userSpentEnoughTimeFillingTheForm = $diff > $minimumFormFillTimeSeconds;
+        return $userSpentEnoughTimeFillingTheForm;
     }
     /**
      * @param string $blockId

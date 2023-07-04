@@ -221,7 +221,8 @@ final class RenderContactFormTest extends PluginTestCase {
                     "fromAddress" => "",
                     "bodyTemplate" => "",
                 ]],
-            ])
+            ]),
+            "useCaptcha" => 0,
         ];
     }
     public static function createDataForTestInputBlock(string $which): object {

@@ -1,5 +1,7 @@
 <?php
 
+define("JET_FORMS_USE_FEAT_1", 1);
+
 /*
 - `cd plugins/JetForms/`
 - `"../../../backend/vendor/bin/phpunit" --bootstrap ./tests/bootstrap.php ./tests`
