@@ -11,6 +11,8 @@ use Sivujetti\ValidationUtils;
 final class ContactFormBlockType implements BlockTypeInterface, RenderAwareBlockTypeInterface {
     public const NAME = "JetFormsContactForm";
     public const DEFAULT_RENDERER = "plugins/JetForms:block-contact-form";
+    /** @var string */
+    private static string $cachedCaptchaToken = "";
     /**
      * @inheritdoc
      */
@@ -30,6 +32,10 @@ final class ContactFormBlockType implements BlockTypeInterface, RenderAwareBlock
                                    Injector $di): void {
         if (!$block->useCaptcha)
             return;
+        if (self::$cachedCaptchaToken) {
+            $block->__captchaChallenge = self::$cachedCaptchaToken;
+            return;
+        }
         $di->execute([$this, "doPerformBeforeRender"], [
             ":block" => $block,
         ]);
@@ -42,10 +48,13 @@ final class ContactFormBlockType implements BlockTypeInterface, RenderAwareBlock
     public function doPerformBeforeRender(Block $block,
                                           Request $req,
                                           Crypto $crypto): void {
-        if ($req->queryVar("in-edit") !== null)
-            return;
-        $key = self::getSecret();
-        $block->__captchaChallenge = $crypto->encrypt(strval(time()), $key);
+        if ($req->queryVar("in-edit") === null) {
+            $key = self::getSecret();
+            self::$cachedCaptchaToken = $crypto->encrypt(strval(time()), $key);
+        } else {
+            self::$cachedCaptchaToken = "-";
+        }
+        $block->__captchaChallenge = self::$cachedCaptchaToken;
     }
     /**
      * @return ?string

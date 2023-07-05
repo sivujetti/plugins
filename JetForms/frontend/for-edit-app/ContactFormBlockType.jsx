@@ -2,7 +2,7 @@ import {__, http, env, Icon} from '@sivujetti-commons-for-edit-app';
 import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl, customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
 import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
-const createBehavioursMutators = [];
+const createPropsMutators = [];
 
 const useNaturalLangBuilderFeat = true;
 
@@ -98,9 +98,9 @@ class ContactFormEditForm extends preact.Component {
     }
 }
 
-function createBehaviours() {
-    return createBehavioursMutators.reduce((out, fn) => fn(out), [
-        {name: 'SendMail', data: {
+function createProps() {
+    return createPropsMutators.reduce((out, fn) => fn(out), {
+        behaviours: [{name: 'SendMail', data: {
             subjectTemplate: __('New contact form entry on [siteName]'),
             toAddress: 'sivuston-omistaja@mail.com',
             toName: 'Sivuston Omistaja',
@@ -115,11 +115,12 @@ function createBehaviours() {
                 `(${__('Sent by JetForms')})`,
                 ``,
             ].join('\n')
-        }}
-    ].concat(!useNaturalLangBuilderFeat
-        ? []
-        : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput'}}]
-    ));
+        }}, ...(!useNaturalLangBuilderFeat
+            ? []
+            : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput'}}]
+        )],
+        useCaptcha: 1,
+    });
 }
 
 export default {
@@ -139,12 +140,10 @@ export default {
     registerBehaviour(name, configurer) {
         customBehaviourImpls.set(name, configurer);
     },
-    configureBehavioursWith(fn) {
-        createBehavioursMutators.push(fn);
+    configurePropsWith(fn) {
+        createPropsMutators.push(fn);
     },
-    initialData: () => ({
-        behaviours: JSON.stringify(createBehaviours())
-    }),
+    initialData: createProps,
     defaultRenderer: 'plugins/JetForms:block-contact-form',
     icon: 'message-2',
     reRender(block, _renderChildren) {

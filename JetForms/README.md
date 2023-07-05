@@ -41,8 +41,10 @@ class Site implements UserSiteInterface {
     public function __construct(UserSiteAPI $api) {
         ...
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
-            if (($jetForms = $api->getPlugin("JetForms")) === null)
-                return;
+            /** @var \SitePlugins\JetForms\JetForms */
+            $jetForms = $api->getPlugin("JetForms");
+            if ($jetForms === null) return;
+
             $api->on($jetForms::ON_MAILER_CONFIGURE,
             /**
              * @param \PHPMailer\PHPMailer\PHPMailer $mailer
@@ -88,6 +90,45 @@ form.onSubmit(e => {
     e.preventDefault();
     /* Do something */
 });
+```
+
+## How to disable captca for all new forms
+
+Create file `public/my-site-edit-app-extensions-bundle.js`:
+
+```
+(function ({api, signals}) {
+    signals.on('edit-app-plugins-loaded', () => {
+        api.blockTypes.get('JetFormsContactForm').configurePropsWith(props => ({
+            ...props,
+            ...{useCaptcha: 0},
+        }));
+    });
+})(sivujettiCommonsEditApp);
+
+```
+
+Edit `site/Site.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace MySite;
+
+use Sivujetti\UserSite\{UserSiteAPI, UserSiteInterface};
+
+class Site implements UserSiteInterface {
+    /**
+     * @param \Sivujetti\UserSite\UserSiteAPI $api
+     */
+    public function __construct(UserSiteAPI $api) {
+        ...
+        $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
+            $api->enqueueEditAppJsFile("my-site-edit-app-extensions-bundle.js");
+        });
+    }
+}
+
 ```
 
 # License
