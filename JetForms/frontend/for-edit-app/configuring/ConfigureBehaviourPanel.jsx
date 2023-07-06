@@ -1,5 +1,6 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 import createSendFormBehaviourConfigurerImpl from './SentFormBehaviourConfigurerTemp.jsx';
+import createStoreSubmissionToLocalDbBehaviourConfigurerImpl from './StoreSubmissionToLocalDbBehaviourConfigurer.jsx';
 import createShowSentMessageBehaviourConfigurerImpl from './ShowSentMessageBehaviourConfigurer.jsx';
 
 const customBehaviourImpls = new Map;
@@ -54,6 +55,8 @@ function getBehaviourConfigurerImpl(behaviourName) {
 
     if (behaviourName === 'SendMail')
         return createSendFormBehaviourConfigurerImpl();
+    if (behaviourName === 'StoreSubmissionToLocalDb')
+        return createStoreSubmissionToLocalDbBehaviourConfigurerImpl();
     if (behaviourName === 'ShowSentMessage')
         return createShowSentMessageBehaviourConfigurerImpl();
 

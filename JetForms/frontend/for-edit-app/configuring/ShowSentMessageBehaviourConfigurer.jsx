@@ -5,8 +5,10 @@ class ShowSentMessageBehaviourConfigurer extends preact.Component {
      * @param {{at: 'beforeFirstInput'; onConfigurationChanged: (vals: {[propName: String]: any;}) => void;}} props
      * @access protected
      */
-    render(props) {
-        return <p>{ JSON.stringify(props) }</p>;
+    render(_props) {
+        return <select class="form-select" disabled>
+            <option>Lomakkeen yläpuolella</option>
+        </select>;
     }
 }
 

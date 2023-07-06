@@ -1,13 +1,16 @@
-import {__, http, env, Icon} from '@sivujetti-commons-for-edit-app';
-import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl, customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
+import {__, http, env, Icon, Popup} from '@sivujetti-commons-for-edit-app';
+import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl,
+        customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
 import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 const createPropsMutators = [];
 
+const TerminatorBehaviour1 = 'ShowSentMessage';
 const useNaturalLangBuilderFeat = true;
 
 class ContactFormEditForm extends preact.Component {
     // outerEl;
+    // addBehaviourBtn;
     /**
      * @access protected
      */
@@ -24,6 +27,7 @@ class ContactFormEditForm extends preact.Component {
         });
         } else {
         this.outerEl = preact.createRef();
+        this.addBehaviourBtn = preact.createRef();
         const {behaviours} = getBlockCopy();
         this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
                         editPanelState: createEditPanelState()});
@@ -31,7 +35,7 @@ class ContactFormEditForm extends preact.Component {
             if (isUndo) return;
             if (this.state.asJson !== block.behaviours) {
                 const parsed = JSON.parse(block.behaviours);
-                const openBehaviourName = this.state.editPanelState.behaviour.name;
+                const openBehaviourName = this.state.editPanelState.behaviour?.name;
                 const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
                 this.setState({asJson: block.behaviours, parsed,
                     editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
@@ -44,7 +48,7 @@ class ContactFormEditForm extends preact.Component {
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({emitValueChanged}, {parsed, editPanelState}) {
+    render({emitValueChanged}, {parsed, editPanelState, curPopupRenderer}) {
         if (!useNaturalLangBuilderFeat)
             return <SendFormBehaviourConfigurer
                 behaviour={ parsed[0] }
@@ -53,19 +57,55 @@ class ContactFormEditForm extends preact.Component {
                     emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
                 } }/>;
         if (!editPanelState) return;
+        const names = getAvailableBehaviours(parsed.map(({name}) => name));
+        const last = parsed.at(-1);
+        const [before, after] = last.name === TerminatorBehaviour1
+            ? [parsed.slice(0,-1), [last]] // [...notLast, btn|null, ...[last]]
+            : [parsed,             []];    // [...all,     btn|null, ...[]]
+        const vm = this;
         return <div class="anim-outer pt-1">
-            <div class={ editPanelState.leftClass } ref={ this.outerEl }>
-                Kun käyttäjä lähettää lomakkeen niin
-                { parsed.map((behaviour, i) => {
-                    const impl = getBehaviourConfigurerImpl(behaviour.name);
-                    if (!impl) return <div>Unknown behaviour { behaviour.name }</div>;
+            <div class={ `instructions-list d-flex ${editPanelState.leftClass}` } ref={ this.outerEl }>
+                <span class="mr-1">Kun käyttäjä lähettää tämän lomakkeen niin</span>
+                { [
+                    ...before,
+                    ...(names.length ? [
+                        <span class="group-p perhaps ml-1">
+                            <button
+                            onClick={ () => this.setState({curPopupRenderer: AddBehaviourPopup}) }
+                            class="poppable d-flex pr-1"
+                            id="button"
+                            ref={ this.addBehaviourBtn }>sekä <Icon iconId="plus" className="size-xs ml-1"/></button>
+                        </span>
+                    ] : []),
+                    ...after
+                ].map((itm, i) => {
+                    if (itm.type === 'span') return itm;
+                    const impl = getBehaviourConfigurerImpl(itm.name);
+                    if (!impl) return <div class="group-p mx-1 px-2 no-round-right">Unknown behaviour { itm.name }</div>;
                     const {configurerLabel, getButtonLabel} = impl;
-                    return [i > 0 ? ', ja sitten' : '', <span>
-                        { configurerLabel }
-                        <button onClick={ () => this.showConfigurerPanel(behaviour) } class="with-icon">
-                            { getButtonLabel(behaviour.data) }<Icon iconId="settings" className="size-xs ml-1 mr-0"/>
-                        </button>
-                    </span>];
+                    const confBtnText = getButtonLabel(itm.data);
+                    const isTerminator = itm.name === TerminatorBehaviour1;
+                    return [
+                        <span class="pl-0 mr-1">{ i > 0 ? !isTerminator ? ', sekä' : ', ja lopuksi' : '' }</span>,
+                        <span class="group-p px-2 no-round-right text-ellipsis no-round-right" title={ configurerLabel }>
+                            { configurerLabel }
+                        </span>,
+                        <span class="group-p no-round-left pl-0">
+                            <button
+                                onClick={ e => this.handleConfigOrDeleteBtnClicked(itm, e.target) }
+                                class={ `with-icon poppable${!confBtnText ? ' pl-0' : ''}${!isTerminator ? '' : ' pr-0'}` }
+                                title={ __('Edit or delete behaviour') }>
+                                { confBtnText
+                                    ? [
+                                        confBtnText,
+                                        <Icon iconId="settings" className="size-xs color-dimmed ml-1 mr-1"/>
+                                    ] : null }
+                                { !isTerminator
+                                    ? <Icon iconId="x" className="size-xs color-dimmed mr-0"/>
+                                    : null }
+                            </button>
+                        </span>
+                    ];
                 }).flat() }
             </div>
             <ConfigureBehaviourPanel
@@ -85,6 +125,23 @@ class ContactFormEditForm extends preact.Component {
                     ? 0
                     : this.outerEl.current.getBoundingClientRect().height
                 }/>
+            { curPopupRenderer
+                ? <Popup
+                    Renderer={ curPopupRenderer }
+                    rendererProps={ {
+                        availableBehaviours: names,
+                        /** @param {String} name */
+                        confirmAddBehaviour(name) {
+                            if (name !== 'StoreSubmissionToLocalDb') throw new Error('todo');
+                            const parsedNew = addBehaviourTo({name, data: {}}, parsed);
+                            vm.setState({curPopupRenderer: null});
+                            emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+                        },
+                    } }
+                    btn={ this.addBehaviourBtn.current }
+                    close={ () => this.setState({curPopupRenderer: null}) }/>
+                : null
+            }
         </div>;
     }
     /**
@@ -96,6 +153,66 @@ class ContactFormEditForm extends preact.Component {
                                         'fade-to-left',
                                         'reveal-from-right')});
     }
+    /**
+     * @param {Behaviour} behaviour
+     * @param {EventTarget} target
+     * @access private
+     */
+    handleConfigOrDeleteBtnClicked(behaviour, target) {
+        const {nodeName} = target;
+        const a = nodeName === 'BUTTON' || nodeName === '#text';
+        const useEl = a ? null : getUseEl(nodeName, target);
+        if (a || useEl && useEl.nodeName === 'use' && useEl.href.baseVal.endsWith('-settings'))
+            this.showConfigurerPanel(behaviour);
+        else
+            this.removeBehaviourAndEmit(behaviour);
+    }
+    /**
+     * @param {Behaviour} behaviour
+     * @access private
+     */
+    removeBehaviourAndEmit(behaviour) {
+        const parsedNew = this.state.parsed.filter(beh => beh !== behaviour);
+        this.props.emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+    }
+}
+
+class AddBehaviourPopup extends preact.Component {
+    /**
+     * @param {{availableBehaviours: Array<String>; confirmAddBehaviour: (name: String) => void;}}
+     * @access protected
+     */
+    render({availableBehaviours, confirmAddBehaviour}) {
+        return <div class="instructions-list d-flex">
+            { availableBehaviours.map(name =>
+                <button
+                    onClick={ () => confirmAddBehaviour(name) }
+                    className="group-p poppable perhaps"
+                    type="button">{ getBehaviourConfigurerImpl(name).configurerLabel }</button>
+            ) }
+        </div>;
+    }
+}
+
+/**
+ * @param {Behaviour} newBehaviour
+ * @param {Array<Behaviour>} to
+ * @returns {Array<Behaviour>}
+ */
+function addBehaviourTo(newBehaviour, to) {
+    const last = to.at(-1);
+    if (last.name === TerminatorBehaviour1)
+        return [...to.slice(0, -1), newBehaviour, last];  // [...notLast, newItem, last]
+    return [...to, newBehaviour]; // [...all, newItem]
+}
+
+/**
+ * @param {String} nodeName
+ * @param {EventTarget} target
+ * @returns {SVGUseElement|null}
+ */
+function getUseEl(nodeName, target) {
+    return nodeName === 'use' ? target : nodeName === 'svg' ? target.children[0] : null;
 }
 
 function createProps() {
@@ -117,11 +234,28 @@ function createProps() {
             ].join('\n')
         }}, ...(!useNaturalLangBuilderFeat
             ? []
-            : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput'}}]
+            : [{name: TerminatorBehaviour1, data: {at: 'beforeFirstInput'}}]
         )],
         useCaptcha: 1,
     });
 }
+
+/**
+ * @param {Array<String>} alreadyAdded
+ * @returns {Array<String>}
+ */
+function getAvailableBehaviours(alreadyAdded) {
+    return [
+        'SendMail',
+        'StoreSubmissionToLocalDb',
+    ].filter(fromAll => alreadyAdded.indexOf(fromAll) < 0);
+}
+
+/**
+ * @typedef Behaviour
+ * @prop {String} name
+ * @prop {{[key: String]: any;}} data
+ */
 
 export default {
     name: 'JetFormsContactForm',
