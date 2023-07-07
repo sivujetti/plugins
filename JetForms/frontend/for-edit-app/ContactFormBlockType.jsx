@@ -59,22 +59,25 @@ class ContactFormEditForm extends preact.Component {
         if (!editPanelState) return;
         const names = getAvailableBehaviours(parsed.map(({name}) => name));
         const last = parsed.at(-1);
-        const [before, after] = last.name === TerminatorBehaviour1
+        const hasTerminator = last.name === TerminatorBehaviour1;
+        const [before, after] = hasTerminator
             ? [parsed.slice(0,-1), [last]] // [...notLast, btn|null, ...[last]]
             : [parsed,             []];    // [...all,     btn|null, ...[]]
         const vm = this;
+        const isEmpty = (parsed.length - (hasTerminator ? 1 : 0)) === 0;
+        const addBehOddCls = before.length % 2 > 0 ? ' group-p-odd' : '';
         return <div class="anim-outer pt-1">
             <div class={ `instructions-list d-flex ${editPanelState.leftClass}` } ref={ this.outerEl }>
                 <span class="mr-1">Kun käyttäjä lähettää tämän lomakkeen niin</span>
                 { [
                     ...before,
                     ...(names.length ? [
-                        <span class="group-p perhaps ml-1">
+                        <span class={ `group-p${addBehOddCls} perhaps ml-1` }>
                             <button
                             onClick={ () => this.setState({curPopupRenderer: AddBehaviourPopup}) }
-                            class="poppable d-flex pr-1"
+                            class="poppable d-flex px-1"
                             id="button"
-                            ref={ this.addBehaviourBtn }>sekä <Icon iconId="plus" className="size-xs ml-1"/></button>
+                            ref={ this.addBehaviourBtn }>{ __(!isEmpty ? 'ja sitten' : 'lähetä täytetyt tiedot …') } <Icon iconId="plus" className="size-xs ml-1"/></button>
                         </span>
                     ] : []),
                     ...after
@@ -85,12 +88,15 @@ class ContactFormEditForm extends preact.Component {
                     const {configurerLabel, getButtonLabel} = impl;
                     const confBtnText = getButtonLabel(itm.data);
                     const isTerminator = itm.name === TerminatorBehaviour1;
+                    const oddCls = (i % 2) > 0 ? ' group-p-odd' : '';
                     return [
-                        <span class="pl-0 mr-1">{ i > 0 ? !isTerminator ? ', sekä' : ', ja lopuksi' : '' }</span>,
-                        <span class="group-p px-2 no-round-right text-ellipsis no-round-right" title={ configurerLabel }>
+                        i > 0 ? <span class="pl-0 mr-1">{
+                            !isTerminator ? __(', ja sitten') : __(', ja lopuksi')
+                        }</span> : null,
+                        <span class={ `group-p${oddCls} px-2 no-round-right text-ellipsis no-round-right` } title={ configurerLabel }>
                             { configurerLabel }
                         </span>,
-                        <span class="group-p no-round-left pl-0">
+                        <span class={ `group-p${oddCls} no-round-left pl-0` }>
                             <button
                                 onClick={ e => this.handleConfigOrDeleteBtnClicked(itm, e.target) }
                                 class={ `with-icon poppable${!confBtnText ? ' pl-0' : ''}${!isTerminator ? '' : ' pr-0'}` }
@@ -130,10 +136,16 @@ class ContactFormEditForm extends preact.Component {
                     Renderer={ curPopupRenderer }
                     rendererProps={ {
                         availableBehaviours: names,
+                        oddCls: addBehOddCls,
                         /** @param {String} name */
                         confirmAddBehaviour(name) {
-                            if (name !== 'StoreSubmissionToLocalDb') throw new Error('todo');
-                            const parsedNew = addBehaviourTo({name, data: {}}, parsed);
+                            const data = name === 'StoreSubmissionToLocalDb'
+                                ? {}
+                                : name === 'SendMail'
+                                    ? createProps().behaviours.find(b => b.name === name)?.data
+                                    : null;
+                            if (data === null) throw new Error('todo');
+                            const parsedNew = addBehaviourTo({name, data}, parsed);
                             vm.setState({curPopupRenderer: null});
                             emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
                         },
@@ -179,15 +191,15 @@ class ContactFormEditForm extends preact.Component {
 
 class AddBehaviourPopup extends preact.Component {
     /**
-     * @param {{availableBehaviours: Array<String>; confirmAddBehaviour: (name: String) => void;}}
+     * @param {{availableBehaviours: Array<String>; confirmAddBehaviour: (name: String) => void; oddCls: String;}}
      * @access protected
      */
-    render({availableBehaviours, confirmAddBehaviour}) {
+    render({availableBehaviours, confirmAddBehaviour, oddCls}) {
         return <div class="instructions-list d-flex">
             { availableBehaviours.map(name =>
                 <button
                     onClick={ () => confirmAddBehaviour(name) }
-                    className="group-p poppable perhaps"
+                    className={ `group-p${oddCls} poppable perhaps` }
                     type="button">{ getBehaviourConfigurerImpl(name).configurerLabel }</button>
             ) }
         </div>;
