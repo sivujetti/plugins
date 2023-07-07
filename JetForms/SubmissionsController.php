@@ -7,6 +7,7 @@ use Pike\Auth\Crypto;
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
                                     StoreSubmissionToLocalDbBehaviour};
 use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
+use Sivujetti\Auth\ACL;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Block\Entities\Block;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
@@ -55,8 +56,9 @@ final class SubmissionsController {
         if (!$form)
             throw new PikeException("Invalid input (no such block)",
                                     PikeException::BAD_INPUT);
+        $reqUserRole = $req->myData->user?->role ?? null;
         if ($form->useCaptcha &&
-            !is_string($req->myData->user?->id ?? null) && // is anon / is not logged in
+            !is_int($reqUserRole) && // is anon / is not logged in
             !self::isValidCaptcha($req->body->_cChallenge ?? null)) {
             throw new PikeException("Captcha challenge failed", PikeException::BAD_INPUT);
         }
@@ -72,18 +74,22 @@ final class SubmissionsController {
         //
         $clsStrings = self::createValidBehaviourClsStrings($form->behaviours, $apiCtx->getPlugin("JetForms"));
         $results = [];
+        $pushErrors = is_int($reqUserRole) && $reqUserRole <= ACL::ROLE_AUTHOR;
         for ($i = 0; $i < count($clsStrings); ++$i) {
             try {
-                $results[] = App::$adi->execute([$clsStrings[$i], "run"], [
+                $result = App::$adi->execute([$clsStrings[$i], "run"], [
                     $form->behaviours[$i]->data,
                     $req->body,
                     $res,
                     ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "sentFromBlock" => $form->id],
                     $results,
                 ]);
+                $results[] = $result;
             } catch (\Exception $e) {
+                $error = "Error: behaviour {$i} failed: " . LogUtils::formatError($e);
                 $fn = $errorLogFn ?? fn($err) => error_log($err);
-                $fn("JetForms: behaviour {$i} failed: " . LogUtils::formatError($e));
+                $fn($error);
+                if ($pushErrors) $results[] = $error;
             }
         }
         //
