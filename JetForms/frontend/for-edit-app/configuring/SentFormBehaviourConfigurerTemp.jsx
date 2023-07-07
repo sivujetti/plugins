@@ -3,6 +3,6 @@ import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 export default () => ({
     configurerLabel: __('lähetä täytetyt tiedot sähköpostiosoitteeseen'),
-    getButtonLabel(data) { return 'foo@bar.com'; },
+    getButtonLabel({toAddress}) { return toAddress; },
     configurerCls: SendFormBehaviourConfigurer,
 });

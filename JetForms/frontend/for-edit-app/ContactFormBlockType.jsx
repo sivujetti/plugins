@@ -89,6 +89,7 @@ class ContactFormEditForm extends preact.Component {
                     const confBtnText = getButtonLabel(itm.data);
                     const isTerminator = itm.name === TerminatorBehaviour1;
                     const oddCls = (i % 2) > 0 ? ' group-p-odd' : '';
+                    const a = !isTerminator ? '2.3rem' : '1.3rem';
                     return [
                         i > 0 ? <span class="pl-0 mr-1">{
                             !isTerminator ? __(', ja sitten') : __(', ja lopuksi')
@@ -99,11 +100,11 @@ class ContactFormEditForm extends preact.Component {
                         <span class={ `group-p${oddCls} no-round-left pl-0` }>
                             <button
                                 onClick={ e => this.handleConfigOrDeleteBtnClicked(itm, e.target) }
-                                class={ `with-icon poppable${!confBtnText ? ' pl-0' : ''}${!isTerminator ? '' : ' pr-0'}` }
+                                class={ `with-icon poppable${!confBtnText ? ' pl-0' : ''}${confBtnText ? ' pr-0' : 'pr-1'}` }
                                 title={ __('Edit or delete behaviour') }>
                                 { confBtnText
                                     ? [
-                                        confBtnText,
+                                        <span class="d-inline-block text-ellipsis" style={ `max-width: calc(100% - ${a})` }>{ confBtnText }</span>,
                                         <Icon iconId="settings" className="size-xs color-dimmed ml-1 mr-1"/>
                                     ] : null }
                                 { !isTerminator
@@ -172,7 +173,7 @@ class ContactFormEditForm extends preact.Component {
      */
     handleConfigOrDeleteBtnClicked(behaviour, target) {
         const {nodeName} = target;
-        const a = nodeName === 'BUTTON' || nodeName === '#text';
+        const a = nodeName === 'BUTTON' || nodeName === 'SPAN' || nodeName === '#text';
         const useEl = a ? null : getUseEl(nodeName, target);
         if (a || useEl && useEl.nodeName === 'use' && useEl.href.baseVal.endsWith('-settings'))
             this.showConfigurerPanel(behaviour);

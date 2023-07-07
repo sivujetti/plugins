@@ -3,26 +3,28 @@ import {__, hookForm, reHookValues, hasErrors, Textarea, InputErrors,
 
 class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
     /**
-     * @param {{item: {text: String;}; onValueChanged: (value: String, key: 'text') => void; done: () => void;}} props
+     * @param {{showValueInput: Boolean; item: SelectOrRadioGroupSelectItem; onValueChanged: (value: String, key: keyof SelectOrRadioGroupSelectItem) => void; done: () => void;}} props
      */
     constructor(props) {
         super(props);
         this.state = hookForm(this, [
             {name: 'text', value: props.item.text, validations: [['minLength', 1]], label: __('Option text'),
              onAfterValueChanged: (value, hasErrors) => { if (!hasErrors) this.props.onValueChanged(value, 'text'); }},
+            {name: 'value', value: props.item.value, validations: [['minLength', 1]], label: __('Option value'),
+             onAfterValueChanged: (value, hasErrors) => { if (!hasErrors) this.props.onValueChanged(value, 'value'); }},
         ]);
     }
     /**
-     * @param {{text: String;}} item
+     * @param {SelectOrRadioGroupSelectItem} item
      * @access public
      */
     overrideValues(item) {
-        reHookValues(this, [{name: 'text', value: item.text}]);
+        reHookValues(this, [{name: 'text', value: item.text}, {name: 'value', value: item.value}]);
     }
     /**
      * @access protected
      */
-    render({done}) {
+    render({done, showValueInput}) {
         return <div class="form-horizontal pt-0">
             <button
                 onClick={ () => done() }
@@ -34,8 +36,40 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
                 <Textarea vm={ this } prop="text" rows="3"/>
                 <InputErrors vm={ this } prop="text"/>
             </FormGroupInline>
+            { showValueInput ? <FormGroupInline>
+                <label htmlFor="value" class="form-label">{ __('Option value') }</label>
+                <Textarea vm={ this } prop="value" rows="3"/>
+                <InputErrors vm={ this } prop="value"/>
+            </FormGroupInline> : null }
         </div>;
     }
 }
 
+/**
+ * @param {Array<String>} currentValues = []
+ * @returns {{createNewItem(text: String, value: String = 'auto'): {text: String; value: String};}}
+ */
+function createSelectOrOptionSelectItemCreator(currentValues = []) {
+    let counter = currentValues.reduce((max, val) => {
+        const asStr = val.split('-').at(-1);
+        const asInt = parseInt(asStr, 10);
+        return !isNaN(asInt) && asInt > max ? asInt : max;
+    }, 0);
+    return {
+        createNewItem(text = __('Option text'), value = 'auto') {
+            return {
+                text,
+                value: value === 'auto' ? `option-${(counter += 1, counter)}` : value,
+            };
+        }
+    };
+}
+
+/**
+ * @typedef SelectOrRadioGroupSelectItem
+ * @prop {String} text
+ * @prop {String} value
+ */
+
 export default SelectOrRadioGroupInputOptionEditForm;
+export {createSelectOrOptionSelectItemCreator};

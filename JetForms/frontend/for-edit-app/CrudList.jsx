@@ -4,13 +4,16 @@ import Sortable from './Sortable.js';
 
 let counter = 0;
 
+/**
+ * @template T
+ */
 class CrudList extends preact.Component {
     // editForm;
     // contextMenu;
     // sortable;
     // itemWithNavOpened;
     /**
-     * @param {{items: Array<Object>; itemTitleKey: String; onListMutated: (newList: Array<Object>) => void; createNewItem: () => Object; editForm: preact.AnyComponent; itemTypeFriendlyName: String;}} props
+     * @param {{items: Array<T>; onListMutated: (newList: Array<T>) => void; createNewItem: () => T; editForm: preact.AnyComponent; editFormProps?: {[key: String]: any;}; itemTypeFriendlyName: String; itemTitleKey?: String; getTitle?: (item: T) => preact.ComponentChild;}} props
      */
     constructor(props) {
         super(props);
@@ -23,6 +26,7 @@ class CrudList extends preact.Component {
      */
     componentWillMount() {
         this.sortable = new Sortable();
+        this.getTitle = this.props.getTitle ? this.props.getTitle : (item => item[this.props.itemTitleKey]);
     }
     /**
      * @access protected
@@ -42,7 +46,7 @@ class CrudList extends preact.Component {
     /**
      * @access protected
      */
-    render({editForm, itemTypeFriendlyName, itemTitleKey}, {items, tab}) {
+    render({editForm, itemTypeFriendlyName, editFormProps}, {items, tab}) {
         if (!items)
             return;
         if (tab === 'default') return [
@@ -53,7 +57,7 @@ class CrudList extends preact.Component {
                         </button>
                     </div>
                     <div class="col-8 text-ellipsis">
-                        { item[itemTitleKey] }
+                        { this.getTitle(item) }
                     </div>
                     <div class="col-2">
                         <button onClick={ e => this.openMoreMenu(item, e) } class="btn btn-sm btn-link col-ml-auto flex-centered" type="button">
@@ -81,20 +85,21 @@ class CrudList extends preact.Component {
         if (tab === 'edit') {
             const Impl = editForm;
             return <Impl
+                { ...(editFormProps || {}) }
                 item={ this.state.editItem }
                 onValueChanged={ (value, key) => {
-                        // eslint-disable-next-line react/no-direct-mutation-state
-                        this.state.editItem[key] = value;
-                        this.setState({items: this.state.items,
-                                       editItem: this.state.editItem});
-                        this.emitListMutated(this.state.items);
-                    } }
+                    // eslint-disable-next-line react/no-direct-mutation-state
+                    this.state.editItem[key] = value;
+                    this.setState({items: this.state.items,
+                                    editItem: this.state.editItem});
+                    this.emitListMutated(this.state.items);
+                } }
                 done={ () => this.setState({tab: 'default', editItem: null}) }
                 ref={ this.editForm }/>;
         }
     }
     /**
-     * @param { } item
+     * @param {T} item
      * @param {Event} e
      * @access private
      */
@@ -116,7 +121,7 @@ class CrudList extends preact.Component {
         }
     }
     /**
-     * @param {Array<{key: String} && Object>} items
+     * @param {Array<T && {key: String}>} items
      * @access private
      */
     emitListMutated(items) {
@@ -138,8 +143,8 @@ class CrudList extends preact.Component {
         });
     }
     /**
-     * @param {Array<Object>} items
-     * @returns {Array<{key: String} && Object>}
+     * @param {Array<T>} items
+     * @returns {Array<T && {key: String}>}
      * @access private
      */
     addKeys(items) {
@@ -149,15 +154,15 @@ class CrudList extends preact.Component {
             if (!item[this.props.itemTitleKey])
                 throw new Error('item[props.itemTitleKey] not defined');
         }
-        return items.map(item => Object.assign({}, item, {
+        return items.map(item => ({...item, ...{
             key: (++counter).toString(),
-        }));
+        }}));
     }
     /**
      * @access private
      */
     addNewItem() {
-        const newItem = Object.assign({}, this.props.createNewItem());
+        const newItem = {...this.props.createNewItem()};
         if (!newItem.key) newItem.key = (++counter).toString();
         const newList = this.state.items.concat(newItem);
         this.setState({items: newList});
@@ -166,12 +171,12 @@ class CrudList extends preact.Component {
 }
 
 /**
- * @param {Array<{key: String} && Object>} items
+ * @param {Array<T && {key: String}>} items
  * @returns {Array<Object>}
  */
 function removeKeys(items) {
     return items.map(item => {
-        const out = Object.assign({}, item);
+        const out = {...item};
         delete out.key;
         return out;
     });

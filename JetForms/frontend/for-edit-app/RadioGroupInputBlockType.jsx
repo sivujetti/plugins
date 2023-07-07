@@ -1,12 +1,14 @@
-import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
+import {__, api, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
         FormGroup, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
 import CrudList from './CrudList.jsx';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
-import SelectOrRadioGroupInputOptionEditForm from './SelectOrRadioGroupInputOptionEditForm.jsx';
+import SelectOrRadioGroupInputOptionEditForm, {createSelectOrOptionSelectItemCreator} from './SelectOrRadioGroupInputOptionEditForm.jsx';
 import services from './services.js';
 
 class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
+    // valueCreator;
+    // showTechnicalInputs;
     // labelInput;
     /**
      * @access protected
@@ -14,6 +16,9 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
     componentWillMount() {
         const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
         const {name, label, radios, isRequired} = getBlockCopy();
+        const radiosParsed = JSON.parse(radios);
+        this.valueCreator = createSelectOrOptionSelectItemCreator(radiosParsed.map(({value}) => value));
+        this.showTechnicalInputs = api.user.getRole() < api.user.ROLE_EDITOR;
         this.labelInput = preact.createRef();
         this.setState(hookForm(this, [
             {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
@@ -22,7 +27,7 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
         ], {
             radios,
-            radiosParsed: JSON.parse(radios),
+            radiosParsed,
             isRequired,
         }));
         grabChanges((block, _origin, isUndo) => {
@@ -30,8 +35,11 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
                            this.state.values.label !== block.label))
                 reHookValues(this, [{name: 'name', value: block.name},
                                     {name: 'label', value: block.label}]);
-            if (this.state.radios !== block.radios)
-                this.setState({radios: block.radios, radiosParsed: JSON.parse(block.radios)});
+            if (this.state.radios !== block.radios) {
+                const radiosParsed = JSON.parse(block.radios);
+                this.valueCreator = createSelectOrOptionSelectItemCreator(radiosParsed.map(({value}) => value));
+                this.setState({radios: block.radios, radiosParsed});
+            }
             if (this.state.isRequired !== block.isRequired)
                 this.setState({isRequired: block.isRequired});
         });
@@ -81,21 +89,20 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
             <CrudList
                 items={ radiosParsed }
                 itemTitleKey="text"
+                getTitle={ item => !this.showTechnicalInputs ? item.text : [`${item.text} `, <i class="color-dimmed">({item.value})</i>] }
                 onListMutated={ this.emitRadios.bind(this) }
-                createNewItem={ () => ({text: __('Option text')}) }
+                createNewItem={ this.valueCreator.createNewItem.bind(this.valueCreator) }
                 editForm={ SelectOrRadioGroupInputOptionEditForm }
+                editFormProps={ {showValueInput: this.showTechnicalInputs} }
                 itemTypeFriendlyName={ __('option') }/>
         </FormGroup>];
     }
     /**
-     * @param {Array<{text: String;}>} list
+     * @param {Array<{text: String; value: String;}>} list
      * @access private
      */
     emitRadios(list) {
-        const withReAssignedValues = list.map((item, i) =>
-            Object.assign({}, item, {value: `option-${i + 1}`}))
-        ;
-        this.props.emitValueChanged(JSON.stringify(withReAssignedValues), 'radios', false, env.normalTypingDebounceMillis);
+        this.props.emitValueChanged(JSON.stringify(list), 'radios', false, env.normalTypingDebounceMillis);
     }
     /**
      * @param {Event} e
@@ -115,7 +122,7 @@ export default {
     initialData: () => ({
         name: services.idGen.getNextId(),
         label: '',
-        radios: JSON.stringify([{text: __('Option text'), value: 'option-1'},]),
+        radios: JSON.stringify([createSelectOrOptionSelectItemCreator().createNewItem()]),
         isRequired: 1,
     }),
     defaultRenderer: 'plugins/JetForms:block-input-radio-group',
