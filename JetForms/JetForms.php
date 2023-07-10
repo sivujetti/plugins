@@ -22,7 +22,12 @@ final class JetForms implements UserPluginInterface {
     public function __construct(UserPluginAPI $api) {
         $api->registerHttpRoute("POST", "/plugins/jet-forms/submissions/[w:blockId]/[w:pageSlug]/[w:isPartOfTreeId]",
             SubmissionsController::class, "handleSubmission",
-            ["allowMissingRequestedWithHeader" => true, "skipAuth" => true]
+            ["allowMissingRequestedWithHeader" => true, "skipAuthButLoadRequestUser" => true]
+        );
+        $api->registerHttpRoute("GET", "/plugins/jet-forms/submissions",
+            SubmissionsController::class, "aaa",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["list", "submissions"]]
         );
         $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/mailSendSettings",
             SettingsController::class, "getMailSendSettings",
@@ -73,8 +78,10 @@ final class JetForms implements UserPluginInterface {
         return $builder
             ->defineResource("mailSendSettings", ["read", "update"])
                 // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
-            ->defineResource("submissions", ["list"]);
-                // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
+            ->defineResource("submissions", ["list"])
+                ->setPermissions(ACL::ROLE_ADMIN, ["list"])
+                ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["list"])
+                ->setPermissions(ACL::ROLE_EDITOR, ["list"]);
     }
     /**
      * @param string $name

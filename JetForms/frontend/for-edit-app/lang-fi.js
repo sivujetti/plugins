@@ -12,6 +12,12 @@ api.registerTranslationStrings({
     'jetFormsTodo3': 'Käytä SMTP-palveluntarjoajaa (esim. Office 365, Gmail, tai webhotellisi oma järjestelmä).',
     'Encryption': 'Salaus',
     'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
+    // Submission/SubmissionsBrowseDialog.jsx
+    'Sent from': 'Lähetetty sivulta',
+    'Sent at': 'Ajankohta',
+    'Answers': 'Täytetyt tiedot',
+    'No one filled out the form yet': 'Ei vielä tallennettuja lähetyksiä',
+    'Once submitted, the data from your form will be shown here': 'Kun käyttäjä lähettää lomakkeen, siinä täytetyt tiedot ilmestyy tähän',
     // CheckboxInputBlockType.jsx
     'Checkbox input (JetForms)': 'Checkbox-kenttä (JetForms)',
     'Text': 'Teksti',
@@ -29,6 +35,7 @@ api.registerTranslationStrings({
     'Add %s': 'Lisää %s',
     // EditAppLeftColumnSection.jsx
     'Manage forms': 'Sivuston lomakkeet',
+    'Browse submissions': 'Selaa lähetyksiä',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx
     'Email input (JetForms)': 'Sähköpostikenttä (JetForms)',

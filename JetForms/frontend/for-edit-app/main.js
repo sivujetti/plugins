@@ -9,7 +9,7 @@ import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
 import EditAppLeftColumnSection from './EditAppLeftColumnSection.jsx';
 
-if (api.user.can('doAnything')) {
+if (api.user.getRole() <= api.user.ROLE_EDITOR) {
     api.mainPanel.registerSection('plugin:jetForms', EditAppLeftColumnSection);
 }
 api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
@@ -37,7 +37,12 @@ setTimeout(() => {
     border: none;
     cursor: grab;
     color: var(--color-fg-dimmed);
-}`
+}
+.table.table-striped .formatted-answers {
+    height: 2.7rem;
+    white-space: pre;
+}
+`
     );
     document.head.appendChild(el);
 }, 900);

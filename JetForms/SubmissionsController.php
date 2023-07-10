@@ -9,7 +9,6 @@ use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
 use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
 use Sivujetti\Auth\ACL;
 use Sivujetti\Block\BlockTree;
-use Sivujetti\Block\Entities\Block;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
 use Sivujetti\Page\PagesRepository2;
 
@@ -50,8 +49,9 @@ final class SubmissionsController {
                                             PikeException::BAD_INPUT);
         //
         $trid = $req->params->isPartOfTreeId;
-        $form = $trid === "main"
-            ? BlockTree::findBlockById($req->params->blockId, $page->blocks)
+        [$form, $tree] = $trid === "main"
+            ? [BlockTree::findBlockById($req->params->blockId, $page->blocks),
+                (object) ["id" => $trid, "name" => "Main"]]
             : self::findFormFromGbt($req->params->blockId, $trid, $gbtRepo);
         if (!$form)
             throw new PikeException("Invalid input (no such block)",
@@ -81,7 +81,8 @@ final class SubmissionsController {
                     $form->behaviours[$i]->data,
                     $req->body,
                     $res,
-                    ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug, "sentFromBlock" => $form->id],
+                    ["answers" => $answers, "inputsMeta" => $meta, "sentFromPage" => $pageSlug,
+                        "sentFromBlock" => $form->id, "sentFromTree" => $tree],
                     $results,
                 ]);
                 $results[] = $result;
@@ -96,6 +97,15 @@ final class SubmissionsController {
         if (!defined("JET_FORMS_USE_FEAT_1"))
             $res->redirect($req->body->_returnTo);
         // else Do nothing (redirection has been handled by ShowSentMessageBehaviour)
+    }
+    /**
+     * GET /plugins/jet-forms/submissions: lists all submissions stored to the local
+     * database.
+     *
+     * @param \Pike\Response $res
+     */
+    public function listSubmissions(Response $res) {
+        $res->json([]);
     }
     /**
      * @param ?string $input
@@ -129,13 +139,15 @@ final class SubmissionsController {
      * @param string $blockId
      * @param string $globalBlockTreeId
      * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
-     * @return \Sivujetti\Block\Entities\Block|null
+     * @return array{0: \Sivujetti\Block\Entities\Block|null, 1: array<int, \Sivujetti\Block\Entities\Block>|null}
      */
     private static function findFormFromGbt(string $blockId,
                                             string $globalBlockTreeId,
-                                            GlobalBlockTreesRepository2 $gbtRepo): ?Block {
+                                            GlobalBlockTreesRepository2 $gbtRepo): array {
         $gbt = $gbtRepo->select()->where("id = ?", [$globalBlockTreeId])->fetch();
-        return $gbt ? BlockTree::findBlockById($blockId, $gbt->blocks) : null;
+        return $gbt
+            ? [BlockTree::findBlockById($blockId, $gbt->blocks), (object) ["id" => $gbt->id, "name" => $gbt->name]]
+            : [null, null];
     }
     /**
      * @psalm-return array<int, InputMeta>

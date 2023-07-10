@@ -163,6 +163,7 @@ final class SendContactFormTest extends PluginTestCase {
         $this->assertEquals("/hello", $all[0]->data["sentFromPage"]);
         $actualFormBlock = $this->state->testPageData->blocks[count($this->state->testPageData->blocks)-1];
         $this->assertEquals($actualFormBlock->id, $all[0]->data["sentFromBlock"]);
+        $this->assertEquals(["id" => "main", "name" => "Main"], $all[0]->data["sentFromTree"]);
         $this->assertTrue($all[0]->data["sentAt"] > time() - 10);
     }
     private function runSendFormWithSendMailBehaviour(\Closure $inputs,

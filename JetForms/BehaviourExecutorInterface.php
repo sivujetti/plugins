@@ -12,7 +12,7 @@ use Pike\Response;
  * @psalm-type SelectInputDetails = array{options: array<int, array{text: string, value: string}>, multiple: bool}
  * @psalm-type InputMeta = array{type: string, name: string, label: string, placeholder: string, isRequired: bool, details: SelectInputDetails|RadioGroupInputDetails|[]}
  * @psalm-type FormInputAnswer = array{label: string, answer: string|{type: string, entries: array<int, {isSelected: bool, text: string}>}}
- * @psalm-type SubmissionInfo = array{answers: array<int, FormInputAnswer>, inputsMeta: array<int, InputMeta>, sentFromPage: string, sentFromBlock: string}
+ * @psalm-type SubmissionInfo = array{answers: array<int, FormInputAnswer>, inputsMeta: array<int, InputMeta>, sentFromPage: string, sentFromBlock: string, sentFromTree: object{id: string, name: string}}
  */
 interface BehaviourExecutorInterface {
     /**

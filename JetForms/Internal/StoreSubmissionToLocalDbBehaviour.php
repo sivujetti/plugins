@@ -29,12 +29,22 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
     /**
      * @inheritdoc
      */
-    public function run(object $behaviourData, object $reqBody, Response $res, array $submissionInfo, array $runResultsArr): mixed {
-        ["sentFromPage" => $pageSlug, "sentFromBlock" => $blockId, "answers" => $answers] = $submissionInfo;
+    public function run(object $behaviourData,
+                        object $reqBody,
+                        Response $res,
+                        array $submissionInfo,
+                        array $runResultsArr): mixed {
+        [
+            "answers" => $answers,
+            "sentFromPage" => $pageSlug,
+            "sentFromBlock" => $blockId,
+            "sentFromTree" => $tree
+        ] = $submissionInfo;
         return $this->storage->putEntry("JetForms:submissions", [
             "sentAt" => time(),
             "sentFromPage" => $pageSlug,
             "sentFromBlock" => $blockId,
+            "sentFromTree" => $tree,
             "answers" => $this->crypto->encrypt(JsonUtils::stringify($answers), SIVUJETTI_SECRET),
         ]) ?? "";
     }
