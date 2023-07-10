@@ -4,7 +4,7 @@ define("JET_FORMS_USE_FEAT_1", 1);
 
 /*
 - `cd plugins/JetForms/`
-- `"../../../backend/vendor/bin/phpunit" --bootstrap ./tests/bootstrap.php ./tests`
+- `"../../../backend/vendor/bin/phpunit" --display-warnings --bootstrap ./tests/bootstrap.php ./tests`
 */
 
 $doBootstrap = require dirname(__DIR__, 3) . "/sivujetti/tests/do-bootstrap.php";

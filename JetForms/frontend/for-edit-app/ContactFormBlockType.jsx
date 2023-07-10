@@ -31,9 +31,8 @@ class ContactFormEditForm extends preact.Component {
         const {behaviours} = getBlockCopy();
         this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
                         editPanelState: createEditPanelState()});
-        grabChanges((block, _origin, isUndo) => {
-            if (isUndo) return;
-            if (this.state.asJson !== block.behaviours) {
+        grabChanges((block, _origin, _isUndo) => {
+            if (block.behaviours !== this.state.asJson) {
                 const parsed = JSON.parse(block.behaviours);
                 const openBehaviourName = this.state.editPanelState.behaviour?.name;
                 const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
@@ -247,7 +246,7 @@ function createProps() {
             ].join('\n')
         }}, ...(!useNaturalLangBuilderFeat
             ? []
-            : [{name: TerminatorBehaviour1, data: {at: 'beforeFirstInput'}}]
+            : [{name: TerminatorBehaviour1, data: {at: 'beforeFirstInput', message: __('Thank you for your message.')}}]
         )],
         useCaptcha: 1,
     });

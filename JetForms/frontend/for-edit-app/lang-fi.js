@@ -22,6 +22,7 @@ api.registerTranslationStrings({
     'Message': 'Viesti',
     'New contact form entry on [siteName]': 'Uusi yhteydenotto sivustolla [siteName]',
     'Sent by JetForms': 'Lähetetty JetFormsilla',
+    'Thank you for your message.': 'Kiitos viestistäsi.',
     'Send': 'Lähetä',
     // CrudList.jsx
     'Drag': 'Raahaa',

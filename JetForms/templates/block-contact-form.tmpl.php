@@ -6,7 +6,9 @@
     ) ?>"
     method="post"
     class="j-<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?> jet-form<?= /* see also public/plugin-jet-forms-bundle.js */ $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "" ?>"
-    data-form-sent-message="<?= $this->__("Thank you for your message!") ?>"
+    data-form-sent-message="<?= $this->escAttr(
+        \Pike\ArrayUtils::findByKey(\Sivujetti\JsonUtils::parse($props->behaviours), "ShowSentMessage", "name")?->data?->message ?? ""
+    ) ?>"
     data-form-id="<?= $props->id ?>"
     data-form-type="contact"
     data-block-type="<?= \SitePlugins\JetForms\ContactFormBlockType::NAME ?>"

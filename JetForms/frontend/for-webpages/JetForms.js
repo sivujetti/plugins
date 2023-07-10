@@ -33,9 +33,6 @@ class JetForms {
      */
     hookAllForms(parentElement) {
         if (formsHooked) return;
-        const sentFormBlockId = location.hash.startsWith('#contact-form-sent=')
-            ? location.hash.split('=')[1]
-            : '';
         const forms = Array.from(parentElement.querySelectorAll('.jet-form'));
         if (!forms.length) return;
         //
@@ -102,13 +99,6 @@ class JetForms {
             });
 
             //
-            const formId = formEl.getAttribute('data-form-id');
-            if (formId && formId === sentFormBlockId) {
-                showFormSentMessage(formEl);
-                history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
-            }
-
-            //
             return {
                 getEl() { return formEl; },
                 setIsSubmitting(isSubmitting) {
@@ -119,6 +109,16 @@ class JetForms {
                 setOnSubmit(fn) { state.onSubmitFn = fn; },
             };
         });
+        //
+        const sentFormBlockId = location.hash.startsWith('#contact-form-sent=')
+            ? location.hash.split('=')[1]
+            : '';
+        const sent = sentFormBlockId ? out.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === sentFormBlockId) : null;
+        if (sent) {
+            showFormSentMessage(sent.getEl());
+            history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
+        }
+        //
         formsHooked = true;
         return out;
     }
@@ -165,9 +165,12 @@ function removeRadioErrorMessagesExceptTheLastOne(radioGroups) {
  * @param {HTMLFormElement} formEl
  */
 function showFormSentMessage(formEl) {
+    const messageToShow = formEl.getAttribute('data-form-sent-message');
+    if (!messageToShow) return;
+    //
     const messageEl = document.createElement('div');
     messageEl.className = 'sent-message';
-    messageEl.textContent = formEl.getAttribute('data-form-sent-message');
+    messageEl.textContent = messageToShow;
     formEl.classList.add('sent-and-processed');
     formEl.insertBefore(messageEl, formEl.firstElementChild);
     messageEl.scrollIntoView(true);

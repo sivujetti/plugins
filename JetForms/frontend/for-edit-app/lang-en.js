@@ -22,6 +22,7 @@ api.registerTranslationStrings({
     'Message': 'Message',
     'New contact form entry on [siteName]': 'New contact form entry on [siteName]',
     'Sent by JetForms': 'Sent by JetForms',
+    'Thank you for your message.': 'Thank you for your message.',
     'Send': 'Send',
     // CrudList.jsx
     'Drag': 'Drag',

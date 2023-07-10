@@ -63,7 +63,7 @@ class Site implements UserSiteInterface {
 ## Run backend tests
 
 - `cd plugins/JetForms/`
-- `"../../../backend/vendor/bin/phpunit" --bootstrap ./tests/bootstrap.php ./tests`
+- `"../../../backend/vendor/bin/phpunit" --display-warnings --bootstrap ./tests/bootstrap.php ./tests`
 
 # Docs
 

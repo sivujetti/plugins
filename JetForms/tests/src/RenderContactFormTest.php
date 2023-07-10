@@ -2,7 +2,7 @@
 
 namespace SitePlugins\JetForms\Tests;
 
-use Laminas\Dom\Query;
+use DiDom\Document;
 use Pike\TestUtils\MutedSpyingResponse;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
     NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
@@ -75,23 +75,22 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->verifyPageContaintsContactForm($response);
     }
     private function verifyPageContaintsContactForm(MutedSpyingResponse $response): void {
-        $dom = new Query(preg_replace("/&([#A-Za-z0-9]+);/", "%\$1;", $response->getActualBody()), 'UTF-8');
-        /** @var ?\DOMElement */
-        $formEl = $dom->execute(".jet-form")[0] ?? null;
+        $dom = new Document(preg_replace("/&([#A-Za-z0-9]+);/", "%\$1;", $response->getActualBody()));
+        $formEl = $dom->first(".jet-form");
         $this->assertNotNull($formEl);
         $this->assertEquals(Template::makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello/main"),
                             $formEl->getAttribute("action"));
         $this->assertEquals("post", $formEl->getAttribute("method"));
-        $this->assertEquals("Thank you for your message!", $formEl->getAttribute("data-form-sent-message"));
+        $this->assertEquals("", $formEl->getAttribute("data-form-sent-message"));
         $this->assertEquals("-bbbbbbbbbbbbbbbbbbb", $formEl->getAttribute("data-form-id"));
         $this->assertEquals("contact", $formEl->getAttribute("data-form-type"));
-        $all = $formEl->childNodes;
+        $all = $formEl->children();
         // <div ... class="j-JetFormsEmailInput">
         //     <input name="email" id="email" type="email" class="form-input" placeholder="Email" data-pristine-required>
         // </div>
         $emailInputOuter = $all[1];
         $this->assertEquals("j-JetFormsEmailInput form-group", $emailInputOuter->getAttribute("class"));
-        $emailInputEl = $emailInputOuter->childNodes[0];
+        $emailInputEl = $emailInputOuter->firstChild();
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
         $this->assertEquals("email", $emailInputEl->getAttribute("id"));
         $this->assertEquals("email", $emailInputEl->getAttribute("type"));
@@ -104,10 +103,10 @@ final class RenderContactFormTest extends PluginTestCase {
         // </div>
         $textInputOuter = $all[2];
         $this->assertEquals("j-JetFormsTextInput form-group", $textInputOuter->getAttribute("class"));
-        [$labelEl, $inputEl] = $textInputOuter->childNodes;
+        [$labelEl, $inputEl] = $textInputOuter->children();
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
         $this->assertEquals("name", $labelEl->getAttribute("for"));
-        $this->assertEquals("Test escape%lt;", $labelEl->nodeValue);
+        $this->assertEquals("Test escape%lt;", $labelEl->text());
         $this->assertEquals("name", $inputEl->getAttribute("name"));
         $this->assertEquals("name", $inputEl->getAttribute("id"));
         $this->assertEquals("text", $inputEl->getAttribute("type"));
@@ -119,7 +118,7 @@ final class RenderContactFormTest extends PluginTestCase {
         foreach ([[3, "message"], [4, "messageTaller"]] as [$idx, $name]) {
             $textareaOuter = $all[$idx];
             $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
-            $textareaEl = $textareaOuter->childNodes[0];
+            $textareaEl = $textareaOuter->firstChild();
             $this->assertEquals($name, $textareaEl->getAttribute("name"));
             $this->assertEquals($name, $textareaEl->getAttribute("id"));
             $this->assertFalse($textareaEl->hasAttribute("type"));
@@ -136,29 +135,29 @@ final class RenderContactFormTest extends PluginTestCase {
         // </div>
         $selectElOuter = $all[5];
         $this->assertEquals("j-JetFormsSelectInput form-group", $selectElOuter->getAttribute("class"));
-        $selectEl = $selectElOuter->childNodes[0];
+        $selectEl = $selectElOuter->firstChild();
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
-        $optionEls = $selectEl->getElementsByTagName("option");
+        $optionEls = $selectEl->find("option");
         $this->assertCount(4, $optionEls);
         $optsData = json_decode(self::createDataForTestInputBlock("wizardLevel")->options);
         $this->assertEquals($optsData[0]->value, $optionEls[0]->getAttribute("value"));
         $this->assertEquals($optsData[1]->value, $optionEls[1]->getAttribute("value"));
         $this->assertEquals($optsData[2]->value, $optionEls[2]->getAttribute("value"));
         $this->assertEquals("-", $optionEls[3]->getAttribute("value"));
-        $this->assertEquals($optsData[0]->text, $optionEls[0]->nodeValue);
-        $this->assertEquals($optsData[1]->text, $optionEls[1]->nodeValue);
-        $this->assertEquals($optsData[2]->text, $optionEls[2]->nodeValue);
-        $this->assertEquals("-", $optionEls[3]->nodeValue);
+        $this->assertEquals($optsData[0]->text, $optionEls[0]->text());
+        $this->assertEquals($optsData[1]->text, $optionEls[1]->text());
+        $this->assertEquals($optsData[2]->text, $optionEls[2]->text());
+        $this->assertEquals("-", $optionEls[3]->text());
         // <div class="j-JetFormsNumberInput form-group" ...>
         //     <label class="form-label" for="age">Age</label>
         //     <input name="age" id="age" type="text" class="form-input" inputmode="numeric">
         // </div>
         $numberInputOuter = $all[6];
         $this->assertEquals("j-JetFormsNumberInput form-group", $numberInputOuter->getAttribute("class"));
-        [$labelEl, $inputEl] = $numberInputOuter->childNodes;
+        [$labelEl, $inputEl] = $numberInputOuter->children();
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
         $this->assertEquals("age", $labelEl->getAttribute("for"));
-        $this->assertEquals("Age escape%gt;", $labelEl->nodeValue);
+        $this->assertEquals("Age escape%gt;", $labelEl->text());
         $this->assertEquals("age", $inputEl->getAttribute("name"));
         $this->assertEquals("age", $inputEl->getAttribute("id"));
         $this->assertEquals("text", $inputEl->getAttribute("type"));
@@ -172,13 +171,13 @@ final class RenderContactFormTest extends PluginTestCase {
         // </div>
         $checkboxInputOuter = $all[7];
         $this->assertEquals("j-JetFormsCheckboxInput form-group", $checkboxInputOuter->getAttribute("class"));
-        $labelEl = $checkboxInputOuter->childNodes[0];
+        $labelEl = $checkboxInputOuter->firstChild();
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
-        [$inputEl, $iconEl, $textNode] = $labelEl->childNodes;
+        [$inputEl, $iconEl, $textNode] = $labelEl->children();
         $this->assertEquals("wantsReply", $inputEl->getAttribute("name"));
         $this->assertEquals("checkbox", $inputEl->getAttribute("type"));
         $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
-        $this->assertEquals(" Test escape%gt;", rtrim($textNode->nodeValue));
+        $this->assertEquals(" Test escape%gt;", rtrim($textNode->text()));
         // <div class="j-JetFormsRadioGroupInput form-group" ...>
         //     <label class="form-label">Test escape&gt;</label>
         //     <label class="form-radio"><input name="gender" value="gender-1" type="radio"><i class="form-icon"></i> Gender 1</label>
@@ -187,24 +186,24 @@ final class RenderContactFormTest extends PluginTestCase {
         // </div>
         $radioGroupOuter = $all[8];
         $this->assertEquals("j-JetFormsRadioGroupInput form-group", $radioGroupOuter->getAttribute("class"));
-        [$mainLabelEl, $radioLabelEl1, $radioLabelEl2, $radioLabelEl3] = $radioGroupOuter->childNodes;
+        [$mainLabelEl, $radioLabelEl1, $radioLabelEl2, $radioLabelEl3] = $radioGroupOuter->children();
         $this->assertEquals("form-label", $mainLabelEl->getAttribute("class"));
-        $this->assertEquals("Test escape%lt;", $mainLabelEl->nodeValue);
+        $this->assertEquals("Test escape%lt;", $mainLabelEl->text());
         $expectedLabels = [" Gender 1", " Gender 2", " Test escape2%gt;"];
         foreach ([$radioLabelEl1, $radioLabelEl2, $radioLabelEl3] as $i => $labelEl) {
             $this->assertEquals("form-radio", $labelEl->getAttribute("class"));
-            [$inputEl, $iconEl, $textNode] = $labelEl->childNodes;
+            [$inputEl, $iconEl, $textNode] = $labelEl->children();
             $this->assertEquals("gender", $inputEl->getAttribute("name"));
             $this->assertEquals("gender-" . ($i + 1), $inputEl->getAttribute("value"));
             $this->assertEquals("radio", $inputEl->getAttribute("type"));
             $this->assertEquals("form-icon", $iconEl->getAttribute("class"));
-            $this->assertEquals($expectedLabels[$i], rtrim($textNode->nodeValue));
+            $this->assertEquals($expectedLabels[$i], rtrim($textNode->text()));
         }
         // <button class="j-Button btn" type="submit" ...>Send</button>
         $buttonEl = $all[9];
         $this->assertTrue(str_starts_with($buttonEl->getAttribute("class"), "j-Button"));
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
-        $this->assertEquals("Send", $buttonEl->nodeValue);
+        $this->assertEquals("Send", $buttonEl->text());
         // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
         $returnToInput = $all[11];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
