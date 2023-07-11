@@ -7,7 +7,7 @@ use Pike\Injector;
 use Pike\TestUtils\{DbTestCase, HttpTestUtils, MockCrypto};
 use Sivujetti\Tests\Utils\{DbDataHelper, HttpApiTestTrait, TestEnvBootstrapper};
 
-abstract class SendSettingsControllerTestCase extends DbTestCase {
+abstract class SettingsOrSubmissionControllerTestCase extends DbTestCase {
     use HttpTestUtils;
     use HttpApiTestTrait;
     protected DbDataHelper $dbDataHelper;
@@ -21,6 +21,10 @@ abstract class SendSettingsControllerTestCase extends DbTestCase {
     }
     protected function insertTestStoredObject(\TestState $state): void {
         $this->dbDataHelper->insertData($state->testStoredObject,
+                                        "storedObjects");
+    }
+    protected function insertTestStoredObjects(\TestState $state): void {
+        $this->dbDataHelper->insertData($state->testStoredObjects,
                                         "storedObjects");
     }
     protected function createAppForSettingsControllerTest(\TestState $state) {

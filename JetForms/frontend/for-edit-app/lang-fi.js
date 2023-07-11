@@ -16,6 +16,7 @@ api.registerTranslationStrings({
     'Sent from': 'Lähetetty sivulta',
     'Sent at': 'Ajankohta',
     'Answers': 'Täytetyt tiedot',
+    'Show more': 'Näytä lisää',
     'No one filled out the form yet': 'Ei vielä tallennettuja lähetyksiä',
     'Once submitted, the data from your form will be shown here': 'Kun käyttäjä lähettää lomakkeen, siinä täytetyt tiedot ilmestyy tähän',
     // CheckboxInputBlockType.jsx

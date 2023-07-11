@@ -16,6 +16,7 @@ api.registerTranslationStrings({
     'Sent from': 'Sent from',
     'Sent at': 'Sent at',
     'Answers': 'Answers',
+    'Show more': 'Näytä lisää',
     'No one filled out the form yet': 'No one filled out the form yet',
     'Once submitted, the data from your form will be shown here': 'Once submitted, the data from your form will be shown here',
     // CheckboxInputBlockType.jsx

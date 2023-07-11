@@ -4,7 +4,7 @@ namespace SitePlugins\JetForms\Tests;
 
 use Pike\TestUtils\MockCrypto;
 
-final class UpdateMailSendSettingsTest extends SendSettingsControllerTestCase {
+final class UpdateMailSendSettingsTest extends SettingsOrSubmissionControllerTestCase {
     public function testUpdateMailSendSettingsOverwritesSettingsToDb(): void {
         $state = $this->setupTest();
         $this->insertTestStoredObject($state);

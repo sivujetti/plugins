@@ -39,7 +39,7 @@ class ConfigureBehaviourPanel extends preact.Component {
  * @param {Behaviour} behaviour = null
  * @param {String} leftClass = ''
  * @param {String} rightClass = ''
- * @returns {{behaviour: null; leftClass: String; rightClass: String;}}
+ * @returns {{behaviour: Behaviour|null; leftClass: String; rightClass: String;}}
  */
 function createEditPanelState(behaviour = null, leftClass = '', rightClass = '') {
     return {behaviour, leftClass, rightClass};

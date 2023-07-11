@@ -38,9 +38,23 @@ setTimeout(() => {
     cursor: grab;
     color: var(--color-fg-dimmed);
 }
-.table.table-striped .formatted-answers {
+.table .formatted-answers {
     height: 2.7rem;
     white-space: pre;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+}
+.table .formatted-answers a {
+    position: absolute;
+    padding: .1rem .1rem .1rem .2rem;
+    background: #fff;
+    bottom: -.1rem;
+    right: 0;
+    text-decoration: underline;
+}
+.table.table-striped .tr:nth-of-type(odd) .formatted-answers a {
+    background: var(--color-table-row-odd);
 }
 `
     );

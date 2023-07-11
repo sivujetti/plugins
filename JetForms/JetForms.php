@@ -25,7 +25,7 @@ final class JetForms implements UserPluginInterface {
             ["allowMissingRequestedWithHeader" => true, "skipAuthButLoadRequestUser" => true]
         );
         $api->registerHttpRoute("GET", "/plugins/jet-forms/submissions",
-            SubmissionsController::class, "aaa",
+            SubmissionsController::class, "listSubmissions",
             ["consumes" => "application/json",
              "identifiedBy" => ["list", "submissions"]]
         );
@@ -77,7 +77,8 @@ final class JetForms implements UserPluginInterface {
     public function defineAclRules(ACLRulesBuilder $builder): ACLRulesBuilder {
         return $builder
             ->defineResource("mailSendSettings", ["read", "update"])
-                // Use the default permissions (SUPER_ADMIN can do anything, everybody else nothing at all)
+                ->setPermissions(ACL::ROLE_ADMIN, ["read", "update"])
+                ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["read", "update"])
             ->defineResource("submissions", ["list"])
                 ->setPermissions(ACL::ROLE_ADMIN, ["list"])
                 ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["list"])

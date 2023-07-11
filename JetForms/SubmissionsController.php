@@ -103,9 +103,11 @@ final class SubmissionsController {
      * database.
      *
      * @param \Pike\Response $res
+     * @param \SitePlugins\JetForms\Internal\StoreSubmissionToLocalDbBehaviour $submissionsRepo
      */
-    public function listSubmissions(Response $res) {
-        $res->json([]);
+    public function listSubmissions(Response $res, StoreSubmissionToLocalDbBehaviour $submissionsRepo): void {
+        $subs = $submissionsRepo->getSubmissions();
+        $res->json($subs);
     }
     /**
      * @param ?string $input

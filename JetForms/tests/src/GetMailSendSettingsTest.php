@@ -2,7 +2,7 @@
 
 namespace SitePlugins\JetForms\Tests;
 
-final class GetMailSendSettingsTest extends SendSettingsControllerTestCase {
+final class GetMailSendSettingsTest extends SettingsOrSubmissionControllerTestCase {
     public function testGetMailSendSettingsReturnsSettingsFromDb(): void {
         $state = $this->setupTest();
         $this->insertTestStoredObject($state);
