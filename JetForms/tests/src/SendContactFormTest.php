@@ -16,7 +16,7 @@ use Sivujetti\Tests\Utils\{PluginTestCase};
 final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
         $this->runSendFormWithSendMailBehaviour(
-            inputs: fn() => [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
+            inputs: [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER, // Doesn't matter
                 propsData: (object) [
                     "name" => "input_1",
@@ -37,7 +37,7 @@ final class SendContactFormTest extends PluginTestCase {
 
     public function testProcessSubmissionWithSendMailBehaviourHandlesSingleSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
-            inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
+            inputs: [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
@@ -61,7 +61,7 @@ final class SendContactFormTest extends PluginTestCase {
 
     public function testProcessSubmissionWithSendMailBehaviourHandlesMultiSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
-            inputs: fn() => [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
+            inputs: [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
                 renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
@@ -89,7 +89,7 @@ final class SendContactFormTest extends PluginTestCase {
 
     public function testProcessSubmissionWithSendMailBehaviourHandlesRadioGroupInput(): void {
         $this->runSendFormWithSendMailBehaviour(
-            inputs: fn() => [$this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
+            inputs: [$this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
                 renderer: RadioGroupInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
@@ -117,7 +117,7 @@ final class SendContactFormTest extends PluginTestCase {
 
     public function testProcessSubmissionWithSendMailBehaviourHandlesNumberInput(): void {
         $this->runSendFormWithSendMailBehaviour(
-            inputs: fn() => [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
+            inputs: [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
                 renderer: NumberInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "phone_number",
@@ -136,9 +136,65 @@ final class SendContactFormTest extends PluginTestCase {
     ////////////////////////////////////////////////////////////////////////////
 
 
+    public function testProcessSubmissionUsesReplyToAddressAndName(): void {
+        $inputs = [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
+            renderer: NumberInputBlockType::DEFAULT_RENDERER,
+            propsData: (object) [
+                "name" => "name_input_1",
+                "label" => "Name",
+                "isRequired" => 1,
+                "placeholder" => "",
+            ]),
+            $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
+            renderer: NumberInputBlockType::DEFAULT_RENDERER,
+            propsData: (object) [
+                "name" => "email_input_1",
+                "label" => "Email",
+                "isRequired" => 1,
+                "placeholder" => "",
+            ]),
+            $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
+            renderer: NumberInputBlockType::DEFAULT_RENDERER,
+            propsData: (object) [
+                "name" => "message",
+                "isRequired" => 0,
+                "label" => "",
+                "placeholder" => "Message",
+                "numRows" => 0,
+            ])
+        ];
+        $postData = [
+            "name_input_1" => "Foo escape<",
+            "email_input_1" => "e@mail.com",
+            "message" => "...",
+        ];
+        $behaviours = ["SendMail"];
+        $setupDataFn = $this->createSetupPageDataFn(
+            behaviours: $behaviours,
+            inputs: $inputs,
+            emailBodyTemplate: "...",
+            replyToAddress: "email_input_1",
+            replyToName: "name_input_1"
+        );
+        $this->sendSendFormRequest($setupDataFn, $postData, $behaviours);
+        $this->verifyUsedReplyTos($postData);
+    }
+    private function verifyUsedReplyTos(array $postData): void {
+        $conf = $this->state->actualFinalSendMailArg;
+        $emailInputName = $this->state->testSendFormBehaviourData["replyToAddress"];
+        $nameInputName = $this->state->testSendFormBehaviourData["replyToName"];
+        $this->assertEquals($postData[$emailInputName], $conf->replyToAddress);
+        $this->assertEquals(str_replace("<", "&lt;", $postData[$nameInputName]), $conf->replyToName);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
     public function testProcessSubmissionWithStoreToLocalDbBehaviourSavesAnswersToDb(): void {
+        $behaviours = ["StoreSubmissionToLocalDb"];
         $this->sendSendFormRequest(
-            inputs: fn() => [
+            $this->createSetupPageDataFn($behaviours, [
                 $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                     renderer: TextInputBlockType::DEFAULT_RENDERER,
                     propsData: RenderContactFormTest::createDataForTestInputBlock("name"),
@@ -147,9 +203,9 @@ final class SendContactFormTest extends PluginTestCase {
                     renderer: EmailInputBlockType::DEFAULT_RENDERER,
                     propsData: RenderContactFormTest::createDataForTestInputBlock("email"),
                 ),
-            ],
+            ], ""),
             postData: ["name" => "Harry Potter", "email" => "e@ministfyofmagic.hm"],
-            behaviours: ["StoreSubmissionToLocalDb"]
+            behaviours: $behaviours
         );
         $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->find("JetForms:submissions")->fetchAll();
         $this->assertCount(1, $all);
@@ -166,11 +222,13 @@ final class SendContactFormTest extends PluginTestCase {
         $this->assertEquals(["id" => "main", "name" => "Main"], $all[0]->data["sentFromTree"]);
         $this->assertTrue($all[0]->data["sentAt"] > time() - 10);
     }
-    private function runSendFormWithSendMailBehaviour(\Closure $inputs,
+    private function runSendFormWithSendMailBehaviour(array $inputs,
                                                       array $postData,
                                                       string $bodyTemplate,
                                                       string $expectedEmailBody): void {
-        $this->sendSendFormRequest($inputs, $postData, emailBodyTemplate: $bodyTemplate);
+        $behaviours = ["SendMail"];
+        $setupDataFn = $this->createSetupPageDataFn($behaviours, $inputs, $bodyTemplate);
+        $this->sendSendFormRequest($setupDataFn, $postData, $behaviours);
         $conf = $this->state->actualFinalSendMailArg;
         $expected = $this->state->testSendFormBehaviourData;
         $this->assertEquals($expected["fromAddress"], $conf->fromAddress);
@@ -181,10 +239,39 @@ final class SendContactFormTest extends PluginTestCase {
         $this->assertEquals($expectedSubject, $conf->subject);
         $this->assertEquals($expectedEmailBody, $conf->body);
     }
-    private function sendSendFormRequest(\Closure $inputs,
+    private function createSetupPageDataFn(array $behaviours,
+                                            array $inputs,
+                                            string $emailBodyTemplate,
+                                            string $replyToAddress = "",
+                                            string $replyToName = ""): \Closure {
+        return function (object $testPageData) use ($behaviours, $inputs, $emailBodyTemplate, $replyToAddress, $replyToName) {
+            $this->state->testSendFormBehaviourData = [
+                "subjectTemplate" => "New mail from [siteName]",
+                "toAddress" => "owner@mysite.com",
+                "toName" => "Site Owner",
+                "fromAddress" => "noreply@mysite.com",
+                "fromName" => "My site",
+                "replyToAddress" => $replyToAddress,
+                "replyToName" => $replyToName,
+                "bodyTemplate" => $emailBodyTemplate,
+            ];
+            $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
+                renderer: ContactFormBlockType::DEFAULT_RENDERER,
+                propsData: (object) [
+                    "behaviours" => json_encode(array_map(fn($name) => [
+                        "name" => $name,
+                        "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
+                    ], $behaviours)),
+                    "useCaptcha" => 0
+                ],
+                children: [...$inputs],
+                id: "@auto"
+            );
+        };
+    }
+    private function sendSendFormRequest(\Closure $setupPageDataFn,
                                          array $postData,
-                                         array $behaviours = ["SendMail"],
-                                         string $emailBodyTemplate = ""): void {
+                                         array $behaviours = ["SendMail"]): void {
         $response = $this
             ->setupPageTest()
             ->usePlugin("JetForms")
@@ -196,28 +283,7 @@ final class SendContactFormTest extends PluginTestCase {
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->useBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType)
             ->useBlockType(NumberInputBlockType::NAME, new NumberInputBlockType)
-            ->withPageData(function (object $testPageData) use ($behaviours, $inputs, $emailBodyTemplate) {
-                $this->state->testSendFormBehaviourData = [
-                    "subjectTemplate" => "New mail from [siteName]",
-                    "toAddress" => "owner@mysite.com",
-                    "toName" => "Site Owner",
-                    "fromAddress" => "noreply@mysite.com",
-                    "fromName" => "My site",
-                    "bodyTemplate" => $emailBodyTemplate,
-                ];
-                $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
-                    renderer: ContactFormBlockType::DEFAULT_RENDERER,
-                    propsData: (object) [
-                        "behaviours" => json_encode(array_map(fn($name) => [
-                            "name" => $name,
-                            "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
-                        ], $behaviours)),
-                        "useCaptcha" => 0
-                    ],
-                    children: $inputs(),
-                    id: "@auto"
-                );
-            })
+            ->withPageData($setupPageDataFn)
             ->withBootModuleAlterer(function (Injector $di) use ($behaviours) {
                 $hasSendMailBehaviour = in_array("SendMail", $behaviours, true);
                 $di->delegate(Crypto::class, fn() => new MockCrypto);
@@ -246,7 +312,7 @@ final class SendContactFormTest extends PluginTestCase {
                     ])
                 ], "storedObjects");
                 $pageData = $this->state->testPageData;
-                $formBlockId = $pageData->blocks[count($pageData->blocks)-1]->id;
+                $formBlockId = $pageData->blocks[count($pageData->blocks) - 1]->id;
                 return $this->createApiRequest("/plugins/jet-forms/submissions/{$formBlockId}{$pageData->slug}/main", "POST",
                     (object) array_merge($postData, ["_returnTo" => "foo"]));
             });

@@ -114,7 +114,7 @@ final class SubmissionsController {
      * @return bool
      */
     private static function isValidCaptcha(?string $input): bool {
-        if (!is_string($input) || !strlen($input))
+        if (!is_string($input) || strlen($input) < 2)
             return false;
         $now = time();
         $decr = "";
@@ -195,12 +195,11 @@ final class SubmissionsController {
     private static function createAnswers(array $inputsMeta, object $reqBody): array {
         $out = [];
         foreach ($inputsMeta as $meta) {
-            $label = "";
-            if (strlen($meta["label"])) $label = $meta["label"];
-            else if (strlen($meta["placeholder"])) $label = $meta["placeholder"];
-            else $label = $meta["name"];
-            //
-            $out[$label] = ["label" => $label, "answer" => self::getAnswerSingle($meta, $reqBody)];
+            $label = $meta["label"] ?: $meta["placeholder"] ?: $meta["name"];
+            $out[$label] = [
+                "label" => $label,
+                "answer" => self::getAnswerSingle($meta, $reqBody)
+            ];
         }
         return array_values($out);
     }

@@ -2,7 +2,7 @@ import {__} from '@sivujetti-commons-for-edit-app';
 
 class StoreSubmissionToLocalDbBehaviourConfigurer extends preact.Component {
     /**
-     * @param {{onConfigurationChanged: (vals: {[propName: String]: any;}) => void;}} props
+     * @param {ConfigureBehaviourPanelProps} props
      * @access protected
      */
     render(_props) {

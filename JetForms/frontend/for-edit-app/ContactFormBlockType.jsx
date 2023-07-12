@@ -28,9 +28,11 @@ class ContactFormEditForm extends preact.Component {
         } else {
         this.outerEl = preact.createRef();
         this.addBehaviourBtn = preact.createRef();
-        const {behaviours} = getBlockCopy();
+        const blockCopy = getBlockCopy();
+        const {behaviours} = blockCopy;
         this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
-                        editPanelState: createEditPanelState()});
+                        editPanelState: createEditPanelState(), blockCopy});
+        const listenChildChanges = true;
         grabChanges((block, _origin, _isUndo) => {
             if (block.behaviours !== this.state.asJson) {
                 const parsed = JSON.parse(block.behaviours);
@@ -40,14 +42,16 @@ class ContactFormEditForm extends preact.Component {
                     editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
                                                             this.state.editPanelState.rightClass)});
             }
-        });
+            if (block.children !== this.state.blockCopy.children)
+                this.setState({blockCopy: block});
+        }, listenChildChanges);
         }
     }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({emitValueChanged}, {parsed, editPanelState, curPopupRenderer}) {
+    render({emitValueChanged}, {parsed, editPanelState, curPopupRenderer, blockCopy}) {
         if (!useNaturalLangBuilderFeat)
             return <SendFormBehaviourConfigurer
                 behaviour={ parsed[0] }
@@ -127,10 +131,11 @@ class ContactFormEditForm extends preact.Component {
                 endEditMode={ () => {
                     this.setState({editPanelState: createEditPanelState(null, 'reveal-from-left', 'fade-to-right')});
                 } }
-                panelHeight={  editPanelState.leftClass === ''
+                panelHeight={ editPanelState.leftClass === ''
                     ? 0
                     : this.outerEl.current.getBoundingClientRect().height
-                }/>
+                }
+                blockCopy={ blockCopy }/>
             { curPopupRenderer
                 ? <Popup
                     Renderer={ curPopupRenderer }
@@ -262,12 +267,6 @@ function getAvailableBehaviours(alreadyAdded) {
         'StoreSubmissionToLocalDb',
     ].filter(fromAll => alreadyAdded.indexOf(fromAll) < 0);
 }
-
-/**
- * @typedef Behaviour
- * @prop {String} name
- * @prop {{[key: String]: any;}} data
- */
 
 export default {
     name: 'JetFormsContactForm',

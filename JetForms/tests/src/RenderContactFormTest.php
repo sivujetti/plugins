@@ -217,6 +217,7 @@ final class RenderContactFormTest extends PluginTestCase {
                 ["name" => "SendMail", "data" => [
                     "subjectTemplate" => "",
                     "toAddress" => "",
+                    "replyToAddress" => "",
                     "fromAddress" => "",
                     "bodyTemplate" => "",
                 ]],

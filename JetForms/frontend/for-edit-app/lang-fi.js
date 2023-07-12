@@ -1,6 +1,12 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 
 api.registerTranslationStrings({
+    //
+    'To address': 'Osoitteeseen',
+    'Display name': 'Display name',
+    'From': 'Osoitteesta',
+    'Reply-to': 'Reply-to',
+    'Firstname Lastname': 'Firstname Lastname',
     // MailSendSettings/MailSendSettingsManageDialog.jsx
     'Host': 'Hosti',
     'Port': 'Portti',

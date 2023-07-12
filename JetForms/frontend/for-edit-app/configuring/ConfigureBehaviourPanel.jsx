@@ -7,7 +7,7 @@ const customBehaviourImpls = new Map;
 
 class ConfigureBehaviourPanel extends preact.Component {
     /**
-     * @param {{behaviour: Behaviour; cssClass: String; onConfigurationChanged: (vals: {[propName: String]: any;}) => void; endEditMode: () => void; panelHeight: Number;}} props
+     * @param {ConfigureBehaviourPanelProps} props
      * @access protected
      */
     componentWillReceiveProps(props) {
@@ -25,11 +25,11 @@ class ConfigureBehaviourPanel extends preact.Component {
     /**
      * @access protected
      */
-    render({behaviour, panelHeight, cssClass, endEditMode, onConfigurationChanged}, {Renderer}) {
+    render({behaviour, panelHeight, cssClass, endEditMode, onConfigurationChanged, blockCopy}, {Renderer}) {
         return <div class={ cssClass } style={ `top: -${panelHeight + 8}px` }>{ Renderer ? [
             <button onClick={ endEditMode } class="btn btn-sm" type="button"> &lt; </button>,
             <div class="form-horizontal pt-0">
-                <Renderer { ...behaviour.data } onConfigurationChanged={ onConfigurationChanged }/>
+                <Renderer { ...behaviour.data } onConfigurationChanged={ onConfigurationChanged } blockCopy={ blockCopy }/>
             </div>
         ] : null }</div>;
     }
@@ -62,17 +62,6 @@ function getBehaviourConfigurerImpl(behaviourName) {
 
     return null;
 }
-
-/**
- * @typedef Behaviour
- * @prop {String} name Example 'SendMail' or 'ShowSentMessage'
- * @prop {{[key: String]: any;}} data
- *
- * @typedef BehaviourConfigurerImpl
- * @prop {String} configurerLabel Example: 'näytä käyttäjälle viesti'
- * @prop {(data: {[key: String]: any;}) => String} getButtonLabel
- * @prop {preact.ComponentConstructor} configurerCls
- */
 
 export default ConfigureBehaviourPanel;
 export {createEditPanelState, getBehaviourConfigurerImpl, customBehaviourImpls};

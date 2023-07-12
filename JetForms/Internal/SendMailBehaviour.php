@@ -5,7 +5,7 @@ namespace SitePlugins\JetForms\Internal;
 use Pike\{PhpMailerMailer, PikeException, Response};
 use Pike\Auth\Crypto;
 use SitePlugins\JetForms\{BehaviourExecutorInterface, JetForms, SettingsController};
-use Sivujetti\SharedAPIContext;
+use Sivujetti\{SharedAPIContext, Template};
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\TheWebsite\Entities\TheWebsite;
 
@@ -49,14 +49,20 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @inheritdoc
      */
     public function run(object $behaviour, object $reqBody, Response $res, array $submissionInfo, array $runResultsArr): mixed {
+        $inputName1 = $behaviour->replyToAddress ?? null;
+        $inputName2 = $behaviour->replyToName ?? null;
+        $replyToAddress = $inputName1 ? ($reqBody->{$inputName1} ?? null) : null;
+        $replyToName = $inputName2 ? ($reqBody->{$inputName2} ?? null) : null;
         $vars = $this->makeTemplateVars();
         $mailSettings = $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
         $this->mailer->sendMail((object) [
             "fromAddress" => $behaviour->fromAddress,
-            "fromName" => is_string($behaviour->fromName ?? null) ? $behaviour->fromName : "",
+            "fromName" => strlen($behaviour->fromName ?? "") ? Template::e($behaviour->fromName) : "",
             "toAddress" => $behaviour->toAddress,
-            "toName" => is_string($behaviour->toName ?? null) ? $behaviour->toName : "",
+            "toName" => strlen($behaviour->toName ?? "") ? Template::e($behaviour->toName) : "",
+            "replyToAddress" => $replyToAddress,
+            "replyToName" => $replyToName ? Template::e($replyToName) : "",
             "subject" => self::renderConstantTags($behaviour->subjectTemplate, $vars),
             "body" => self::renderDynamicTags(self::renderConstantTags($behaviour->bodyTemplate, $vars), $submissionInfo["answers"]),
             "configureMailer" => function ($mailer) use ($mailSettings) {
@@ -101,7 +107,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      */
     private static function renderConstantTags(string $tmpl, array $vars): string {
         foreach ($vars as $key => $val)
-            $tmpl = str_replace("[{$key}]", htmlspecialchars($val, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5), $tmpl);
+            $tmpl = str_replace("[{$key}]", Template::e($val), $tmpl);
         return $tmpl;
     }
     /**
@@ -132,7 +138,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                         $a . ($itm["isSelected"] ? $b : " ") . "{$c} {$itm["text"]}"
                     , $ans["answer"]["entries"]));
                 }
-                return "{$ans["label"]}:\n" . htmlspecialchars($asString, ENT_QUOTES|ENT_SUBSTITUTE|ENT_HTML5);
+                return "{$ans["label"]}:\n" . Template::e($asString);
             }, $answers))
             : "-";
     }

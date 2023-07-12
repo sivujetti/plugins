@@ -13,7 +13,7 @@ class ShowSentMessageBehaviourConfigurer extends preact.Component {
         ]));
     }
     /**
-     * @param {{at: 'beforeFirstInput'; message: String; onConfigurationChanged: (vals: {[propName: String]: any;}) => void;}} props
+     * @param {{at: 'beforeFirstInput'; message: String;} & ConfigureBehaviourPanelProps} props
      * @access protected
      */
     componentWillReceiveProps(props) {
