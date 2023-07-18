@@ -46,5 +46,6 @@ class ShowSentMessageBehaviourConfigurer extends preact.Component {
 export default () => ({
     configurerLabel: __('näytä käyttäjälle viesti'),
     getButtonLabel(data) { return data.at === 'beforeFirstInput' ? __('lomakkeen yläpuolella') : '?'; },
-    configurerCls: ShowSentMessageBehaviourConfigurer
+    configurerCls: ShowSentMessageBehaviourConfigurer,
+    isTerminator: true,
 });

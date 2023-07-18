@@ -5,12 +5,12 @@ import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 const createPropsMutators = [];
 
-const TerminatorBehaviour1 = 'ShowSentMessage';
 const useNaturalLangBuilderFeat = true;
 
 class ContactFormEditForm extends preact.Component {
     // outerEl;
     // addBehaviourBtn;
+    // customTerminatorsExist;
     /**
      * @access protected
      */
@@ -28,6 +28,9 @@ class ContactFormEditForm extends preact.Component {
         } else {
         this.outerEl = preact.createRef();
         this.addBehaviourBtn = preact.createRef();
+        this.customTerminatorsExist = Array.from(customBehaviourImpls.values()).reduce((has, {isTerminator}) =>
+            has ? has : isTerminator === true
+        , false);
         const blockCopy = getBlockCopy();
         const {behaviours} = blockCopy;
         this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
@@ -60,9 +63,9 @@ class ContactFormEditForm extends preact.Component {
                     emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
                 } }/>;
         if (!editPanelState) return;
-        const names = getAvailableBehaviours(parsed.map(({name}) => name));
         const last = parsed.at(-1);
-        const hasTerminator = last.name === TerminatorBehaviour1;
+        const hasTerminator = getBehaviourConfigurerImpl(last.name).isTerminator;
+        const names = getAvailableBehaviours(parsed.map(({name}) => name), !hasTerminator);
         const [before, after] = hasTerminator
             ? [parsed.slice(0,-1), [last]] // [...notLast, btn|null, ...[last]]
             : [parsed,             []];    // [...all,     btn|null, ...[]]
@@ -90,9 +93,10 @@ class ContactFormEditForm extends preact.Component {
                     if (!impl) return <div class="group-p mx-1 px-2 no-round-right">Unknown behaviour { itm.name }</div>;
                     const {configurerLabel, getButtonLabel} = impl;
                     const confBtnText = getButtonLabel(itm.data);
-                    const isTerminator = itm.name === TerminatorBehaviour1;
+                    const {isTerminator} = impl;
                     const oddCls = (i % 2) > 0 ? ' group-p-odd' : '';
-                    const a = !isTerminator ? '2.3rem' : '1.3rem';
+                    const hideRemoveBtn = isTerminator && !this.customTerminatorsExist;
+                    const a = !hideRemoveBtn ? '2.3rem' : '1.3rem';
                     return [
                         i > 0 ? <span class="pl-0 mr-1">{
                             !isTerminator ? __(', ja sitten') : __(', ja lopuksi')
@@ -110,9 +114,9 @@ class ContactFormEditForm extends preact.Component {
                                         <span class="d-inline-block text-ellipsis" style={ `max-width: calc(100% - ${a})` }>{ confBtnText }</span>,
                                         <Icon iconId="settings" className="size-xs color-dimmed ml-1 mr-1"/>
                                     ] : null }
-                                { !isTerminator
-                                    ? <Icon iconId="x" className="size-xs color-dimmed mr-0"/>
-                                    : null }
+                                { hideRemoveBtn
+                                    ? null
+                                    : <Icon iconId="x" className="size-xs color-dimmed mr-0"/> }
                             </button>
                         </span>
                     ];
@@ -218,7 +222,7 @@ class AddBehaviourPopup extends preact.Component {
  */
 function addBehaviourTo(newBehaviour, to) {
     const last = to.at(-1);
-    if (last.name === TerminatorBehaviour1)
+    if (getBehaviourConfigurerImpl(last.name).isTerminator)
         return [...to.slice(0, -1), newBehaviour, last];  // [...notLast, newItem, last]
     return [...to, newBehaviour]; // [...all, newItem]
 }
@@ -251,7 +255,7 @@ function createProps() {
             ].join('\n')
         }}, ...(!useNaturalLangBuilderFeat
             ? []
-            : [{name: TerminatorBehaviour1, data: {at: 'beforeFirstInput', message: __('Thank you for your message.')}}]
+            : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput', message: __('Thank you for your message.')}}]
         )],
         useCaptcha: 1,
     });
@@ -259,19 +263,25 @@ function createProps() {
 
 /**
  * @param {Array<String>} alreadyAdded
+ * @param {Boolean} includeTerminators
  * @returns {Array<String>}
  */
-function getAvailableBehaviours(alreadyAdded) {
+function getAvailableBehaviours(alreadyAdded, includeTerminators) {
+    const customs1 = Array.from(customBehaviourImpls.entries());
+    const customs = includeTerminators ? customs1 : customs1.filter(([_, impl]) => !impl.isTerminator);
     return [
-        'SendMail',
-        'StoreSubmissionToLocalDb',
+        ...[
+            'SendMail',
+            'StoreSubmissionToLocalDb',
+        ],
+        ...customs.map(([key, _]) => key)
     ].filter(fromAll => alreadyAdded.indexOf(fromAll) < 0);
 }
 
 export default {
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form (JetForms)',
-    ownPropNames: ['behaviours'],
+    ownPropNames: ['behaviours', 'useCaptcha'],
     initialChildren: [
         {blockType: 'JetFormsTextInput', initialOwnData: {name: 'input_1', isRequired: 1, label: '',
             placeholder: __('Name')}, initialDefaultsData: null},
@@ -282,13 +292,27 @@ export default {
         {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
             initialDefaultsData: null},
     ],
+    /**
+     * @param {String} name
+     * @param {BehaviourConfigurerImpl} configurer
+     */
     registerBehaviour(name, configurer) {
         customBehaviourImpls.set(name, configurer);
     },
+    /**
+     * @param {(props: ContactFormBlockPropsIr) => ContactFormBlockPropsIr} fn
+     */
     configurePropsWith(fn) {
         createPropsMutators.push(fn);
     },
-    initialData: createProps,
+    /**
+     * @returns {ContactFormBlockProps}
+     */
+    initialData() {
+        const obj = createProps();
+        obj.behaviours = JSON.stringify(obj.behaviours);
+        return obj;
+    },
     defaultRenderer: 'plugins/JetForms:block-contact-form',
     icon: 'message-2',
     reRender(block, _renderChildren) {
@@ -296,6 +320,7 @@ export default {
     },
     createSnapshot: from => ({
         behaviours: from.behaviours,
+        useCaptcha: from.useCaptcha,
     }),
     editForm: ContactFormEditForm,
 };
