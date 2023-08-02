@@ -48,7 +48,7 @@ api.registerTranslationStrings({
     'Email input (JetForms)': 'Email input (JetForms)',
     // InputBlockType.jsx
     'Label_with_descr': 'Label',
-    'Placeholder_with_descr': 'Label',
+    'Placeholder_with_descr': 'Placeholder',
     'Rows': 'Rows',
     'Required': 'Required',
     // NumberInputBlockType.jsx

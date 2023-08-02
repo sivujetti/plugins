@@ -150,7 +150,7 @@ let formatter = null;
  */
 function timeToLocalFormat(unixTime) {
     if (!formatter)
-        formatter = new Intl.DateTimeFormat('fi', {
+        formatter = new Intl.DateTimeFormat(env.document.documentElement.lang || 'fi', {
             day: 'numeric',
             month: 'long',
             hour: '2-digit',

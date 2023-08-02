@@ -28,3 +28,12 @@ interface ContactFormBlockPropsIr {
     behaviours: Array<Behaviour>;
     useCaptcha: Number;
 }
+
+interface CreateInputSettings {
+    name: String;
+    friendlyName: String;
+    type?: String;
+    icon?: String;
+    defaultPlaceholder?: String;
+    inputMode?: String;
+}

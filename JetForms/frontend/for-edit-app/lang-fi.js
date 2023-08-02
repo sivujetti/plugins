@@ -3,7 +3,7 @@ import {api} from '@sivujetti-commons-for-edit-app';
 api.registerTranslationStrings({
     //
     'To address': 'Osoitteeseen',
-    'Display name': 'Display name',
+    'Display name': 'nimi',
     'From': 'Osoitteesta',
     'Reply-to': 'Reply-to',
     'Firstname Lastname': 'Firstname Lastname',

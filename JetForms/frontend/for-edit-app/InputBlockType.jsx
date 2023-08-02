@@ -115,7 +115,7 @@ function normalizeNumRows(input) {
 }
 
 /**
- * @param {{name: String; friendlyName: String; type?: String; icon?: String; inputMode?: String;}} settings
+ * @param {CreateInputSettings} settings
  * @returns {Object}
  */
 export default settings => ({
@@ -125,7 +125,7 @@ export default settings => ({
         name: services.idGen.getNextId(),
         isRequired: 1,
         label: '',
-        placeholder: '',
+        placeholder: settings.defaultPlaceholder || '',
     }, ...(settings.name !== 'TextareaInput'
         ? {}
         : {numRows: 0}
