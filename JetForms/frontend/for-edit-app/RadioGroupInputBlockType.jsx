@@ -64,7 +64,7 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
-                <label htmlFor="label" class="form-label">{ __('Label_with_descr') }</label>
+                <label htmlFor="label" class="form-label">{ __('Label#withDescr') }</label>
                 <Input vm={ this } prop="label" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>

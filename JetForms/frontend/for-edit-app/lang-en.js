@@ -47,8 +47,8 @@ api.registerTranslationStrings({
     // EmailInputBlockType.jsx
     'Email input (JetForms)': 'Email input (JetForms)',
     // InputBlockType.jsx
-    'Label_with_descr': 'Label',
-    'Placeholder_with_descr': 'Placeholder',
+    'Label#withDescr': 'Label',
+    'Placeholder#withDescr': 'Placeholder',
     'Rows': 'Rows',
     'Required': 'Required',
     // NumberInputBlockType.jsx
@@ -85,4 +85,13 @@ api.registerTranslationStrings({
     'Long text input (JetForms)': 'Long text input (JetForms)',
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Short text input (JetForms)',
+    // ../../std-styles.md
+    // JetFormsEmailInput
+    'Font size': 'Font size',
+    'Padding y input': 'Padding y input',
+    'Padding x input': 'Padding x input',
+    // JetFormsEmailInput
+    'Placeholder': 'Placeholder',
+    // JetFormsRadioGroupInput
+    'Text options': 'Text options',
 });

@@ -15,9 +15,9 @@ class InputBlockEditForm extends InputEditFormAbstract {
         this.setState(hookForm(this, [...[
             {name: 'name', value: name, validations: [['identifier'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: 'Id',
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'name', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label_with_descr'),
+            {name: 'label', value: label, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Label#withDescr'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
-            {name: 'placeholder', value: placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder_with_descr'),
+            {name: 'placeholder', value: placeholder, validations: [['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Placeholder#withDescr'),
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
         ], ...(numRows === undefined
             ? []
@@ -65,12 +65,12 @@ class InputBlockEditForm extends InputEditFormAbstract {
         if (!this.state.values) return;
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
-                <label htmlFor="label" class="form-label">{ __('Label_with_descr') }</label>
+                <label htmlFor="label" class="form-label">{ __('Label#withDescr') }</label>
                 <Input vm={ this } prop="label" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
-                <label htmlFor="placeholder" class="form-label">{ __('Placeholder_with_descr') }</label>
+                <label htmlFor="placeholder" class="form-label">{ __('Placeholder#withDescr') }</label>
                 <Input vm={ this } prop="placeholder"/>
                 <InputErrors vm={ this } prop="placeholder"/>
             </FormGroupInline>

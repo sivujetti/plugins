@@ -47,8 +47,8 @@ api.registerTranslationStrings({
     // EmailInputBlockType.jsx
     'Email input (JetForms)': 'Sähköpostikenttä (JetForms)',
     // InputBlockType.jsx
-    'Label_with_descr': 'Nimike (label)',
-    'Placeholder_with_descr': 'Vihje (placeholder)',
+    'Label#withDescr': 'Label / Nimike',
+    'Placeholder#withDescr': 'Placeholder / Vihje',
     'Rows': 'Rivejä',
     'Required': 'Vaaditaan',
     // NumberInputBlockType.jsx
@@ -85,4 +85,13 @@ api.registerTranslationStrings({
     'Long text input (JetForms)': 'Pitkä tekstikenttä (JetForms)',
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Lyhyt tekstikenttä (JetForms)',
+    // ../../std-styles.md
+    // JetFormsEmailInput
+    'Font size': 'Fonttikoko',
+    'Padding y input': 'Täyte y kentät',
+    'Padding x input': 'Täyte x kentät',
+    // JetFormsEmailInput
+    'Placeholder': 'Placeholder / Vihje',
+    // JetFormsRadioGroupInput
+    'Text options': 'Text options',
 });

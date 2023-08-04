@@ -5,6 +5,8 @@ import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 const createPropsMutators = [];
 
+const childChangeEvents = ['theBlockTree/applySwap', 'theBlockTree/applyAdd(Drop)Block', 'theBlockTree/deleteBlock', 'theBlockTree/undoAdd(Drop)Block', 'theBlockTree/cloneItem', 'theBlockTree/undo'];
+
 const useNaturalLangBuilderFeat = true;
 
 class ContactFormEditForm extends preact.Component {
@@ -31,24 +33,36 @@ class ContactFormEditForm extends preact.Component {
         this.customTerminatorsExist = Array.from(customBehaviourImpls.values()).reduce((has, {isTerminator}) =>
             has ? has : isTerminator === true
         , false);
+        //
         const blockCopy = getBlockCopy();
-        const {behaviours} = blockCopy;
+        const {behaviours, id} = blockCopy;
         this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
                         editPanelState: createEditPanelState(), blockCopy});
-        const listenChildChanges = true;
-        grabChanges((block, _origin, _isUndo) => {
-            if (block.behaviours !== this.state.asJson) {
-                const parsed = JSON.parse(block.behaviours);
-                const openBehaviourName = this.state.editPanelState.behaviour?.name;
-                const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
-                this.setState({asJson: block.behaviours, parsed,
-                    editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
-                                                            this.state.editPanelState.rightClass)});
+        //
+        this.unregistrables = [this.props.observeStore('theBlockTree', (_, [event, data]) => {
+            if (event === 'theBlockTree/updatePropsOf' && data[0] === id) {
+                const block = this.props.getBlockCopy();
+                if (block.behaviours !== this.state.asJson) {
+                    const parsed = JSON.parse(block.behaviours);
+                    const openBehaviourName = this.state.editPanelState.behaviour?.name;
+                    const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
+                    this.setState({asJson: block.behaviours, parsed, blockCopy: block,
+                        editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
+                                                                this.state.editPanelState.rightClass)});
+                }
+            } else if (childChangeEvents.indexOf(event) > -1) {
+                const block = this.props.getBlockCopy();
+                if (this.props.serializeTree(block.children) !== this.props.serializeTree(this.state.blockCopy.children))
+                    this.setState({blockCopy: block});
             }
-            if (block.children !== this.state.blockCopy.children)
-                this.setState({blockCopy: block});
-        }, listenChildChanges);
+        })];
         }
+    }
+    /**
+     * @access protected
+     */
+    componentWillUnmount() {
+        this.unregistrables.forEach(unreg => unreg());
     }
     /**
      * @param {BlockEditFormProps} props

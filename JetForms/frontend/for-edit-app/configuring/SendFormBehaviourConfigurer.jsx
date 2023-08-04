@@ -122,12 +122,12 @@ class SendFormBehaviourConfigurer extends preact.Component {
                 <div>
                     <ReplyToAddrOrDisplayName
                         name="replyToAddress"
-                        val={ replyToAddress }
+                        val={ replyToAddress || '' }
                         relevantFormInputInfos={ replyToInputs.emailInputs }
                         onValueSelected={ (name, val) => this.props.onConfigurationChanged({[name]: val}) }/>
                     <ReplyToAddrOrDisplayName
                         name="replyToName"
-                        val={ replyToName }
+                        val={ replyToName || '' }
                         relevantFormInputInfos={ replyToInputs.textInputs }
                         onValueSelected={ (name, val) => this.props.onConfigurationChanged({[name]: val}) }/>
                 </div>
