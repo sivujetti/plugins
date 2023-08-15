@@ -40,7 +40,8 @@ class ContactFormEditForm extends preact.Component {
                         editPanelState: createEditPanelState(), blockCopy});
         //
         this.unregistrables = [this.props.observeStore('theBlockTree', (_, [event, data]) => {
-            if (event === 'theBlockTree/updatePropsOf' && data[0] === id) {
+            if ((event === 'theBlockTree/updatePropsOf' && data[0] === id) ||
+                (event === 'theBlockTree/undo' && data[1] === id)) {
                 const block = this.props.getBlockCopy();
                 if (block.behaviours !== this.state.asJson) {
                     const parsed = JSON.parse(block.behaviours);
@@ -218,11 +219,11 @@ class AddBehaviourPopup extends preact.Component {
      * @access protected
      */
     render({availableBehaviours, confirmAddBehaviour, oddCls}) {
-        return <div class="instructions-list d-flex">
+        return <div class="instructions-list d-grid">
             { availableBehaviours.map(name =>
                 <button
                     onClick={ () => confirmAddBehaviour(name) }
-                    className={ `group-p${oddCls} poppable perhaps` }
+                    className={ `group-p${oddCls} poppable perhaps text-left` }
                     type="button">{ getBehaviourConfigurerImpl(name).configurerLabel }</button>
             ) }
         </div>;

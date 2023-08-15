@@ -14,14 +14,14 @@ class EditAppLeftColumnSection extends MenuSection {
             colorClass="color-purple">
             <nav>
                 { api.user.getRole() <= api.user.ROLE_EDITOR
-                    ? <a onClick={ e => this.openDialog(e, SubmissionsBrowseDialog, 'Browse submissions') } class="with-icon">
+                    ? <a onClick={ e => this.openDialog(e, SubmissionsBrowseDialog, 'Browse submissions') } class="with-icon" href="#browse-submissions">
                         <Icon iconId="message-2" className="size-xs color-purple color-saturated"/>
                         <span class="color-dimmed">{ __('Browse submissions') }</span>
                     </a>
                     : null
                 }
                 { api.user.getRole() <= api.user.ROLE_ADMIN_EDITOR
-                    ? <a onClick={ e => this.openDialog(e, MailSendSettingsManageDialog, 'Send mail settings') } class="with-icon">
+                    ? <a onClick={ e => this.openDialog(e, MailSendSettingsManageDialog, 'Send mail settings') } class="with-icon" href="#change-mail-settings">
                         <Icon iconId="settings" className="size-xs color-purple color-saturated"/>
                         <span class="color-dimmed">{ __('Send mail settings') }</span>
                     </a>
