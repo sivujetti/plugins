@@ -133,7 +133,7 @@ final class SubmissionsController {
         $twoDays = 60 * 60 * 24;
         if ($diff > $twoDays) // User spent more than 2 days filling the form (unlikely > reject it)
             return false;
-        $minimumFormFillTimeSeconds = 10;
+        $minimumFormFillTimeSeconds = 6;
         $userSpentEnoughTimeFillingTheForm = $diff > $minimumFormFillTimeSeconds;
         return $userSpentEnoughTimeFillingTheForm;
     }
