@@ -1,13 +1,10 @@
 import {__, http, env, Icon, Popup} from '@sivujetti-commons-for-edit-app';
 import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl,
         customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
-import SendFormBehaviourConfigurer from './SendFormBehaviourConfigurer.jsx';
 
 const createPropsMutators = [];
 
 const childChangeEvents = ['theBlockTree/applySwap', 'theBlockTree/applyAdd(Drop)Block', 'theBlockTree/deleteBlock', 'theBlockTree/undoAdd(Drop)Block', 'theBlockTree/cloneItem', 'theBlockTree/undo'];
-
-const useNaturalLangBuilderFeat = true;
 
 class ContactFormEditForm extends preact.Component {
     // outerEl;
@@ -17,17 +14,7 @@ class ContactFormEditForm extends preact.Component {
      * @access protected
      */
     componentWillMount() {
-        const {getBlockCopy, grabChanges} = this.props;
-        if (!useNaturalLangBuilderFeat) {
-        const updateState = behaviours => {
-            this.setState({asJson: behaviours, parsed: JSON.parse(behaviours)});
-        };
-        updateState(getBlockCopy().behaviours);
-        grabChanges((block, _origin, _isUndo) => {
-            if (this.state.asJson !== block.behaviours)
-                updateState(block.behaviours);
-        });
-        } else {
+        const {getBlockCopy} = this.props;
         this.outerEl = preact.createRef();
         this.addBehaviourBtn = preact.createRef();
         this.customTerminatorsExist = Array.from(customBehaviourImpls.values()).reduce((has, {isTerminator}) =>
@@ -53,11 +40,10 @@ class ContactFormEditForm extends preact.Component {
                 }
             } else if (childChangeEvents.indexOf(event) > -1) {
                 const block = this.props.getBlockCopy();
-                if (this.props.serializeTree(block.children) !== this.props.serializeTree(this.state.blockCopy.children))
+                if (block && this.props.serializeTree(block.children) !== this.props.serializeTree(this.state.blockCopy.children))
                     this.setState({blockCopy: block});
             }
         })];
-        }
     }
     /**
      * @access protected
@@ -70,13 +56,6 @@ class ContactFormEditForm extends preact.Component {
      * @access protected
      */
     render({emitValueChanged}, {parsed, editPanelState, curPopupRenderer, blockCopy}) {
-        if (!useNaturalLangBuilderFeat)
-            return <SendFormBehaviourConfigurer
-                behaviour={ parsed[0] }
-                onConfigurationChanged={ vals => {
-                    Object.assign(parsed[0].data, vals); // Mutates state temporarily
-                    emitValueChanged(JSON.stringify(parsed), 'behaviours', false, env.normalTypingDebounceMillis);
-                } }/>;
         if (!editPanelState) return;
         const last = parsed.at(-1);
         const hasTerminator = getBehaviourConfigurerImpl(last.name).isTerminator;
@@ -253,25 +232,28 @@ function getUseEl(nodeName, target) {
 
 function createProps() {
     return createPropsMutators.reduce((out, fn) => fn(out), {
-        behaviours: [{name: 'SendMail', data: {
-            subjectTemplate: __('New contact form entry on [siteName]'),
-            toAddress: 'sivuston-omistaja@mail.com',
-            toName: 'Sivuston Omistaja',
-            fromAddress: 'no-reply@sivuston-nimi.com',
-            fromName: 'Sivuston nimi',
-            bodyTemplate: [
-                `${__('New contact form entry on [siteName]')}.`,
-                ``,
-                `[resultsAll]`,
-                ``,
-                `------------`,
-                `(${__('Sent by JetForms')})`,
-                ``,
-            ].join('\n')
-        }}, ...(!useNaturalLangBuilderFeat
-            ? []
-            : [{name: 'ShowSentMessage', data: {at: 'beforeFirstInput', message: __('Thank you for your message.')}}]
-        )],
+        behaviours: [
+            {name: 'SendMail', data: {
+                subjectTemplate: __('New contact form entry on [siteName]'),
+                toAddress: 'sivuston-omistaja@mail.com',
+                toName: 'Sivuston Omistaja',
+                fromAddress: 'no-reply@sivuston-nimi.com',
+                fromName: 'Sivuston nimi',
+                bodyTemplate: [
+                    `${__('New contact form entry on [siteName]')}.`,
+                    ``,
+                    `[resultsAll]`,
+                    ``,
+                    `------------`,
+                    `(${__('Sent by JetForms')})`,
+                    ``,
+                ].join('\n')
+            }},
+            {name: 'ShowSentMessage', data: {
+                at: 'beforeFirstInput',
+                message: __('Thank you for your message.')
+            }}
+        ],
         useCaptcha: 1,
     });
 }

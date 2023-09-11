@@ -12,7 +12,7 @@ use Sivujetti\Tests\Utils\{PluginTestCase};
 final class UseCaptchaTest extends PluginTestCase {
     public static function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
-        if (!defined("JET_FORMS_USE_FEAT_1"))
+        if (defined("JET_FORMS_NO_FEAT_1"))
             throw new \RuntimeException("Living on the edge");
     }
     public function testSubmitFormRejectsRequestIfUserSendsTheFormImmediately(): void {

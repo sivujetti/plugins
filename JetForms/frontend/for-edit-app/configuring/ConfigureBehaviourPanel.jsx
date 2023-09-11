@@ -1,5 +1,5 @@
 import {api} from '@sivujetti-commons-for-edit-app';
-import createSendFormBehaviourConfigurerImpl from './SentFormBehaviourConfigurerTemp.jsx';
+import createSendFormBehaviourConfigurerImpl from './SendFormBehaviourConfigurer.jsx';
 import createStoreSubmissionToLocalDbBehaviourConfigurerImpl from './StoreSubmissionToLocalDbBehaviourConfigurer.jsx';
 import createShowSentMessageBehaviourConfigurerImpl from './ShowSentMessageBehaviourConfigurer.jsx';
 

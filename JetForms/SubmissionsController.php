@@ -94,7 +94,7 @@ final class SubmissionsController {
             }
         }
         //
-        if (!defined("JET_FORMS_USE_FEAT_1"))
+        if (defined("JET_FORMS_NO_FEAT_1"))
             $res->redirect($req->body->_returnTo);
         // else Do nothing (redirection has been handled by ShowSentMessageBehaviour)
     }

@@ -207,4 +207,8 @@ function getDetailedLabel(itm) {
  * @prop {String} label
 */
 
-export default SendFormBehaviourConfigurer;
+export default () => ({
+    configurerLabel: __('lähetä täytetyt tiedot sähköpostiosoitteeseen'),
+    getButtonLabel({toAddress}) { return toAddress; },
+    configurerCls: SendFormBehaviourConfigurer,
+});
