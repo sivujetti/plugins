@@ -4,7 +4,7 @@
  */
 import JetGallery from './JetGallery.js';
 
-const jg = new JetGallery();
+const jg = new JetGallery(document.documentElement.lang);
 const galleries = jg.hookAllGalleries(document.body);
 
 export default {

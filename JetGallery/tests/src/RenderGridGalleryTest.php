@@ -44,6 +44,7 @@ final class RenderGridGalleryTest extends PluginTestCase {
         </div> */
         $outermostEl = $dom->first(".jet-gallery");
         $this->assertNotNull($outermostEl);
+        $this->assertEquals("no", $outermostEl->getAttribute("data-use-captions"));
         $all = $outermostEl->children();
         /* <a href="/sivujetti/public/uploads/vivid-blurred-colorful-background-compr.jpg" ...>
             <figure data-block-root>
