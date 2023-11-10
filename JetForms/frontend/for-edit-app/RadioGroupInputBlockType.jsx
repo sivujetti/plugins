@@ -128,9 +128,9 @@ export default {
     defaultRenderer: 'plugins/JetForms:block-input-radio-group',
     icon: 'circle',
     reRender({name, label, radios, isRequired, id, styleClasses}, renderChildren) {
-        return ['<div class="j-', blockTypeName,
+        return ['<div class="j-', blockTypeName, ' form-group',
             styleClasses ? ` ${styleClasses}` : '',
-            ' form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
+            '" data-block-type="', blockTypeName, '" data-block="', id, '">',
             '<div class="form-label">', label, '</div>',
             ...JSON.parse(radios).map(radio => ['<label class="form-radio">',
                 '<input name="', name, '" value="', radio.value, '" type="radio"', isRequired ? ' data-pristine-required' : '', '>',

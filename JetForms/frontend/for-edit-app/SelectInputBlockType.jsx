@@ -129,9 +129,9 @@ export default {
     defaultRenderer: 'plugins/JetForms:block-input-select',
     icon: 'selector',
     reRender({name, label, options, multiple, id, styleClasses}, renderChildren) {
-        return ['<div class="j-', blockTypeName,
+        return ['<div class="j-', blockTypeName, ' form-group',
             styleClasses ? ` ${styleClasses}` : '',
-            ' form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
+            '" data-block-type="', blockTypeName, '" data-block="', id, '">',
             !label ? '' : `<label class="form-label" for="${name}">${label}</label>`,
             '<select class="form-select" name="', name, !multiple ? '"' : '[]" multiple', '>',
                 ...JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>

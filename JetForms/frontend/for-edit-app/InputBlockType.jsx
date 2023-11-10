@@ -138,9 +138,9 @@ export default settings => ({
             : ['textarea', '</textarea>', !numRows ? '' : ` rows="${numRows}"`, ''];
         const blockTypeName = `JetForms${settings.name}`;
         return [
-            '<div class="j-', blockTypeName,
+            '<div class="j-', blockTypeName, ' form-group',
                     styleClasses ? ` ${styleClasses}` : '',
-                    ' form-group" data-block-type="', blockTypeName, '" data-block="', id, '">',
+                    '" data-block-type="', blockTypeName, '" data-block="', id, '">',
                 !label
                     ? ''
                     : `<label class="form-label" for="${name}">${label}</label>`,
