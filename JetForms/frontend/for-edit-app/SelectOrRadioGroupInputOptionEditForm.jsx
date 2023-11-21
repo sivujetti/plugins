@@ -32,13 +32,13 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
                 disabled={ hasErrors(this) }
                 title={ __('Done') }>&lt;</button>
             <FormGroupInline className="mt-0">
-                <label htmlFor="text" class="form-label">{ __('Option text') }</label>
-                <Textarea vm={ this } prop="text" rows="3"/>
+                <label htmlFor="selecteOrRadioItemText" class="form-label">{ __('Option text') }</label>
+                <Textarea vm={ this } prop="text" id="selecteOrRadioItemText" rows="3"/>
                 <InputErrors vm={ this } prop="text"/>
             </FormGroupInline>
             { showValueInput ? <FormGroupInline>
-                <label htmlFor="value" class="form-label">{ __('Option value') }</label>
-                <Textarea vm={ this } prop="value" rows="3"/>
+                <label htmlFor="selectOrRadioItemValue" class="form-label">{ __('Option value') }</label>
+                <Textarea vm={ this } prop="value" id="selectOrRadioItemValue" rows="3"/>
                 <InputErrors vm={ this } prop="value"/>
             </FormGroupInline> : null }
         </div>;

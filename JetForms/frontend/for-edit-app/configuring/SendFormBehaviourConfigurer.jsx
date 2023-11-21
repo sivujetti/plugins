@@ -95,7 +95,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
                 </label>
                 <div>
                     <div>
-                        <Input vm={ this } prop="toAddress" ref={ this.toAddrInputEl }/>
+                        <Input vm={ this } prop="toAddress" id="toAddress" ref={ this.toAddrInputEl }/>
                         <InputErrors vm={ this } prop="toAddress"/>
                     </div>
                     <div class="mt-1">
@@ -108,7 +108,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
                 <label htmlFor="fromAddress" class="form-label">{ __('From') }</label>
                 <div>
                     <div>
-                        <Input vm={ this } prop="fromAddress"/>
+                        <Input vm={ this } prop="fromAddress" id="fromAddress"/>
                         <InputErrors vm={ this } prop="fromAddress"/>
                     </div>
                     <div class="mt-1">
@@ -118,7 +118,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
                 </div>
             </FormGroupInline>,
             <FormGroupInline>
-                <label htmlFor="replyToAddress" class="form-label">{ __('Reply-to') }</label>
+                <label class="form-label">{ __('Reply-to') }</label>
                 <div>
                     <ReplyToAddrOrDisplayName
                         name="replyToAddress"
@@ -134,12 +134,12 @@ class SendFormBehaviourConfigurer extends preact.Component {
             </FormGroupInline>,
             <FormGroup>
                 <label htmlFor="subjectTemplate" class="form-label">{ __('Subject') }</label>
-                <Textarea vm={ this } prop="subjectTemplate"/>
+                <Textarea vm={ this } prop="subjectTemplate" id="subjectTemplate"/>
                 <InputErrors vm={ this } prop="subjectTemplate"/>
             </FormGroup>,
             <FormGroup>
                 <label htmlFor="bodyTemplate" class="form-label">{ __('Body') }</label>
-                <Textarea vm={ this } prop="bodyTemplate" class="form-input code" ref={ this.bodyTemplateInputEl }/>
+                <Textarea vm={ this } prop="bodyTemplate" id="bodyTemplate" class="form-input code" ref={ this.bodyTemplateInputEl }/>
                 <InputErrors vm={ this } prop="bodyTemplate"/>
             </FormGroup>] : null }
         </div>;

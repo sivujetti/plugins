@@ -35,8 +35,8 @@ class ShowSentMessageBehaviourConfigurer extends preact.Component {
                 <option>Lomakkeen yläpuolella</option>
             </select>,
             <FormGroupInline>
-                <label class="form-label" htmlFor="message">{ __('Message') }</label>
-                <Textarea vm={ this } prop="message" rows="1"/>
+                <label class="form-label" htmlFor="showSentMessage">{ __('Message') }</label>
+                <Textarea vm={ this } prop="message" id="showSentMessage" rows="1"/>
                 <InputErrors vm={ this } prop="message"/>
             </FormGroupInline>
         ];

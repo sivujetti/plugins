@@ -21,9 +21,9 @@ class InputBlockEditForm extends InputEditFormAbstract {
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'placeholder', hasErrors, env.normalTypingDebounceMillis); }},
         ], ...(numRows === undefined
             ? []
-            : [{name: 'numRows', value: normalizeNumRows(numRows), validations: [['min', 0], ['max', 2000]], label: __('Rows'),
+            : [{name: 'numRows', value: getNormalizedNumRows(numRows), validations: [['min', 0], ['max', 2000]], label: __('Rows'),
              type: 'number', step: '1', onAfterValueChanged: (value, hasErrors) => {
-                emitValueChanged(parseInt(value || 0, 10), 'numRows', hasErrors, env.normalTypingDebounceMillis);
+                emitValueChanged(getUnnormalizedNumRows(value), 'numRows', hasErrors, env.normalTypingDebounceMillis);
             }}]
         )], {
             isRequired,
@@ -32,14 +32,14 @@ class InputBlockEditForm extends InputEditFormAbstract {
             if (isUndo && (this.state.values.name !== block.name ||
                            this.state.values.label !== block.label ||
                            this.state.values.placeholder !== block.placeholder ||
-                           (block.numRows !== undefined && this.state.values.numRows !== normalizeNumRows(block.numRows))))
+                           (block.numRows !== undefined && getUnnormalizedNumRows(this.state.values.numRows) !== block.numRows)))
                 reHookValues(this, [...[
                     {name: 'name', value: block.name},
                     {name: 'label', value: block.label},
                     {name: 'placeholder', value: block.placeholder}
                 ], ...(block.numRows === undefined
                     ? []
-                    : [{name: 'numRows', value: normalizeNumRows(block.numRows)}]
+                    : [{name: 'numRows', value: getNormalizedNumRows(block.numRows)}]
                 )]);
             if (this.state.isRequired !== block.isRequired)
                 this.setState({isRequired: block.isRequired});
@@ -66,17 +66,17 @@ class InputBlockEditForm extends InputEditFormAbstract {
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
                 <label htmlFor="label" class="form-label">{ __('Label#withDescr') }</label>
-                <Input vm={ this } prop="label" ref={ this.labelInput }/>
+                <Input vm={ this } prop="label" id="label" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
                 <label htmlFor="placeholder" class="form-label">{ __('Placeholder#withDescr') }</label>
-                <Input vm={ this } prop="placeholder"/>
+                <Input vm={ this } prop="placeholder" id="placeholder"/>
                 <InputErrors vm={ this } prop="placeholder"/>
             </FormGroupInline>
             { this.state.values.numRows !== undefined ? <FormGroupInline>
-                <label htmlFor="placeholder" class="form-label">{ __('Rows') }</label>
-                <Input vm={ this } prop="numRows"/>
+                <label htmlFor="numRows" class="form-label">{ __('Rows') }</label>
+                <Input vm={ this } prop="numRows" id="numRows"/>
                 <InputErrors vm={ this } prop="numRows"/>
             </FormGroupInline> : null }
             <FormGroupInline>
@@ -91,7 +91,7 @@ class InputBlockEditForm extends InputEditFormAbstract {
             </FormGroupInline>
             { this.showTechnicalInputs ? <FormGroupInline>
                 <label htmlFor="name" class="form-label">Id</label>
-                <Input vm={ this } prop="name"/>
+                <Input vm={ this } prop="name" id="name"/>
                 <InputErrors vm={ this } prop="name"/>
             </FormGroupInline> : null }
         </div>;
@@ -108,10 +108,18 @@ class InputBlockEditForm extends InputEditFormAbstract {
 
 /**
  * @param {Number} input
- * @returns {String}
+ * @returns {Number|String}
  */
-function normalizeNumRows(input) {
-    return input !== 0 ? input.toString() : '';
+function getNormalizedNumRows(input) {
+    return input !== 0 ? input : '';
+}
+
+/**
+ * @param {Number|String}
+ * @param {Number}
+ */
+function getUnnormalizedNumRows(normalized) {
+    return normalized !== '' ? normalized : 0;
 }
 
 /**

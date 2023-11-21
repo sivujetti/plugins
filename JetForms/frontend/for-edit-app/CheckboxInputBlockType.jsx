@@ -50,7 +50,7 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
         return <div class="form-horizontal pt-0">
             <FormGroupInline>
                 <label htmlFor="label" class="form-label">{ __('Text') }</label>
-                <Input vm={ this } prop="label" ref={ this.labelInput }/>
+                <Input vm={ this } prop="label" id="label" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
@@ -64,8 +64,8 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
                 </label>
             </FormGroupInline>
             { this.showTechnicalInputs ? <FormGroupInline>
-                <label htmlFor="name" class="form-label">Id</label>
-                <Input vm={ this } prop="name"/>
+                <label htmlFor="checkBoxName" class="form-label">Id</label>
+                <Input vm={ this } prop="name" id="checkBoxName"/>
                 <InputErrors vm={ this } prop="name"/>
             </FormGroupInline> : null }
         </div>;

@@ -47,14 +47,14 @@ class MailSendSettingsManageDialog extends preact.Component {
             { sendingMethod ? [<div>
                 <div class="form-label">{ __('Send method') }</div>
                 <div class="button-options">
-                    <button class={ `form-radio btn${sendingMethod === 'mail' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('mail') } type="button">
+                    <button class={ `form-radio btn focus-default${sendingMethod === 'mail' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('mail') } type="button">
                         <span class="d-block mb-2">
                             <input type="radio" name="sendingMethod" checked={ sendingMethod === 'mail' } tabIndex="-1"/>
                             <i class="form-icon"></i><b class="h4">mail()</b>
                         </span>
                         <span>{ __('jetFormsTodo2') }</span>
                     </button>
-                    <button class={ `form-radio btn${sendingMethod === 'smtp' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('smtp') } type="button">
+                    <button class={ `form-radio btn focus-default${sendingMethod === 'smtp' ? ' selected' : ''}` } onClick={ () => this.handleSendMethodRadioClicked('smtp') } type="button">
                         <span class="d-block mb-2">
                             <input type="radio" name="sendingMethod" checked={ sendingMethod === 'smtp' } tabIndex="-1"/>
                             <i class="form-icon"></i><b class="h4">SMTP</b>

@@ -64,28 +64,29 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
-                <label htmlFor="label" class="form-label">{ __('Label#withDescr') }</label>
-                <Input vm={ this } prop="label" ref={ this.labelInput }/>
+                <label htmlFor="radioLabel" class="form-label">{ __('Label#withDescr') }</label>
+                <Input vm={ this } prop="label" id="radioLabel" ref={ this.labelInput }/>
                 <InputErrors vm={ this } prop="label"/>
             </FormGroupInline>
             <FormGroupInline>
-                <span class="form-label">{ __('Required') }?</span>
-                <label class="form-checkbox mt-0">
+                <label class="form-label" htmlFor="radioIsRequired">{ __('Required') }?</label>
+                <span class="form-checkbox mt-0">
                     <input
                         onClick={ this.emitIsRequired.bind(this) }
                         checked={ isRequired }
                         type="checkbox"
-                        class="form-input"/><i class="form-icon"></i>
-                </label>
+                        class="form-input"
+                        id="radioIsRequired"/><i class="form-icon"></i>
+                </span>
             </FormGroupInline>
             { this.showTechnicalInputs ? <FormGroupInline>
-                <label htmlFor="name" class="form-label">Id</label>
-                <Input vm={ this } prop="name"/>
+                <label htmlFor="radioName" class="form-label">Id</label>
+                <Input vm={ this } prop="name" id="radioName"/>
                 <InputErrors vm={ this } prop="name"/>
             </FormGroupInline> : null }
         </div>,
         <FormGroup>
-            <label htmlFor="radios" class="form-label pt-0 pb-1">{ __('Options') }</label>
+            <label class="form-label pt-0 pb-1">{ __('Options') }</label>
             <CrudList
                 items={ radiosParsed }
                 itemTitleKey="text"
