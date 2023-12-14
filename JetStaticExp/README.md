@@ -2,6 +2,12 @@
 
 Generates static sites.
 
+# Developing
+
+## Bundle frontend
+
+See `frontend/rollup.config.js`
+
 # Docs
 
 How to's.
