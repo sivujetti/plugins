@@ -5,6 +5,9 @@ api.registerTranslationStrings({
     'Export functionalities': 'Export functionalities',
     'Export site': 'Export site',
     // ExportSiteDialog.jsx
-    'jetStaticExpTodo1': 'jetStaticExpTodo1',
+    'All': 'All',
+    'Target site info': 'Target site info',
+    'Success! Download your site here: ': 'Success! Download your site here: ',
+    'Directory': 'Directory',
     'Export': 'Export',
 });

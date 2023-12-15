@@ -4,7 +4,7 @@ namespace SitePlugins\JetStaticExp;
 
 use Pike\{AppConfig, Db, FileSystem, Request, Response, Validation};
 use Pike\Auth\Crypto;
-use Sivujetti\AppEnv;
+use Sivujetti\{AppEnv, ValidationUtils};
 use Sivujetti\Cli\PageRenderer;
 use Sivujetti\Update\{Updater, ZipPackageStream};
 
@@ -80,8 +80,8 @@ final class ExportsController {
                 "env" => array_merge(
                     $appEnv->constants,
                     [
-                        "SIVUJETTI_BASE_URL" => $req->body->targetBaseUrl,
-                        "SIVUJETTI_QUERY_VAR" => $req->body->targetQueryVar,
+                        "BASE_URL" => $req->body->targetBaseUrl,
+                        "QUERY_VAR" => $req->body->targetQueryVar,
                     ]
                 )
             ]
@@ -134,7 +134,8 @@ final class ExportsController {
             ->rule("pages", "minLength", 1, "array")
             ->rule("pages.*", "type", "string") // todo
             ->rule("files?.*", "in", ["all"])
-            ->rule("targetHost", "type", "string") // todo
+            ->rule("targetHost", "type", "string")
+            ->rule("targetHost", "maxLength", ValidationUtils::HARD_SHORT_TEXT_MAX_LEN)
             ->rule("targetBaseUrl", "in", ["/"]) // todo
             ->rule("targetQueryVar", "in", [""]) // todo
             ->validate($input);

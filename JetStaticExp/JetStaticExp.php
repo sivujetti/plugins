@@ -15,6 +15,11 @@ final class JetStaticExp implements UserPluginInterface {
             ["consumes" => "application/json",
              "identifiedBy" => ["exportAsStatic", "sites"]]
         );
+        //
+        $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
+            $api->enqueueEditAppJsFile("plugin-jet-static-exp-edit-app-lang-{$api->getCurrentLang()}.js");
+            $api->enqueueEditAppJsFile("plugin-jet-static-exp-edit-app-bundle.js");
+        });
     }
     /**
      * @inheritdoc

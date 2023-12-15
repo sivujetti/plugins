@@ -5,6 +5,9 @@ api.registerTranslationStrings({
     'Export functionalities': 'Export-toiminnallisuudet',
     'Export site': 'Exporttaa sivusto',
     // ExportSiteDialog.jsx
-    'jetStaticExpTodo1': 'Exporttaa sivusto ohje...',
+    'All': 'Kaikki',
+    'Target site info': 'Kohdesivuston tiedot',
+    'Success! Download your site here: ': 'Success! Lataa sivusto tästä: ',
+    'Directory': 'Kansio',
     'Export': 'Exporttaa',
 });
