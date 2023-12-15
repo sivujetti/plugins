@@ -2,7 +2,7 @@
 
 namespace SitePlugins\JetStaticExp;
 
-use Pike\{AppConfig, FileSystem, Request, Response, Validation};
+use Pike\{AppConfig, Db, FileSystem, Request, Response, Validation};
 use Pike\Auth\Crypto;
 use Sivujetti\AppEnv;
 use Sivujetti\Cli\PageRenderer;
@@ -13,16 +13,18 @@ use Sivujetti\Update\{Updater, ZipPackageStream};
  */
 final class ExportsController {
     /**
-     * POST /plugins/jet-static-exp/exports/export: ....
+     * POST /plugins/jet-static-exp/exports/export: Writes a zip file to
+     * `${SIVUJETTI_INDEX_PATH}${$randomString32Chars}zip` that contains rendered
+     * $req->body->pages (page1/index.html, page2/index.html ...) and public assets
+     * (public/uploads/*.ext, public/relevant-file.ext).
      *
      * @param \Pike\Request $req
      * @param \Pike\Response $res
      * @param \Pike\AppConfig $appConfig 
      * @param \Sivujetti\AppEnv $appEnv
-     * @param Sivujetti\Update\ZipPackageStream $zip
+     * @param \Sivujetti\Update\ZipPackageStream $zip
      * @param \Pike\Auth\Crypto $crypto
      * @param \Pike\FileSystem $fs
-     * @param \Sivujetti\Cli\PageRenderer $pageRenderer = null For tests
      */
     public function exportSite(Request $req,
                                Response $res,
@@ -30,8 +32,7 @@ final class ExportsController {
                                AppEnv $appEnv,
                                ZipPackageStream $zip,
                                Crypto $crypto,
-                               FileSystem $fs,
-                               PageRenderer $pageRenderer = null): void {
+                               FileSystem $fs): void {
         if (($errors = self::validateExportSiteInput($req->body))) {
             $res->status(400)->json($errors);
             return;
@@ -43,18 +44,20 @@ final class ExportsController {
         $zip->open($filePath, create: true);
 
         // 2. Render and add all pages
-        $rendered = self::renderPages($req, $appConfig, $appEnv, $pageRenderer);
+        $rendered = self::renderPages($req, $appConfig, $appEnv);
         foreach ($rendered as $item)
             $zip->addFromString($item["relFilePath"], $item["html"]);
 
         // 2. Add public/<relevantFiles> and public/uploads/*
-        $publicDirPath = SIVUJETTI_INDEX_PATH . "public/";
-        $allExceptThese = '/^(?:(?!\/public\/sivujetti\/|\/public\/tests\/).)*$/';
-        $publicAll = $fs->readDirRecursive($publicDirPath, $allExceptThese);
-        $relevant = self::filterOnlyRelevant($publicAll);
-        $relatifyPath = Updater::makeRelatifier($publicDirPath);
-        foreach ($relevant as $absFilePath)
-            $zip->addFile($absFilePath, $relatifyPath($absFilePath));
+        if (($req->body->files[0] ?? "") === "all") {
+            $publicDirPath = SIVUJETTI_INDEX_PATH . "public/";
+            $allExceptThese = '/^(?:(?!\/public\/sivujetti\/|\/public\/tests\/).)*$/';
+            $publicAll = $fs->readDirRecursive($publicDirPath, $allExceptThese);
+            $relevant = self::filterOnlyRelevant($publicAll);
+            $relatifyPath = Updater::makeRelatifier($publicDirPath);
+            foreach ($relevant as $absFilePath)
+                $zip->addFile($absFilePath, $relatifyPath($absFilePath));
+        }
 
         // 3. Write to disk and return
         $zip->getResult(); // @allow \Pike\PikeException
@@ -64,16 +67,15 @@ final class ExportsController {
      * @param \Pike\Request $req
      * @param \Pike\AppConfig $appConfig
      * @param \Sivujetti\AppEnv $appEnv
-     * @param \Sivujetti\Cli\PageRenderer $pageRenderer = null
      * @psalm-return array<int, array{relFilePath: string, html: string}>
      */
     private static function renderPages(Request $req,
                                         AppConfig $appConfig,
-                                        AppEnv $appEnv,
-                                        PageRenderer $pageRenderer = null): array {
-        if (!$pageRenderer) {
-            require SIVUJETTI_BACKEND_PATH . "cli/src/PageRenderer.php";
-            $pageRenderer = (new PageRenderer())->create([
+                                        AppEnv $appEnv): array {
+        require SIVUJETTI_BACKEND_PATH . "cli/src/PageRenderer.php";
+        $pageRenderer = (new PageRenderer())->create(
+            $appEnv->di->make(Db::class),
+            [
                 "app" => (array) $appConfig->getVals(),
                 "env" => array_merge(
                     $appEnv->constants,
@@ -82,8 +84,8 @@ final class ExportsController {
                         "SIVUJETTI_QUERY_VAR" => $req->body->targetQueryVar,
                     ]
                 )
-            ]);
-        }
+            ]
+        );
         $createRenderPageRequest = fn(string $slug) => new Request($slug, serverVars: [
             // for PagesController:getServerHost()
             "HTTPS" => str_starts_with($req->body->targetHost, "https:") ? "on" : "off",
@@ -93,7 +95,7 @@ final class ExportsController {
         $rendered = [];
         foreach ($req->body->pages as $slug) {
             $html = $pageRenderer->renderToString($createRenderPageRequest($slug));
-            $pref = $slug !== "/" ? "/{$slug}/" : "";
+            $pref = $slug !== "/" ? ltrim("{$slug}/", "/") : "";
             $rendered[] = [
                 "relFilePath" => "{$pref}index.html",
                 "html" => $html
@@ -124,16 +126,17 @@ final class ExportsController {
         return $out;
     }
     /**
-     * Todo
      * @param object $input
      * @return string[] Error messages or []
      */
     private static function validateExportSiteInput(object $input): array {
         return Validation::makeObjectValidator()
+            ->rule("pages", "minLength", 1, "array")
             ->rule("pages.*", "type", "string") // todo
+            ->rule("files?.*", "in", ["all"])
             ->rule("targetHost", "type", "string") // todo
-            ->rule("targetBaseUrl", "type", "string") // todo
-            ->rule("targetQueryVar", "type", "string") // todo
+            ->rule("targetBaseUrl", "in", ["/"]) // todo
+            ->rule("targetQueryVar", "in", [""]) // todo
             ->validate($input);
     }
 }

@@ -8,6 +8,11 @@ Generates static sites.
 
 See `frontend/rollup.config.js`
 
+## Run backend tests
+
+- `cd plugins/JetStaticExp/`
+- `"../../../backend/vendor/bin/phpunit" --display-warnings --bootstrap ./tests/bootstrap.php ./tests`
+
 # Docs
 
 How to's.
