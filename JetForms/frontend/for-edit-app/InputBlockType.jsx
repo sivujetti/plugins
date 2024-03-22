@@ -1,5 +1,5 @@
-import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
-import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline,
+        setFocusTo, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import services from './services.js';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 
@@ -129,48 +129,18 @@ function getUnnormalizedNumRows(normalized) {
 export default settings => ({
     name: `JetForms${settings.name}`,
     friendlyName: settings.friendlyName,
-    initialData: () => ({...{
-        name: services.idGen.getNextId(),
-        isRequired: 1,
-        label: '',
-        placeholder: settings.defaultPlaceholder || '',
-    }, ...(settings.name !== 'TextareaInput'
-        ? {}
-        : {numRows: 0}
-    )}),
-    defaultRenderer: 'plugins/JetForms:block-input-auto',
-    icon: settings.icon || 'box',
-    reRender({name, isRequired, label, placeholder, id, styleClasses, numRows}, renderChildren) {
-        const [startTag, closingTag, attrsStr, inputModeStr] = settings.type !== 'textarea'
-            ? ['input',    '',            ` type="${settings.type}"`,           !settings.inputMode ? '' : ` inputmode="${settings.inputMode}"`]
-            : ['textarea', '</textarea>', !numRows ? '' : ` rows="${numRows}"`, ''];
-        const blockTypeName = `JetForms${settings.name}`;
-        return [
-            '<div class="j-', blockTypeName, ' form-group',
-                    styleClasses ? ` ${styleClasses}` : '',
-                    '" data-block-type="', blockTypeName, '" data-block="', id, '">',
-                !label
-                    ? ''
-                    : `<label class="form-label" for="${name}">${label}</label>`,
-                '<', startTag, ' name="', name, '" id="', name, '"',
-                    attrsStr,
-                    ' class="form-input"',
-                    inputModeStr,
-                    placeholder ? ` placeholder="${placeholder}"` : '',
-                    isRequired ? ' data-pristine-required' : '',
-                '>', closingTag,
-                renderChildren(),
-            '</div>'
-        ].join('');
-    },
-    createSnapshot: from => ({...{
-        name: from.name,
-        label: from.label,
-        isRequired: from.isRequired,
-        placeholder: from.placeholder,
-    }, ...(settings.name !== 'TextareaInput'
-        ? {}
-        : {numRows: from.numRows}
-    )}),
     editForm: InputBlockEditForm,
+    stylesEditForm: InputBlockEditForm,
+    createOwnProps(_defProps) {
+        return {...{
+            name: services.idGen.getNextId(),
+            label: '',
+            isRequired: 1,
+            placeholder: settings.defaultPlaceholder || '',
+        }, ...(settings.name !== 'TextareaInput'
+            ? {}
+            : {numRows: 0}
+        )};
+    },
+    icon: settings.icon || 'box',
 });

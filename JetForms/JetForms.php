@@ -41,24 +41,18 @@ final class JetForms implements UserPluginInterface {
         );
         //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
+// --             $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
-            $api->registerBlockRenderer(ContactFormBlockType::DEFAULT_RENDERER);
-            //
-            $api->registerBlockRenderer(CheckboxInputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockRenderer(InputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
             $api->registerBlockType(NumberInputBlockType::NAME, new NumberInputBlockType);
-            $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
+// --             $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
+// --             $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
+// --             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
-            //
-            $api->registerBlockRenderer(RadioGroupInputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
-            $api->registerBlockRenderer(SelectInputBlockType::DEFAULT_RENDERER);
-            $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             //
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
+            $api->enqueuePreviewAppJsFile("plugin-jet-forms-webpage-preview-renderer-app-bundle.js");
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
             if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))

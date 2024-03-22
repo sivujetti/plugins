@@ -1,3 +1,4 @@
+<?php // @deprecated, see ../ContactFormBlockType->render() ?>
 <form
     action="<?= $this->url(
         "/plugins/jet-forms/submissions/{$props->id}" .

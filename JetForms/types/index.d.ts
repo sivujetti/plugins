@@ -20,7 +20,7 @@ interface BehaviourConfigurerImpl {
 }
 
 interface ContactFormBlockProps {
-    behaviours: String;
+    behaviours: Array<Behaviour>;
     useCaptcha: Number;
 }
 

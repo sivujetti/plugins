@@ -85,9 +85,9 @@ final class UseCaptchaTest extends PluginTestCase {
                 $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
                     renderer: ContactFormBlockType::DEFAULT_RENDERER,
                     propsData: (object) [
-                        "behaviours" => json_encode([
+                        "behaviours" => [
                             ["name" => "StoreSubmissionToLocalDb", "data" => new \stdClass,]
-                        ]),
+                        ],
                         "useCaptcha" => 1,
                     ],
                     children: [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,

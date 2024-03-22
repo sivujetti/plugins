@@ -1,19 +1,19 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 
 const services = {
-    idGen: createCountingIdGenerator(api.webPageIframe),
+    idGen: createCountingIdGenerator(api.webPagePreview),
 };
 
 /**
- * @param {WebPageIframe} webPage
+ * @param {WebPagePreviewApp} webPagePreview
  */
-function createCountingIdGenerator(webPage) {
+function createCountingIdGenerator(webPagePreview) {
     return {
         /**
          * @returns {String} Example: "input_3"
          */
         getNextId() {
-            const previousInputs = Array.from(webPage.getEl().contentDocument.querySelectorAll('[name^="input_"]'));
+            const previousInputs = Array.from(webPagePreview.getEl().contentDocument.querySelectorAll('[name^="input_"]'));
             const max = previousInputs.reduce((max, inputEl) => {
                 const asStr = inputEl.getAttribute('name').split('input_')[1];
                 const asInt = parseInt(asStr, 10);

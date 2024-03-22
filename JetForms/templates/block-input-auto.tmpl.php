@@ -1,4 +1,5 @@
-<?php if (($settings = match ($props->type) {
+<?php // @deprecated, see ../InputBlockType->render()
+if (($settings = match ($props->type) {
     "JetFormsEmailInput" => ["attrsStr" => " type=\"email\"", "startTag" => "input", "closingTag" => "",
         "inputModeStr" => ""],
     "JetFormsNumberInput" => ["attrsStr" => " type=\"text\"", "startTag" => "input", "closingTag" => "",

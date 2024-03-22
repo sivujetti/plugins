@@ -213,7 +213,7 @@ final class RenderContactFormTest extends PluginTestCase {
     }
     public static function createDataForTestContactFormBlock(): object {
         return (object) [
-            "behaviours" => json_encode([
+            "behaviours" => [
                 ["name" => "SendMail", "data" => [
                     "subjectTemplate" => "",
                     "toAddress" => "",
@@ -221,7 +221,7 @@ final class RenderContactFormTest extends PluginTestCase {
                     "fromAddress" => "",
                     "bodyTemplate" => "",
                 ]],
-            ]),
+            ],
             "useCaptcha" => 0,
         ];
     }
