@@ -3,7 +3,9 @@
 namespace SitePlugins\JetForms;
 
 use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
-use Sivujetti\ValidationUtils;
+use Sivujetti\Page\WebPageAwareTemplate;
+
+use function Sivujetti\createElement as el;
 
 final class SelectInputBlockType implements BlockTypeInterface {
     public const NAME = "JetFormsSelectInput";
@@ -15,10 +17,41 @@ final class SelectInputBlockType implements BlockTypeInterface {
         return $builder
             ->newProperty("name", $builder::DATA_TYPE_TEXT)
             ->newProperty("label", $builder::DATA_TYPE_TEXT)
-            ->newProperty("options")->dataType($builder::DATA_TYPE_TEXT, validationRules: [
-                ["maxLength", ValidationUtils::HARD_LONG_TEXT_MAX_LEN]
-            ])
+            ->newProperty("options")->dataType(
+                $builder::DATA_TYPE_ARRAY,
+                sanitizeWith: fn(array $in) => array_map(fn(object $itm) =>
+                    (object) ["text" => strval($itm->text), "value" => strval($itm->value)]
+                , $in)
+            )
             ->newProperty("multiple", $builder::DATA_TYPE_UINT)
             ->getResult();
+    }
+    /**
+     * @inheritdoc
+     */
+    public function render(object $block,
+                           \Closure $createDefaultProps,
+                           \Closure $renderChildren,
+                           WebPageAwareTemplate $tmpl): array {
+        return el("div", $createDefaultProps("form-group"),
+            !$block->label
+                ? ""
+                : el("label", ["class" => "form-label", "for" => $block->name], $block->label),
+            el(
+                "select",
+                [
+                    "class" => "form-select",
+                    "name" => $block->name . ($block->multiple ? "[]" : ""),
+                    ...($block->multiple ? ["multiple" => ""] : []),
+                ],
+                array_map(fn($itm) =>
+                    el("option", ["value" => $itm->value], $tmpl->__($itm->text))
+                , [
+                    ...$block->options,
+                    (object) ["text" => "-", "value" => "-"]
+                ]),
+            ),
+            ...$renderChildren()
+        );
     }
 }

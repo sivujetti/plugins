@@ -1,6 +1,5 @@
 import {__, api, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
-        FormGroup, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
-import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+        FormGroup, FormGroupInline, objectUtils, setFocusTo, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import CrudList from './CrudList.jsx';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm,
@@ -17,8 +16,8 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
     componentWillMount() {
         const {getBlockCopy, emitValueChanged, grabChanges} = this.props;
         const {name, label, multiple, options} = getBlockCopy();
-        const optionsParsed = JSON.parse(options);
-        this.valueCreator = createSelectOrOptionSelectItemCreator(optionsParsed.map(({value}) => value));
+        const optionsCopy = objectUtils.cloneDeep(options);
+        this.valueCreator = createSelectOrOptionSelectItemCreator(optionsCopy.map(({value}) => value));
         this.showTechnicalInputs = api.user.getRole() < api.user.ROLE_EDITOR;
         this.labelInput = preact.createRef();
         this.setState(hookForm(this, [
@@ -28,8 +27,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
              onAfterValueChanged: (value, hasErrors) => { emitValueChanged(value, 'label', hasErrors, env.normalTypingDebounceMillis); }},
         ], {
             multiple,
-            optionsJson: options,
-            optionsParsed,
+            options: optionsCopy,
         }));
         grabChanges((block, _origin, isUndo) => {
             if (isUndo && (this.state.values.name !== block.name ||
@@ -38,10 +36,10 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
                                     {name: 'label', value: block.label}]);
             if (this.state.multiple !== block.multiple)
                 this.setState({multiple: block.multiple});
-            if (this.state.optionsJson !== block.options) {
-                const optionsParsed = JSON.parse(block.options);
-                this.valueCreator = createSelectOrOptionSelectItemCreator(optionsParsed.map(({value}) => value));
-                this.setState({optionsJson: block.options, optionsParsed});
+            if (JSON.stringify(this.state.options) !== JSON.stringify(block.options)) {
+                const optionsCopy = objectUtils.cloneDeep(block.options);
+                this.valueCreator = createSelectOrOptionSelectItemCreator(optionsCopy.map(({value}) => value));
+                this.setState({options: optionsCopy});
             }
         });
     }
@@ -61,7 +59,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render(_, {multiple, optionsParsed}) {
+    render(_, {multiple, options}) {
         if (!this.state.values) return;
         return [<div class="form-horizontal py-0">
             <FormGroupInline>
@@ -88,7 +86,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
         <FormGroup>
             <label htmlFor="options" class="form-label pt-0 pb-1">{ __('Options') }</label>
             <CrudList
-                items={ optionsParsed }
+                items={ options }
                 itemTitleKey="text"
                 getTitle={ item => !this.showTechnicalInputs ? item.text : [`${item.text} `, <i class="color-dimmed">({item.value})</i>] }
                 onListMutated={ this.emitOptions.bind(this) }
@@ -104,48 +102,29 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
      */
     emitMultiple(e) {
         const multiple = e.target.checked ? 1 : 0;
-        this.props.emitValueChanged(multiple, 'multiple', false, env.normalTypingDebounceMillis);
+        this.props.emitValueChanged(multiple, 'multiple');
     }
     /**
      * @param {Array<{text: String; value: String;}>} list
      * @access private
      */
     emitOptions(list) {
-        this.props.emitValueChanged(JSON.stringify(list), 'options', false, env.normalTypingDebounceMillis);
+        this.props.emitValueChanged(list, 'options');
     }
 }
 
-const blockTypeName = 'JetFormsSelectInput';
-
 export default {
-    name: blockTypeName,
+    name: 'JetFormsSelectInput',
     friendlyName: 'Select input (JetForms)',
-    initialData: () => ({
-        name: services.idGen.getNextId(),
-        label: '',
-        options: JSON.stringify([createSelectOrOptionSelectItemCreator().createNewItem()]),
-        multiple: 0,
-    }),
-    defaultRenderer: 'plugins/JetForms:block-input-select',
     icon: 'selector',
-    reRender({name, label, options, multiple, id, styleClasses}, renderChildren) {
-        return ['<div class="j-', blockTypeName, ' form-group',
-            styleClasses ? ` ${styleClasses}` : '',
-            '" data-block-type="', blockTypeName, '" data-block="', id, '">',
-            !label ? '' : `<label class="form-label" for="${name}">${label}</label>`,
-            '<select class="form-select" name="', name, !multiple ? '"' : '[]" multiple', '>',
-                ...JSON.parse(options).concat({text: '-', value: '-'}).map(({value, text}) =>
-                    ['<option value="', value , '">', __(text), '</option>']
-                ).flat(),
-            '</select>',
-            renderChildren(),
-        '</div>'].join('');
-    },
-    createSnapshot: from => ({
-        name: from.name,
-        label: from.label,
-        options: from.options,
-        multiple: from.multiple,
-    }),
     editForm: SelectInputBlockEditForm,
+    stylesEditForm: null,
+    createOwnProps(_defProps) {
+        return {
+            name: services.idGen.getNextId(),
+            label: '',
+            options: [createSelectOrOptionSelectItemCreator().createNewItem()],
+            multiple: 0,
+        };
+    },
 };

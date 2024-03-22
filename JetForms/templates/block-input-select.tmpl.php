@@ -1,4 +1,5 @@
-<?php echo "<div class=\"j-JetFormsSelectInput form-group",
+<?php // @deprecated, see ../SelectInputBlockType->render()
+echo "<div class=\"j-JetFormsSelectInput form-group",
     $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
     "\" data-block-type=\"JetFormsSelectInput\" data-block=\"", $props->id, "\">",
     !$props->label

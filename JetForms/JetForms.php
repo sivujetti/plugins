@@ -46,8 +46,8 @@ final class JetForms implements UserPluginInterface {
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
             $api->registerBlockType(NumberInputBlockType::NAME, new NumberInputBlockType);
 // --             $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
-// --             $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
-// --             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
+            $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
+            $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);
             //
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");

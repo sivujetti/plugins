@@ -2,17 +2,21 @@
 
 namespace SitePlugins\JetForms;
 
-use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
+use Sivujetti\BlockType\{PropertiesBuilder};
 
-final class TextareaInputBlockType implements BlockTypeInterface {
+final class TextareaInputBlockType extends InputBlockType {
     public const NAME = "JetFormsTextareaInput";
-    public const DEFAULT_RENDERER = InputBlockType::DEFAULT_RENDERER;
     /**
      * @inheritdoc
      */
-    public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
-        return InputBlockType::addDefaultProperties($builder)
-            ->newProperty("numRows", $builder::DATA_TYPE_UINT)
-            ->getResult();
+    protected function addDefaultProperties(PropertiesBuilder $to): PropertiesBuilder {
+        return parent::addDefaultProperties($to)
+            ->newProperty("numRows", $to::DATA_TYPE_UINT);
+    }
+    /**
+     * @inheritdoc
+     */
+    protected function getSettings(): array {
+        return ["inputType" => "textarea"];
     }
 }

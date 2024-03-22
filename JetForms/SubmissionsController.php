@@ -62,7 +62,7 @@ final class SubmissionsController {
             !self::isValidCaptcha($req->body->_cChallenge ?? null)) {
             throw new PikeException("Captcha challenge failed", PikeException::BAD_INPUT);
         }
-        if (!($form->behaviours = JsonUtils::parse($form->behaviours)))
+        if (!$form->behaviours)
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
         //
         $meta = self::createInputsMeta($form);
@@ -178,7 +178,7 @@ final class SubmissionsController {
                             "radios" => JsonUtils::parse($block->radios, asObject: false),
                         ],
                         SelectInputBlockType::NAME => [
-                            "options" => JsonUtils::parse($block->options, asObject: false),
+                            "options" => (array) $block->options,
                             "multiple" => $block->multiple === 1,
                         ],
                         default =>  [],

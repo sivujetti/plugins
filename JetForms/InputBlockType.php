@@ -18,18 +18,7 @@ abstract class InputBlockType implements BlockTypeInterface, JsxLikeRenderingBlo
      * @inheritdoc
      */
     public function defineProperties(PropertiesBuilder $builder): \ArrayObject {
-        return self::addDefaultProperties($builder)->getResult();
-    }
-    /**
-     * @param \Sivujetti\BlockType\PropertiesBuilder $to
-     * @return \Sivujetti\BlockType\PropertiesBuilder
-     */
-    public static function addDefaultProperties(PropertiesBuilder $to): PropertiesBuilder {
-        return $to
-            ->newProperty("name", $to::DATA_TYPE_TEXT)
-            ->newProperty("isRequired", $to::DATA_TYPE_UINT)
-            ->newProperty("label", $to::DATA_TYPE_TEXT)
-            ->newProperty("placeholder", $to::DATA_TYPE_TEXT);
+        return $this->addDefaultProperties($builder)->getResult();
     }
     /**
      * @inheritdoc
@@ -62,5 +51,16 @@ abstract class InputBlockType implements BlockTypeInterface, JsxLikeRenderingBlo
                 $renderChildren(),
             )
         );
+    }
+    /**
+     * @param \Sivujetti\BlockType\PropertiesBuilder $to
+     * @return \Sivujetti\BlockType\PropertiesBuilder
+     */
+    protected function addDefaultProperties(PropertiesBuilder $to): PropertiesBuilder {
+        return $to
+            ->newProperty("name", $to::DATA_TYPE_TEXT)
+            ->newProperty("isRequired", $to::DATA_TYPE_UINT)
+            ->newProperty("label", $to::DATA_TYPE_TEXT)
+            ->newProperty("placeholder", $to::DATA_TYPE_TEXT);
     }
 }

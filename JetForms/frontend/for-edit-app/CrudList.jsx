@@ -1,5 +1,4 @@
-import {__, Icon} from '@sivujetti-commons-for-edit-app';
-import ContextMenu from '../../../../../frontend/edit-app/src/commons/ContextMenu.jsx';
+import {__, ContextMenu, Icon} from '@sivujetti-commons-for-edit-app';
 import Sortable from './Sortable.js';
 
 let counter = 0;
@@ -64,7 +63,7 @@ class CrudList extends preact.Component {
                             <Icon iconId="dots" className="size-sm"/>
                         </button>
                     </div>
-                </li>) : <tr><div>-</div></tr> }
+                </li>) : <li>-</li> }
             </ul>,
             <button onClick={ this.addNewItem.bind(this) }
                 title={ __('Add %s', itemTypeFriendlyName) }

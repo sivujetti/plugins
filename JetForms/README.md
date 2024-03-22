@@ -97,8 +97,8 @@ form.onSubmit(e => {
 Create file `public/my-site-edit-app-extensions-bundle.js`:
 
 ```
-(function ({api, signals}) {
-    signals.on('edit-app-plugins-loaded', () => {
+(function ({api, events}) {
+    events.on('edit-app-plugins-loaded', () => {
         api.blockTypes.get('JetFormsContactForm').configurePropsWith(props => ({
             ...props,
             ...{useCaptcha: 0},

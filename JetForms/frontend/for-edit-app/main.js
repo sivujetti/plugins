@@ -5,8 +5,8 @@ import EditAppLeftColumnSection from './EditAppLeftColumnSection.jsx';
 import EmailInputBlockType from './EmailInputBlockType.jsx';
 import NumberInputBlockType from './NumberInputBlockType.jsx';
 // import RadioGroupInputBlockType from './RadioGroupInputBlockType.jsx';
-// import SelectInputBlockType from './SelectInputBlockType.jsx';
-// import TextareaInputBlockType from './TextareaInputBlockType.jsx';
+import SelectInputBlockType from './SelectInputBlockType.jsx';
+import TextareaInputBlockType from './TextareaInputBlockType.jsx';
 import TextInputBlockType from './TextInputBlockType.jsx';
 
 if (api.user.getRole() <= api.user.ROLE_EDITOR) {
@@ -17,8 +17,8 @@ api.blockTypes.register(ContactFormBlockType.name, () => ContactFormBlockType);
 api.blockTypes.register(EmailInputBlockType.name, () => EmailInputBlockType);
 api.blockTypes.register(NumberInputBlockType.name, () => NumberInputBlockType);
 // api.blockTypes.register(RadioGroupInputBlockType.name, () => RadioGroupInputBlockType);
-// api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
-// api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
+api.blockTypes.register(SelectInputBlockType.name, () => SelectInputBlockType);
+api.blockTypes.register(TextareaInputBlockType.name, () => TextareaInputBlockType);
 api.blockTypes.register(TextInputBlockType.name, () => TextInputBlockType);
 
 setTimeout(() => {
