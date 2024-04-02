@@ -174,7 +174,7 @@ function ReplyToAddrOrDisplayName({name, val, relevantFormInputInfos, onValueSel
 }
 
 /**
- * @param {RawBlock} block
+ * @param {Block} block
  * @returns {RelevantInputs}
  */
 function getRelevantInputsForReplyTo(block) {
@@ -189,7 +189,7 @@ function getRelevantInputsForReplyTo(block) {
 }
 
 /**
- * @param {RawBlock} itm JetFormsEmailInput|JetFormsTextInput
+ * @param {Block} itm JetFormsEmailInput|JetFormsTextInput
  * @returns {String}
  */
 function getDetailedLabel(itm) {

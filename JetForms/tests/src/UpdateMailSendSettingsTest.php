@@ -50,7 +50,8 @@ final class UpdateMailSendSettingsTest extends SettingsOrSubmissionControllerTes
             "SMTP_host" => $state->testInput->SMTP_host,
             "SMTP_port" => $state->testInput->SMTP_port,
             "SMTP_username" => $state->testInput->SMTP_username,
-            "SMTP_password" => MockCrypto::mockEncrypt($state->testInput->SMTP_password, SIVUJETTI_SECRET),
+            "SMTP_password" => MockCrypto::mockEncrypt($state->testInput->SMTP_password,
+                                                       (require TEST_CONFIG_FILE_PATH)["env"]["SITE_SECRET"]),
             "SMTP_secureProtocol" => $state->testInput->SMTP_secureProtocol,
         ], $actual["data"]);
     }

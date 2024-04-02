@@ -4,7 +4,7 @@ interface ConfigureBehaviourPanelProps {
     onConfigurationChanged: (vals: {[propName: String]: any;}) => void;
     endEditMode: () => void;
     panelHeight: Number;
-    blockCopy: RawBlock;
+    blockCopy: Block;
 }
 
 interface Behaviour {

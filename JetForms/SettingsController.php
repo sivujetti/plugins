@@ -4,6 +4,7 @@ namespace SitePlugins\JetForms;
 
 use Pike\{Request, Response, Validation};
 use Pike\Auth\Crypto;
+use Sivujetti\AppEnv;
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 
 /**
@@ -19,16 +20,20 @@ final class SettingsController {
      * @param \Pike\Response $res
      * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storedObjectsRepo 
      * @param \Pike\Auth\Crypto $crypto
+     * @param \Sivujetti\AppEnv $appEnv
      */
     public function getMailSendSettings(Response $res,
                                         StoredObjectsRepository $storedObjectsRepo,
-                                        Crypto $crypto): void {
+                                        Crypto $crypto,
+                                        AppEnv $appEnv): void {
         $entry = $storedObjectsRepo->find("JetForms:mailSendSettings")->fetch() ?? null;
         if (!$entry) {
             $res->status(404)->json(null);
             return;
         }
-        $entry->data = self::withDecryptedValues($entry->data, $crypto);
+        $entry->data = self::withDecryptedValues($entry->data,
+                                                 $crypto,
+                                                 $appEnv->constants["SITE_SECRET"]);
         $res->json($entry->data);
     }
     /**
@@ -39,11 +44,13 @@ final class SettingsController {
      * @param \Pike\Response $res
      * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storage
      * @param \Pike\Auth\Crypto $crypto
+     * @param \Sivujetti\AppEnv $appEnv
      */
     public function updateMailSendSettings(Request $req,
                                            Response $res,
                                            StoredObjectsRepository $storage,
-                                           Crypto $crypto): void {
+                                           Crypto $crypto,
+                                           AppEnv $appEnv): void {
         if (($errors = self::validateAsd($req->body))) {
             $res->status(400)->json($errors);
             return;
@@ -54,7 +61,7 @@ final class SettingsController {
             "SMTP_port" => $req->body->SMTP_port ?? null,
             "SMTP_username" => $req->body->SMTP_username ?? null,
             "SMTP_password" => $req->body->SMTP_password
-                ? $crypto->encrypt($req->body->SMTP_password, SIVUJETTI_SECRET)
+                ? $crypto->encrypt($req->body->SMTP_password, $appEnv->constants["SITE_SECRET"])
                 : null,
             "SMTP_secureProtocol" => $req->body->SMTP_secureProtocol ?? null,
         ])->execute();
@@ -80,11 +87,18 @@ final class SettingsController {
      *
      * @psalm-param JetFormsMailSendSettings &$mailSettings
      * @param \Pike\Auth\Crypto $crypto
+     * @param ?string $secret = null
      * @psalm-return JetFormsMailSendSettings
      */
-    public static function withDecryptedValues(array &$mailSettings, Crypto $crypto): array {
-        if ($mailSettings["sendingMethod"] === "smtp")
-            $mailSettings["SMTP_password"] = $crypto->decrypt($mailSettings["SMTP_password"], SIVUJETTI_SECRET);
+    public static function withDecryptedValues(array &$mailSettings,
+                                               Crypto $crypto,
+                                               #[\SensitiveParameter]
+                                               ?string $secret = null): array {
+        if ($mailSettings["sendingMethod"] === "smtp") {
+            if (!$secret)
+                $secret = (require SIVUJETTI_INDEX_PATH . "/config.php")["env"]["SITE_SECRET"];
+            $mailSettings["SMTP_password"] = $crypto->decrypt($mailSettings["SMTP_password"], $secret);
+        }
         return $mailSettings;
     }
 }

@@ -1,3 +1,5 @@
+import {urlUtils} from '@sivujetti-commons-for-web-pages';
+
 class ContactFormBlockRenderer extends preact.Component {
     /**
      * @param {BlockRendererProps} props
@@ -12,7 +14,7 @@ class ContactFormBlockRenderer extends preact.Component {
             data-form-type="contact"
             { ...createDefaultProps('jet-form') }>
                 { renderChildren() }
-                <input type="hidden" name="_returnTo" value="todo"/>
+                <input type="hidden" name="_returnTo" value={ `${urlUtils.makeUrl(urlUtils.currentPageSlug)}#contact-form-sent=${block.id}` }/>
                 { block.useCaptcha
                     ? <input type="hidden" name="_cChallenge" value={ block.__captchaChallenge }/>
                     : null

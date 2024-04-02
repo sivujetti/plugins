@@ -16,7 +16,7 @@ class ConfigureBehaviourPanel extends preact.Component {
             const Renderer = ir ? ir.configurerCls : null;
             if (Renderer) {
                 this.setState({Renderer});
-                api.inspectorPanel.getEl().scrollTo({top: 0});
+                api.inspectorPanel.getOuterEl().scrollTo({top: 0});
             }
         } else if (this.state.Renderer && !props.behaviour) {
             this.setState({Renderer: null});

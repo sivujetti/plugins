@@ -5,7 +5,7 @@ namespace SitePlugins\JetForms\Internal;
 use Pike\Auth\Crypto;
 use Pike\Response;
 use SitePlugins\JetForms\BehaviourExecutorInterface;
-use Sivujetti\JsonUtils;
+use Sivujetti\{AppEnv, JsonUtils};
 use Sivujetti\StoredObjects\StoredObjectsRepository;
 
 /**
@@ -17,15 +17,19 @@ use Sivujetti\StoredObjects\StoredObjectsRepository;
 final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterface {
     /** @var \Sivujetti\StoredObjects\StoredObjectsRepository */
     private StoredObjectsRepository $storage;
-    /** @var \Pike\Auth\Crypto */
-    private Crypto $crypto;
+    /** @var \Closure */
+    private \Closure $cryptoMethod;
     /**
      * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storage
      * @param \Pike\Auth\Crypto $crypto
+     * @param \Sivujetti\AppEnv $appEnv
      */
-    public function __construct(StoredObjectsRepository $storage, Crypto $crypto) {
+    public function __construct(StoredObjectsRepository $storage,
+                                Crypto $crypto,
+                                AppEnv $appEnv) {
         $this->storage = $storage;
-        $this->crypto = $crypto;
+        $secret = $appEnv->constants["SITE_SECRET"];
+        $this->cryptoMethod = fn(string $meth, string $arg1) => $crypto->{$meth}($arg1, $secret);
     }
     /**
      * @inheritdoc
@@ -46,7 +50,7 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
             "sentFromPage" => $pageSlug,
             "sentFromBlock" => $blockId,
             "sentFromTree" => $tree,
-            "answers" => $this->crypto->encrypt(JsonUtils::stringify($answers), SIVUJETTI_SECRET),
+            "answers" => $this->cryptoMethod->__invoke("encrypt", JsonUtils::stringify($answers)),
         ]) ?? "";
     }
     /**
@@ -57,7 +61,7 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
         $subs = $this->storage->find("JetForms:submissions")->fetchAll();
         $l = $decrypt ? count($subs) : 0;
         for ($i = 0; $i < $l; ++$i) {
-            $json = $this->crypto->decrypt($subs[$i]->data["answers"], SIVUJETTI_SECRET);
+            $json = $this->cryptoMethod->__invoke("decrypt", $subs[$i]->data["answers"]);
             $subs[$i]->data["answers"] = JsonUtils::parse($json);
         }
         return array_map(fn($sub) => $sub->data, $subs);

@@ -78,7 +78,8 @@ final class RenderContactFormTest extends PluginTestCase {
         $dom = new Document(preg_replace("/&([#A-Za-z0-9]+);/", "%\$1;", $response->getActualBody()));
         $formEl = $dom->first(".jet-form");
         $this->assertNotNull($formEl);
-        $this->assertEquals(Template::makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello/main"),
+        $tmpl = new Template("dummy");
+        $this->assertEquals($tmpl->makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello/main"),
                             $formEl->getAttribute("action"));
         $this->assertEquals("post", $formEl->getAttribute("method"));
         $this->assertEquals("", $formEl->getAttribute("data-form-sent-message"));
@@ -208,7 +209,7 @@ final class RenderContactFormTest extends PluginTestCase {
         $returnToInput = $all[11];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
-        $this->assertEquals(Template::makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
+        $this->assertEquals($tmpl->makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
     }
     public static function createDataForTestContactFormBlock(): object {

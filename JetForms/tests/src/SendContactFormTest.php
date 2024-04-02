@@ -210,7 +210,7 @@ final class SendContactFormTest extends PluginTestCase {
         $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->find("JetForms:submissions")->fetchAll();
         $this->assertCount(1, $all);
         $mockEncryptedAnswers = $all[0]->data["answers"];
-        $decryptedAnswers = MockCrypto::mockDecrypt($mockEncryptedAnswers, SIVUJETTI_SECRET);
+        $decryptedAnswers = MockCrypto::mockDecrypt($mockEncryptedAnswers, (require TEST_CONFIG_FILE_PATH)["env"]["SITE_SECRET"]);
         $parsed = JsonUtils::parse($decryptedAnswers);
         $this->assertEquals([
             (object) ["label" => "Test escape<", "answer" => "Harry Potter"],

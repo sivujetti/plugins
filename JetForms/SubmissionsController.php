@@ -6,7 +6,7 @@ use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use Pike\Auth\Crypto;
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
                                     StoreSubmissionToLocalDbBehaviour};
-use Sivujetti\{App, JsonUtils, LogUtils, SharedAPIContext};
+use Sivujetti\{App, AppEnv, JsonUtils, LogUtils, SharedAPIContext};
 use Sivujetti\Auth\ACL;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
@@ -30,6 +30,7 @@ final class SubmissionsController {
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
      * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
+     * @param \Sivujetti\AppEnv $appEnv
      * @param ?\Closure $errorLogFn = null For tests
      */
     public function handleSubmission(Request $req,
@@ -37,6 +38,7 @@ final class SubmissionsController {
                                      SharedAPIContext $apiCtx,
                                      PagesRepository2 $pagesRepo,
                                      GlobalBlockTreesRepository2 $gbtRepo,
+                                     AppEnv $appEnv,
                                      ?\Closure $errorLogFn = null): void {
         if (($errors = self::validateSubmissionInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
@@ -77,7 +79,7 @@ final class SubmissionsController {
         $pushErrors = is_int($reqUserRole) && $reqUserRole <= ACL::ROLE_AUTHOR;
         for ($i = 0; $i < count($clsStrings); ++$i) {
             try {
-                $result = App::$adi->execute([$clsStrings[$i], "run"], [
+                $result = $appEnv->di->execute([$clsStrings[$i], "run"], [
                     $form->behaviours[$i]->data,
                     $req->body,
                     $res,
@@ -117,17 +119,17 @@ final class SubmissionsController {
         if (!is_string($input) || strlen($input) < 2)
             return false;
         $now = time();
-        $decr = "";
+        $decrypted = "";
         $key = ContactFormBlockType::getSecret();
         try {
-            $decr = (new Crypto)->decrypt($input, $key);
+            $decrypted = (new Crypto)->decrypt($input, $key);
         } catch (PikeException $e) {
             return false;
         }
-        if (!$decr)
+        if (!$decrypted)
             return false; // empty or falsey
-        $asInt = (int) $decr;
-        if (strval($asInt) !== $decr)
+        $asInt = (int) $decrypted;
+        if (strval($asInt) !== $decrypted)
             return false; // not an integer
         $diff = $now - $asInt;
         $twoDays = 60 * 60 * 24;

@@ -6,6 +6,10 @@ use Pike\TestUtils\MockCrypto;
 use Sivujetti\JsonUtils;
 
 final class GetSubmissionsTest extends SettingsOrSubmissionControllerTestCase {
+    private static string $testSiteSecret;
+    public static function setUpBeforeClass(): void {
+        self::$testSiteSecret = (require TEST_CONFIG_FILE_PATH)["env"]["SITE_SECRET"];
+    }
     public function testGetSubmissionsReturnsAndDecryptsDataFromDb(): void {
         $state = $this->setupTest();
         $this->insertTestStoredObjects($state);
@@ -24,7 +28,7 @@ final class GetSubmissionsTest extends SettingsOrSubmissionControllerTestCase {
                 "sentFromTree" => (object) ["id" => "main", "name" => "Main"],
                 "answers" => (new MockCrypto)->encrypt(JsonUtils::stringify([
                     (object) ["label" => "Name", "answer" => "Harry Potter"],
-                ]), SIVUJETTI_SECRET),
+                ]), self::$testSiteSecret),
             ])
         ], (object) [
             "objectName" => "JetForms:submissions",
@@ -35,7 +39,7 @@ final class GetSubmissionsTest extends SettingsOrSubmissionControllerTestCase {
                 "sentFromTree" => (object) ["id" => "-bbbbbbbbbbbbbbbbbbb", "name" => "Footer"],
                 "answers" => (new MockCrypto)->encrypt(JsonUtils::stringify([
                     (object) ["label" => "Email", "answer" => "harry.potter@ministfyofmagic.hm"],
-                ]), SIVUJETTI_SECRET),
+                ]), self::$testSiteSecret),
             ])
         ]];
         $state->spyingResponse = null;
@@ -48,11 +52,11 @@ final class GetSubmissionsTest extends SettingsOrSubmissionControllerTestCase {
     }
     private function verifyReturnedAndDecryptedSubmissionsFromDb(\TestState $state): void {
         $expected1 = JsonUtils::parse($state->testStoredObjects[0]->data);
-        $decryptedAnwsersJson = (new MockCrypto)->decrypt($expected1->answers, SIVUJETTI_SECRET);
+        $decryptedAnwsersJson = (new MockCrypto)->decrypt($expected1->answers, self::$testSiteSecret);
         $expected1->answers = JsonUtils::parse($decryptedAnwsersJson);
         //
         $expected2 = JsonUtils::parse($state->testStoredObjects[1]->data);
-        $decryptedAnwsersJson2 = (new MockCrypto)->decrypt($expected2->answers, SIVUJETTI_SECRET);
+        $decryptedAnwsersJson2 = (new MockCrypto)->decrypt($expected2->answers, self::$testSiteSecret);
         $expected2->answers = JsonUtils::parse($decryptedAnwsersJson2);
         //
         $this->verifyResponseBodyEquals([$expected1, $expected2], $state->spyingResponse);

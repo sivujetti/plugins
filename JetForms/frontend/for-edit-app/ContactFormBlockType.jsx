@@ -1,6 +1,14 @@
-import {__, http, env, Icon, Popup} from '@sivujetti-commons-for-edit-app';
-import ConfigureBehaviourPanel, {createEditPanelState, getBehaviourConfigurerImpl,
-        customBehaviourImpls} from './configuring/ConfigureBehaviourPanel.jsx';
+import {
+    __,
+    env,
+    Icon,
+    Popup,
+} from '@sivujetti-commons-for-edit-app';
+import ConfigureBehaviourPanel, {
+    createEditPanelState,
+    getBehaviourConfigurerImpl,
+    customBehaviourImpls,
+} from './configuring/ConfigureBehaviourPanel.jsx';
 
 const createPropsMutators = [];
 
@@ -145,7 +153,7 @@ class ContactFormEditForm extends preact.Component {
                             const data = name === 'StoreSubmissionToLocalDb'
                                 ? {}
                                 : name === 'SendMail'
-                                    ? createProps().behaviours.find(b => b.name === name)?.data
+                                    ? createDefaultOwnProps().behaviours.find(b => b.name === name)?.data
                                     : null;
                             if (data === null) throw new Error('todo');
                             const parsedNew = addBehaviourTo({name, data}, parsed);
@@ -230,7 +238,10 @@ function getUseEl(nodeName, target) {
     return nodeName === 'use' ? target : nodeName === 'svg' ? target.children[0] : null;
 }
 
-function createProps() {
+/**
+ * @returns {ContactFormBlockProps}
+ */
+function createDefaultOwnProps() {
     return createPropsMutators.reduce((out, fn) => fn(out), {
         behaviours: [
             {name: 'SendMail', data: {
@@ -276,19 +287,6 @@ function getAvailableBehaviours(alreadyAdded, includeTerminators) {
 }
 
 export default {
-    name: 'JetFormsContactForm',
-    friendlyName: 'Contact form (JetForms)',
-    ownPropNames: ['behaviours', 'useCaptcha'],
-    initialChildren: [
-        {blockType: 'JetFormsTextInput', initialOwnData: {name: 'input_1', isRequired: 1, label: '',
-            placeholder: __('Name')}, initialDefaultsData: null},
-        {blockType: 'JetFormsEmailInput', initialOwnData: {name: 'input_2', isRequired: 1, label: '',
-            placeholder: __('Email')}, initialDefaultsData: null},
-        {blockType: 'JetFormsTextareaInput', initialOwnData: {name: 'input_3', isRequired: 0, label: '',
-            placeholder: __('Message'), numRows: 0}, initialDefaultsData: null},
-        {blockType: 'Button', initialOwnData: {html: __('Send'), tagType: 'submit', url: ''},
-            initialDefaultsData: null},
-    ],
     /**
      * @param {String} name
      * @param {BehaviourConfigurerImpl} configurer
@@ -302,22 +300,13 @@ export default {
     configurePropsWith(fn) {
         createPropsMutators.push(fn);
     },
-    /**
-     * @returns {ContactFormBlockProps}
-     */
-    initialData() {
-        const obj = createProps();
-        obj.behaviours = JSON.stringify(obj.behaviours);
-        return obj;
-    },
-    defaultRenderer: 'plugins/JetForms:block-contact-form',
-    icon: 'message-2',
-    reRender(block, _renderChildren) {
-        return http.post(`/api/blocks/render`, {block}).then(resp => resp.result);
-    },
-    createSnapshot: from => ({
-        behaviours: from.behaviours,
-        useCaptcha: from.useCaptcha,
-    }),
+
+    name: 'JetFormsContactForm',
+    friendlyName: 'Contact form (JetForms)',
     editForm: ContactFormEditForm,
+    stylesEditForm: ContactFormEditForm,
+    icon: 'message-2',
+    createOwnProps(_defProps) {
+        return createDefaultOwnProps();
+    }
 };

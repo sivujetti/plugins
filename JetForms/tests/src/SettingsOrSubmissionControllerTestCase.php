@@ -17,7 +17,7 @@ abstract class SettingsOrSubmissionControllerTestCase extends DbTestCase {
         $this->dbDataHelper->insertData((object) ["name" => "JetForms", "isActive" => true], "plugins");
     }
     public static function getDbConfig(): array {
-        return require TEST_CONFIG_FILE_PATH;
+        return (require TEST_CONFIG_FILE_PATH)["app"];
     }
     protected function insertTestStoredObject(\TestState $state): void {
         $this->dbDataHelper->insertData($state->testStoredObject,

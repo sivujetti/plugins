@@ -1,4 +1,4 @@
-class AbtractInputBlockRenderer extends preact.Component {
+class AbstractInputBlockRenderer extends preact.Component {
     /**
      * @returns {{inputType: String; inputMode?: String;}}
      * @access protected
@@ -30,10 +30,10 @@ class AbtractInputBlockRenderer extends preact.Component {
                     ...(block.isRequired ? {'data-pristine-required': true} : {}),
                     ...(inputMode ? {'inputmode': inputMode} : {}),
                 } }>
-                { renderChildren() }
+                    { renderChildren() }
             </El>
         </div>;
     }
 }
 
-export default AbtractInputBlockRenderer;
+export default AbstractInputBlockRenderer;
