@@ -1,6 +1,5 @@
 import {__, api, env, hookForm, unhookForm, reHookValues, Input, InputErrors,
-        FormGroup, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
-import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+        FormGroup, FormGroupInline, setFocusTo, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import CrudList from './CrudList.jsx';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm, {createSelectOrOptionSelectItemCreator} from './SelectOrRadioGroupInputOptionEditForm.jsx';
@@ -115,36 +114,18 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
     }
 }
 
-const blockTypeName = 'JetFormsRadioGroupInput';
-
 export default {
-    name: blockTypeName,
+    name: 'JetFormsRadioGroupInput',
     friendlyName: 'Radio group (JetForms)',
-    initialData: () => ({
-        name: services.idGen.getNextId(),
-        label: '',
-        radios: JSON.stringify([createSelectOrOptionSelectItemCreator().createNewItem()]),
-        isRequired: 1,
-    }),
-    defaultRenderer: 'plugins/JetForms:block-input-radio-group',
     icon: 'circle',
-    reRender({name, label, radios, isRequired, id, styleClasses}, renderChildren) {
-        return ['<div class="j-', blockTypeName, ' form-group',
-            styleClasses ? ` ${styleClasses}` : '',
-            '" data-block-type="', blockTypeName, '" data-block="', id, '">',
-            '<div class="form-label">', label, '</div>',
-            ...JSON.parse(radios).map(radio => ['<label class="form-radio">',
-                '<input name="', name, '" value="', radio.value, '" type="radio"', isRequired ? ' data-pristine-required' : '', '>',
-                '<i class="form-icon"></i> ', radio.text,
-            '</label>']).flat(),
-            renderChildren(),
-        '</div>'].join('');
-    },
-    createSnapshot: from => ({
-        name: from.name,
-        label: from.label,
-        radios: from.radios,
-        isRequired: from.isRequired,
-    }),
     editForm: RadioGroupInputBlockEditForm,
+    stylesEditForm: null,
+    createOwnProps(/*defProps*/) {
+        return {
+            name: services.idGen.getNextId(),
+            label: '',
+            radios: [createSelectOrOptionSelectItemCreator().createNewItem()],
+            isRequired: 1,
+        };
+    }
 };

@@ -2,12 +2,12 @@
 
 namespace SitePlugins\JetForms;
 
-use Sivujetti\BlockType\{BlockTypeInterface, PropertiesBuilder};
+use Sivujetti\BlockType\{BlockTypeInterface, JsxLikeRenderingBlockTypeInterface, PropertiesBuilder};
 use Sivujetti\Page\WebPageAwareTemplate;
 
 use function Sivujetti\createElement as el;
 
-final class SelectInputBlockType implements BlockTypeInterface {
+final class SelectInputBlockType implements BlockTypeInterface, JsxLikeRenderingBlockTypeInterface {
     public const NAME = "JetFormsSelectInput";
     public const DEFAULT_RENDERER = "plugins/JetForms:block-input-select";
     /**

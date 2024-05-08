@@ -1,3 +1,4 @@
+<?php // @deprecated, see ../CheckboxInputBlockType->render() ?>
 <?php if ($props->type === "JetFormsCheckboxInput"):
     echo "<div class=\"j-JetFormsCheckboxInput form-group",
         $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",

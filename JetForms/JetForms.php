@@ -41,11 +41,11 @@ final class JetForms implements UserPluginInterface {
         );
         //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
-// --             $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
+            $api->registerBlockType(CheckboxInputBlockType::NAME, new CheckboxInputBlockType);
             $api->registerBlockType(ContactFormBlockType::NAME, new ContactFormBlockType);
             $api->registerBlockType(EmailInputBlockType::NAME, new EmailInputBlockType);
             $api->registerBlockType(NumberInputBlockType::NAME, new NumberInputBlockType);
-// --             $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
+            $api->registerBlockType(RadioGroupInputBlockType::NAME, new RadioGroupInputBlockType);
             $api->registerBlockType(SelectInputBlockType::NAME, new SelectInputBlockType);
             $api->registerBlockType(TextareaInputBlockType::NAME, new TextareaInputBlockType);
             $api->registerBlockType(TextInputBlockType::NAME, new TextInputBlockType);

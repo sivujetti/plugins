@@ -38,18 +38,16 @@ abstract class InputBlockType implements BlockTypeInterface, JsxLikeRenderingBlo
             el(
                 $El,
                 [
-                    ...[
-                        "name" => $block->name,
-                        "id" => $block->name,
-                        "class" => "form-input"
-                    ],
+                    "name" => $block->name,
+                    "id" => $block->name,
+                    "class" => "form-input",
                     ...$attrs,
                     ...($block->placeholder ? ["placeholder" => $block->placeholder] : []),
-                    ...($block->isRequired ? ["data-pristine-required" => true] : []),
+                    ...($block->isRequired ? ["data-pristine-required" => ""] : []),
                     ...(($settings["inputMode"] ?? null) ? ["inputmode" => $settings["inputMode"]] : []),
-                ],
-                $renderChildren(),
-            )
+                ]
+            ),
+            ...$renderChildren(),
         );
     }
     /**

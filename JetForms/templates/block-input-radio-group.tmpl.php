@@ -1,4 +1,5 @@
-<?= "<div class=\"j-JetFormsRadioGroupInput form-group",
+<?= // @deprecated, see ../RadioGroupInputBlockType->render()
+"<div class=\"j-JetFormsRadioGroupInput form-group",
     $props->styleClasses ? " {$this->escAttr($props->styleClasses)}" : "",
     "\" data-block-type=\"JetFormsRadioGroupInput\" data-block=\"", $props->id, "\">",
     "<label class=\"form-label\">{$this->e($props->label)}</label>";

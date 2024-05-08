@@ -1,5 +1,4 @@
-import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline, validationConstraints} from '@sivujetti-commons-for-edit-app';
-import setFocusTo from '../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
+import {__, env, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline, setFocusTo, validationConstraints} from '@sivujetti-commons-for-edit-app';
 import services from './services.js';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
 
@@ -80,34 +79,17 @@ class CheckboxInputBlockEditForm extends InputEditFormAbstract {
     }
 }
 
-const blockTypeName = 'JetFormsCheckboxInput';
-const checkboxInputBlockType = {
-    name: blockTypeName,
+export default {
+    name: 'JetFormsCheckboxInput',
     friendlyName: 'Checkbox input (JetForms)',
-    initialData: () => ({
-        name: services.idGen.getNextId(),
-        isRequired: 0,
-        label: __('Text'),
-    }),
-    defaultRenderer: 'plugins/JetForms:block-inline-input-auto',
     icon: 'checkbox',
-    reRender({name, isRequired, label, id, styleClasses}, renderChildren) {
-        return ['<div class="j-', blockTypeName, ' form-group',
-                styleClasses ? ` ${styleClasses}` : '',
-                '" data-block-type="', blockTypeName, '" data-block="', id,
-            '"><label class="form-checkbox">',
-                '<input name="', name, '" type="checkbox"', isRequired ? ' data-pristine-required' : '', '>',
-                '<i class="form-icon"></i> ', label,
-            '</label>',
-            renderChildren(),
-        '</div>'].join('');
-    },
-    createSnapshot: from => ({
-        name: from.name,
-        isRequired: from.isRequired,
-        label: from.label,
-    }),
     editForm: CheckboxInputBlockEditForm,
+    stylesEditForm: null,
+    createOwnProps(/*defProps*/) {
+        return {
+            name: services.idGen.getNextId(),
+            isRequired: 0,
+            label: __('Text'),
+        };
+    }
 };
-
-export default checkboxInputBlockType;
