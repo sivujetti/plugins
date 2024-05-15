@@ -1,6 +1,6 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 import CheckboxInputBlockType from './block-types/CheckboxInputBlockType.jsx';
-import ContactFormBlockType from './ContactFormBlockType.jsx';
+import ContactFormBlockType from './block-types/ContactFormBlockType.jsx';
 import EditAppLeftColumnSection from './EditAppLeftColumnSection.jsx';
 import EmailInputBlockType from './block-types/EmailInputBlockType.jsx';
 import NumberInputBlockType from './block-types/NumberInputBlockType.jsx';

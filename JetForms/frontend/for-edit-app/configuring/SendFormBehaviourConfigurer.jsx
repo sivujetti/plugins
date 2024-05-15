@@ -1,8 +1,8 @@
 import {__, api, Icon, hookForm, unhookForm, reHookValues, Input, Textarea, FormGroupInline,
-        FormGroup, InputErrors, validationConstraints, stringUtils} from '@sivujetti-commons-for-edit-app';
-import {createTrier} from '../../../../../../frontend/edit-app/src/block/dom-commons.js';
-import setFocusTo from '../../../../../../frontend/edit-app/src/block-types/auto-focusers.js';
-import blockTreeUtils from '../../../../../../frontend/edit-app/src/left-column/block/blockTreeUtils.js';
+        FormGroup, InputErrors, validationConstraints, setFocusTo, stringUtils,
+        traverseRecursively,
+        blockTreeUtils,
+        isUndoOrRedo} from '@sivujetti-commons-for-edit-app';
 
 class SendFormBehaviourConfigurer extends preact.Component {
     // toAddrInputEl;
@@ -14,7 +14,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
     componentWillMount() {
         this.toAddrInputEl = preact.createRef();
         this.bodyTemplateInputEl = preact.createRef();
-        this.showTechnicalInputs = api.user.getRole() < api.user.ROLE_EDITOR;
+        this.showTechnicalInputs = api.user.getRole() <= api.user.ROLE_ADMIN_EDITOR;
         this.setState(hookForm(this, [
             {name: 'subjectTemplate', value: this.props.subjectTemplate, validations: [['required'], ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]], label: __('Subject'),
              onAfterValueChanged: (value, hasErrors) => { if (!hasErrors) this.props.onConfigurationChanged({subjectTemplate: value}); }},
@@ -31,7 +31,16 @@ class SendFormBehaviourConfigurer extends preact.Component {
         ], {
             replyToAddress: this.props.replyToAddress,
             replyToName: this.props.replyToName,
+            replyToInputs: getRelevantInputsForReplyTo(this.props.block),
         }));
+        this.unregistrables = [api.saveButton.getInstance().subscribeToChannel('theBlockTree', (theTree, _userCtx, ctx) => {
+            if (!isUndoOrRedo(ctx)) return;
+            const [block] = blockTreeUtils.findBlockMultiTree(this.props.block.id, theTree);
+            if (!block) return;
+            const maybeChanged = getRelevantInputsForReplyTo(block);
+            if (JSON.stringify(maybeChanged) !== JSON.stringify(this.state.replyToInputs))
+                this.setState({replyToInputs: maybeChanged});
+        })];
     }
     /**
      * @param {{subjectTemplate: String; toAddress: String; toName: String; fromAddress: String; fromName: String; replyToAddress: String; replyToName: String; bodyTemplate: String;} & ConfigureBehaviourPanelProps} props
@@ -76,13 +85,13 @@ class SendFormBehaviourConfigurer extends preact.Component {
      * @access protected
      */
     componentWillUnmount() {
+        this.unregistrables.forEach(unreg => unreg());
         unhookForm(this);
     }
     /**
      * @access protected
      */
-    render(_, {replyToAddress, replyToName}) {
-        const replyToInputs = getRelevantInputsForReplyTo(this.props.blockCopy);
+    render(_, {replyToAddress, replyToName, replyToInputs}) {
         return <div class="form-horizontal pt-0">
             { this.showTechnicalInputs ? null : <div class="with-icon text-tiny py-1">
                 <Icon iconId="info-circle" className="size-xs"/>
@@ -179,7 +188,7 @@ function ReplyToAddrOrDisplayName({name, val, relevantFormInputInfos, onValueSel
  */
 function getRelevantInputsForReplyTo(block) {
     const out = {emailInputs: [], textInputs: []};
-    blockTreeUtils.traverseRecursively([block], itm => {
+    traverseRecursively([block], itm => {
         if (itm.type === 'JetFormsEmailInput')
             out.emailInputs.push({name: itm.name, label: getDetailedLabel(itm)});
         if (itm.type === 'JetFormsTextInput')
@@ -195,6 +204,38 @@ function getRelevantInputsForReplyTo(block) {
 function getDetailedLabel(itm) {
     const labelOrPlaceholder = itm.label || itm.placeholder;
     return labelOrPlaceholder ? `${labelOrPlaceholder} (${itm.name})` : itm.name;
+}
+
+/**
+ * Calls $fn once every $tryEveryMillis until it returns true or $stopTryingAfterNTimes
+ * is reached.
+ *
+ * @param {() => Boolean} fn
+ * @param {Number} tryEveryMillis = 200
+ * @param {Number} stopTryingAfterNTimes = 5
+ * @param {String} messageTmpl = 'fn() did not return true after %sms'
+ * @returns {fn() => void}
+ */
+function createTrier(fn,
+                     tryEveryMillis = 200,
+                     stopTryingAfterNTimes = 5,
+                     messageTmpl = 'fn() did not return true after %sms') {
+    let tries = 0;
+    const callTryFn = () => {
+        const ret = fn();
+        if (ret === true) {
+            return;
+        }
+        if (ret === false) {
+            if (++tries < stopTryingAfterNTimes)
+                setTimeout(callTryFn, tryEveryMillis);
+            else if (messageTmpl.length)
+                window.console.error(messageTmpl.replace('%s', tries * tryEveryMillis));
+        } else {
+            throw new Error('fn must return true or false, got: ', ret);
+        }
+    };
+    return callTryFn;
 }
 
 /**

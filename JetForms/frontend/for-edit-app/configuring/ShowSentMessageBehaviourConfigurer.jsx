@@ -31,7 +31,7 @@ class ShowSentMessageBehaviourConfigurer extends preact.Component {
      */
     render() {
         return [
-            <select class="form-select" disabled>
+            <select class="form-select mt-2" name="placement" disabled>
                 <option>Lomakkeen yläpuolella</option>
             </select>,
             <FormGroupInline>

@@ -25,11 +25,11 @@ class ConfigureBehaviourPanel extends preact.Component {
     /**
      * @access protected
      */
-    render({behaviour, panelHeight, cssClass, endEditMode, onConfigurationChanged, blockCopy}, {Renderer}) {
+    render({behaviour, panelHeight, cssClass, endEditMode, onConfigurationChanged, block}, {Renderer}) {
         return <div class={ cssClass } style={ `top: -${panelHeight + 8}px` }>{ Renderer ? [
             <button onClick={ endEditMode } class="btn btn-sm" type="button"> &lt; </button>,
             <div class="form-horizontal pt-0">
-                <Renderer { ...behaviour.data } onConfigurationChanged={ onConfigurationChanged } blockCopy={ blockCopy }/>
+                <Renderer { ...behaviour.data } onConfigurationChanged={ onConfigurationChanged } block={ block }/>
             </div>
         ] : null }</div>;
     }

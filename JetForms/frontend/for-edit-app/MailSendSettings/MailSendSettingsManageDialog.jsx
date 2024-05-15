@@ -42,7 +42,7 @@ class MailSendSettingsManageDialog extends preact.Component {
      * @access protected
      */
     render(_, {sendingMethod, formIsSubmittingClass, showPasswordVisually}) {
-        return <form onSubmit={ e => handleSubmit(this, this.applyCreateGlobalBlockTree.bind(this), e) }>
+        return <form onSubmit={ e => handleSubmit(this, this.applySaveMailSettings.bind(this), e) }>
             <div class="mb-1">{ __('jetFormsTodo1') }</div>
             { sendingMethod ? [<div>
                 <div class="form-label">{ __('Send method') }</div>
@@ -123,7 +123,7 @@ class MailSendSettingsManageDialog extends preact.Component {
     /**
      * @access private
      */
-    applyCreateGlobalBlockTree() {
+    applySaveMailSettings() {
         const mailSendSettings = Object.assign(
             {
                 sendingMethod: this.state.sendingMethod,

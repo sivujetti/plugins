@@ -1,18 +1,16 @@
 import {
     __,
-    env,
     Icon,
+    objectUtils,
     Popup,
 } from '@sivujetti-commons-for-edit-app';
 import ConfigureBehaviourPanel, {
     createEditPanelState,
     getBehaviourConfigurerImpl,
     customBehaviourImpls,
-} from './configuring/ConfigureBehaviourPanel.jsx';
+} from '../configuring/ConfigureBehaviourPanel.jsx';
 
 const createPropsMutators = [];
-
-const childChangeEvents = ['theBlockTree/applySwap', 'theBlockTree/applyAdd(Drop)Block', 'theBlockTree/deleteBlock', 'theBlockTree/undoAdd(Drop)Block', 'theBlockTree/cloneItem', 'theBlockTree/undo'];
 
 class ContactFormEditForm extends preact.Component {
     // outerEl;
@@ -22,57 +20,46 @@ class ContactFormEditForm extends preact.Component {
      * @access protected
      */
     componentWillMount() {
-        const {getBlockCopy} = this.props;
+        const {block} = this.props;
         this.outerEl = preact.createRef();
         this.addBehaviourBtn = preact.createRef();
         this.customTerminatorsExist = Array.from(customBehaviourImpls.values()).reduce((has, {isTerminator}) =>
             has ? has : isTerminator === true
         , false);
         //
-        const blockCopy = getBlockCopy();
-        const {behaviours, id} = blockCopy;
-        this.setState({asJson: behaviours, parsed: JSON.parse(behaviours),
-                        editPanelState: createEditPanelState(), blockCopy});
-        //
-        this.unregistrables = [this.props.observeStore('theBlockTree', (_, [event, data]) => {
-            if ((event === 'theBlockTree/updatePropsOf' && data[0] === id) ||
-                (event === 'theBlockTree/undo' && data[1] === id)) {
-                const block = this.props.getBlockCopy();
-                if (block.behaviours !== this.state.asJson) {
-                    const parsed = JSON.parse(block.behaviours);
-                    const openBehaviourName = this.state.editPanelState.behaviour?.name;
-                    const openBehaviourNext = parsed.find(({name}) => name === openBehaviourName);
-                    this.setState({asJson: block.behaviours, parsed, blockCopy: block,
-                        editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
-                                                                this.state.editPanelState.rightClass)});
-                }
-            } else if (childChangeEvents.indexOf(event) > -1) {
-                const block = this.props.getBlockCopy();
-                if (block && this.props.serializeTree(block.children) !== this.props.serializeTree(this.state.blockCopy.children))
-                    this.setState({blockCopy: block});
-            }
-        })];
-    }
-    /**
-     * @access protected
-     */
-    componentWillUnmount() {
-        this.unregistrables.forEach(unreg => unreg());
+        this.setState({behaviours: objectUtils.cloneDeep(block.behaviours),
+                        editPanelState: createEditPanelState(), block});
     }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({emitValueChanged}, {parsed, editPanelState, curPopupRenderer, blockCopy}) {
+    componentWillReceiveProps(props) {
+        const {block} = props;
+        if (block !== this.props.block &&
+            JSON.stringify(block.behaviours) !== JSON.stringify(this.state.behaviours)) {
+            const behaviours = objectUtils.cloneDeep(block.behaviours);
+            const openBehaviourName = this.state.editPanelState.behaviour?.name;
+            const openBehaviourNext = behaviours.find(({name}) => name === openBehaviourName);
+            this.setState({behaviours,
+                editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
+                                                        this.state.editPanelState.rightClass)});
+        }
+    }
+    /**
+     * @param {BlockEditFormProps} props
+     * @access protected
+     */
+    render({block, emitValueChanged, emitValueChangedThrottled}, {behaviours, editPanelState, curPopupRenderer}) {
         if (!editPanelState) return;
-        const last = parsed.at(-1);
+        const last = behaviours.at(-1);
         const hasTerminator = getBehaviourConfigurerImpl(last.name).isTerminator;
-        const names = getAvailableBehaviours(parsed.map(({name}) => name), !hasTerminator);
+        const names = getAvailableBehaviours(behaviours.map(({name}) => name), !hasTerminator);
         const [before, after] = hasTerminator
-            ? [parsed.slice(0,-1), [last]] // [...notLast, btn|null, ...[last]]
-            : [parsed,             []];    // [...all,     btn|null, ...[]]
+            ? [behaviours.slice(0,-1), [last]] // [...notLast, btn|null, ...[last]]
+            : [behaviours,             []];    // [...all,     btn|null, ...[]]
         const vm = this;
-        const isEmpty = (parsed.length - (hasTerminator ? 1 : 0)) === 0;
+        const isEmpty = (behaviours.length - (hasTerminator ? 1 : 0)) === 0;
         const addBehOddCls = before.length % 2 > 0 ? ' group-p-odd' : '';
         return <div class="anim-outer pt-1">
             <div class={ `instructions-list d-flex ${editPanelState.leftClass}` } ref={ this.outerEl }>
@@ -128,11 +115,11 @@ class ContactFormEditForm extends preact.Component {
                 behaviour={ editPanelState.behaviour }
                 cssClass={ editPanelState.rightClass }
                 onConfigurationChanged={ vals => {
-                    const parsedNew = parsed.map(beh => beh !== editPanelState.behaviour
+                    const behavioursNew = behaviours.map(beh => beh !== editPanelState.behaviour
                         ? beh
                         : {...beh, ...{data: {...beh.data, ...vals}}}
                     );
-                    emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+                    emitValueChangedThrottled(behavioursNew, 'behaviours');
                 } }
                 endEditMode={ () => {
                     this.setState({editPanelState: createEditPanelState(null, 'reveal-from-left', 'fade-to-right')});
@@ -141,7 +128,7 @@ class ContactFormEditForm extends preact.Component {
                     ? 0
                     : this.outerEl.current.getBoundingClientRect().height
                 }
-                blockCopy={ blockCopy }/>
+                block={ block }/>
             { curPopupRenderer
                 ? <Popup
                     Renderer={ curPopupRenderer }
@@ -156,9 +143,9 @@ class ContactFormEditForm extends preact.Component {
                                     ? createDefaultOwnProps().behaviours.find(b => b.name === name)?.data
                                     : null;
                             if (data === null) throw new Error('todo');
-                            const parsedNew = addBehaviourTo({name, data}, parsed);
+                            const behavioursNew = addBehaviourTo({name, data}, behaviours);
                             vm.setState({curPopupRenderer: null});
-                            emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+                            emitValueChanged(behavioursNew, 'behaviours');
                         },
                     } }
                     btn={ this.addBehaviourBtn.current }
@@ -187,16 +174,10 @@ class ContactFormEditForm extends preact.Component {
         const useEl = a ? null : getUseEl(nodeName, target);
         if (a || useEl && useEl.nodeName === 'use' && useEl.href.baseVal.endsWith('-settings'))
             this.showConfigurerPanel(behaviour);
-        else
-            this.removeBehaviourAndEmit(behaviour);
-    }
-    /**
-     * @param {Behaviour} behaviour
-     * @access private
-     */
-    removeBehaviourAndEmit(behaviour) {
-        const parsedNew = this.state.parsed.filter(beh => beh !== behaviour);
-        this.props.emitValueChanged(JSON.stringify(parsedNew), 'behaviours', false, env.normalTypingDebounceMillis);
+        else {
+            const behavioursNew = this.state.behaviours.filter(beh => beh !== behaviour);
+            this.props.emitValueChanged(behavioursNew, 'behaviours');
+        }
     }
 }
 
@@ -300,7 +281,6 @@ export default {
     configurePropsWith(fn) {
         createPropsMutators.push(fn);
     },
-
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form (JetForms)',
     editForm: ContactFormEditForm,
