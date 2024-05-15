@@ -1,13 +1,13 @@
 import {api} from '@sivujetti-commons-for-edit-app';
-import CheckboxInputBlockType from './CheckboxInputBlockType.jsx';
+import CheckboxInputBlockType from './block-types/CheckboxInputBlockType.jsx';
 import ContactFormBlockType from './ContactFormBlockType.jsx';
 import EditAppLeftColumnSection from './EditAppLeftColumnSection.jsx';
-import EmailInputBlockType from './EmailInputBlockType.jsx';
-import NumberInputBlockType from './NumberInputBlockType.jsx';
-import RadioGroupInputBlockType from './RadioGroupInputBlockType.jsx';
-import SelectInputBlockType from './SelectInputBlockType.jsx';
-import TextareaInputBlockType from './TextareaInputBlockType.jsx';
-import TextInputBlockType from './TextInputBlockType.jsx';
+import EmailInputBlockType from './block-types/EmailInputBlockType.jsx';
+import NumberInputBlockType from './block-types/NumberInputBlockType.jsx';
+import RadioGroupInputBlockType from './block-types/RadioGroupInputBlockType.jsx';
+import SelectInputBlockType from './block-types/SelectInputBlockType.jsx';
+import TextareaInputBlockType from './block-types/TextareaInputBlockType.jsx';
+import TextInputBlockType from './block-types/TextInputBlockType.jsx';
 
 if (api.user.getRole() <= api.user.ROLE_EDITOR) {
     api.menuPanel.registerSection('plugin:jetForms', EditAppLeftColumnSection);

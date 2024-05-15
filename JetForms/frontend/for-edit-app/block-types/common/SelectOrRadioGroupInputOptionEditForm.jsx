@@ -7,11 +7,16 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
      */
     constructor(props) {
         super(props);
+        console.log('on m',this);
         this.state = hookForm(this, [
             {name: 'text', value: props.item.text, validations: [['minLength', 1]], label: __('Option text'),
-             onAfterValueChanged: (value, hasErrors) => { if (!hasErrors) this.props.onValueChanged(value, 'text'); }},
+             onAfterValueChanged: (value, hasErrors, _source) => {
+                if (!hasErrors) this.props.onValueChanged(value, 'text');
+            }},
             {name: 'value', value: props.item.value, validations: [['minLength', 1]], label: __('Option value'),
-             onAfterValueChanged: (value, hasErrors) => { if (!hasErrors) this.props.onValueChanged(value, 'value'); }},
+             onAfterValueChanged: (value, hasErrors, _source) => {
+                if (!hasErrors) this.props.onValueChanged(value, 'value');
+            }},
         ]);
     }
     /**
@@ -19,7 +24,10 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
      * @access public
      */
     overrideValues(item) {
-        reHookValues(this, [{name: 'text', value: item.text}, {name: 'value', value: item.value}]);
+        reHookValues(this, [
+            {name: 'text', value: item.text},
+            {name: 'value', value: item.value},
+        ]);
     }
     /**
      * @access protected

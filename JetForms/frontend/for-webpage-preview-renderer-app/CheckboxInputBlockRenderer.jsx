@@ -9,7 +9,7 @@ class CheckboxInputBlockRenderer extends preact.Component {
                 <input
                     name={ `${block.name}` }
                     type="checkbox"
-                    { ...(block.isRequired ? {'data-pristine-required': true} : {}) }/>
+                    { ...(block.isRequired ? {'data-pristine-required': ''} : {}) }/>
                 <i class="form-icon"></i> { block.label }
             </label>
             { renderChildren() }

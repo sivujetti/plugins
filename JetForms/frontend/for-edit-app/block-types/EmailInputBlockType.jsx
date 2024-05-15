@@ -1,5 +1,5 @@
 import {__} from '@sivujetti-commons-for-edit-app';
-import createInputBlockType from './InputBlockType.jsx';
+import createInputBlockType from './common/InputBlockType.jsx';
 
 const emailInputBlockType = createInputBlockType({
     name: 'EmailInput',

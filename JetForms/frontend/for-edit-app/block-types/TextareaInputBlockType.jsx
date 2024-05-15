@@ -1,4 +1,4 @@
-import createInputBlockType from './InputBlockType.jsx';
+import createInputBlockType from './common/InputBlockType.jsx';
 
 const textareaInputBlockType = createInputBlockType({
     name: 'TextareaInput',

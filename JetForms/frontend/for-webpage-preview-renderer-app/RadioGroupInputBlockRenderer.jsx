@@ -13,7 +13,7 @@ class RadioGroupInputBlockRenderer extends preact.Component {
                     name={ block.name }
                     value={ radio.value }
                     type="radio"
-                    { ...(block.isRequired ? {'data-pristine-required': true} : {}) }/>
+                    { ...(block.isRequired ? {'data-pristine-required': ''} : {}) }/>
                 <i class="form-icon"></i> { radio.text }
             </label>) }
             { renderChildren() }

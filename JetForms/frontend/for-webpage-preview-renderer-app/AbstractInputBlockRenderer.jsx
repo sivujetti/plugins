@@ -27,7 +27,7 @@ class AbstractInputBlockRenderer extends preact.Component {
                 { ...{
                     ...attrs,
                     ...(block.placeholder ? {'placeholder': block.placeholder} : {}),
-                    ...(block.isRequired ? {'data-pristine-required': true} : {}),
+                    ...(block.isRequired ? {'data-pristine-required': ''} : {}),
                     ...(inputMode ? {'inputmode': inputMode} : {}),
                 } }>
                     { renderChildren() }
