@@ -86,6 +86,12 @@ api.registerTranslationStrings({
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Lyhyt tekstikenttä (JetForms)',
     // ../../std-styles.md
+    // JetForms*Input
+    'Background focus': 'Tausta focus',
+    'Border focus': 'Reunus focus',
+    'Outline focus': 'Varjo focus',
+    'Placeholder text': 'Placeholder-teksti',
+    'Error text': 'Virheteksti',
     // JetFormsEmailInput
     'Font size': 'Fonttikoko',
     'Padding y input': 'Täyte y kentät',

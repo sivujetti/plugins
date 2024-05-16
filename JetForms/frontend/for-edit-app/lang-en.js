@@ -86,6 +86,12 @@ api.registerTranslationStrings({
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Short text input (JetForms)',
     // ../../std-styles.md
+    // JetForms*Input
+    'Background focus': 'Background focus',
+    'Border focus': 'Border focus',
+    'Outline focus': 'Shadow focus',
+    'Placeholder text': 'Placeholder text',
+    'Error text': 'Error text',
     // JetFormsEmailInput
     'Font size': 'Font size',
     'Padding y input': 'Padding y input',

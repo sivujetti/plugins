@@ -1,7 +1,17 @@
-import {__, hookForm, unhookForm, reHookValues, Input, InputErrors, FormGroupInline,
-        setFocusTo, validationConstraints} from '@sivujetti-commons-for-edit-app';
+import {
+    __,
+    FormGroupInline,
+    hookForm,
+    Input,
+    InputErrors,
+    reHookValues,
+    setFocusTo,
+    unhookForm,
+    validationConstraints,
+} from '@sivujetti-commons-for-edit-app';
 import services from '../../services.js';
 import InputEditFormAbstract from './InputEditFormAbstract.jsx';
+import {createVisualEditFormAuto} from './style-forms-utils.js';
 
 class InputBlockEditForm extends InputEditFormAbstract {
     // labelInput;
@@ -139,7 +149,7 @@ export default settings => ({
     name: `JetForms${settings.name}`,
     friendlyName: settings.friendlyName,
     editForm: InputBlockEditForm,
-    stylesEditForm: settings.StylesEditForm,
+    stylesEditForm: settings.StylesEditForm || createVisualEditFormAuto(settings.name),
     createOwnProps(_defProps) {
         return {...{
             name: services.idGen.getNextId(),
