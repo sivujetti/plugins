@@ -46,17 +46,24 @@ function createVisualEditFormAuto(inputNameId) {
                     ];
                 }
                 if (varName === 'outlineFocusColor') {
-                    const def = cssVarDefs.find(d => d.varName === varName);
-                    return [
-                        `${def.cssSubSelector} {`,
-                        `  box-shadow: 0 0 0 0.1rem %s;`,
-                        `}`,
-                    ];
+                    return createFocusOutlineCodeTemplate(cssVarDefs.find(d => d.varName === varName));
                 }
                 return stock(varName, val);
             };
         }
     };
+}
+
+/**
+ * @param {VisualStylesFormVarDefinition} varDef
+ * @returns {scssCodeInput}
+ */
+function createFocusOutlineCodeTemplate(varDef) {
+    return [
+        `${varDef.cssSubSelector} {`,
+        `  box-shadow: 0 0 0 0.1rem %s;`,
+        `}`,
+    ];
 }
 
 const innerScopes = {
@@ -205,4 +212,4 @@ function createCommonVarDefs(inputNameId) {
     ];
 }
 
-export {createVisualEditFormAuto};
+export {createFocusOutlineCodeTemplate, createVisualEditFormAuto};

@@ -96,7 +96,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
             </FormGroupInline>
             { this.showTechnicalInputs ? <FormGroupInline>
                 <label htmlFor="name" class="form-label">Id</label>
-                <Input vm={ this } prop="name"/>
+                <Input vm={ this } prop="name" id="name"/>
                 <InputErrors vm={ this } prop="name"/>
             </FormGroupInline> : null }
         </div>,

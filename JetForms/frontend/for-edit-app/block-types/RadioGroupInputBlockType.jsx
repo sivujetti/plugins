@@ -1,11 +1,23 @@
-import {__, api, hookForm, unhookForm, reHookValues, Input, InputErrors,
-        FormGroup, FormGroupInline, setFocusTo, validationConstraints, objectUtils} from '@sivujetti-commons-for-edit-app';
+import {
+    __,
+    FormGroup,
+    FormGroupInline,
+    hookForm,
+    Input,
+    InputErrors,
+    objectUtils,
+    reHookValues,
+    setFocusTo,
+    unhookForm,
+    validationConstraints,
+} from '@sivujetti-commons-for-edit-app';
 import CrudList from '../CrudList.jsx';
 import services from '../services.js';
 import InputEditFormAbstract from './common/InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm, {
     createSelectOrOptionSelectItemCreator
 } from './common/SelectOrRadioGroupInputOptionEditForm.jsx';
+import RadioGroupInputBlockVisualStylesEditForm from './RadioGroupInputBlockVisualStylesEditForm.jsx';
 
 class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
     // valueCreator;
@@ -117,7 +129,7 @@ export default {
     friendlyName: 'Radio group (JetForms)',
     icon: 'circle',
     editForm: RadioGroupInputBlockEditForm,
-    stylesEditForm: null,
+    stylesEditForm: RadioGroupInputBlockVisualStylesEditForm,
     createOwnProps(/*defProps*/) {
         return {
             name: services.idGen.getNextId(),

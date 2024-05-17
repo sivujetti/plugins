@@ -86,18 +86,26 @@ api.registerTranslationStrings({
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Lyhyt tekstikenttä (JetForms)',
     // ../../std-styles.md
+    // Base vars
+    'Inputs font size': 'Inputs fonttikoko',
+    'Inputs text': 'Inputs teksti',
+    'Inputs border': 'Inputs reunus',
+    'Inputs border focus': 'Inputs reunus focus',
+    'Inputs border width': 'Inputs reunus paksuus',
+    'Inputs radius': 'Inputs pyöristys',
+    'Inputs background': 'Inputs tausta',
+    'Inputs checkbox selected': 'Inputs checkbox valittu',
+    'Inputs focus shadow': 'Inputs focus varjo',
+    'Inputs placeholder-text': 'Inputs placeholder-teksti',
+    // ContactForm
+    'Gap ↕': 'Gäppi ↕',
     // JetForms*Input
     'Background focus': 'Tausta focus',
     'Border focus': 'Reunus focus',
     'Outline focus': 'Varjo focus',
     'Placeholder text': 'Placeholder-teksti',
     'Error text': 'Virheteksti',
-    // JetFormsEmailInput
-    'Font size': 'Fonttikoko',
-    'Padding y input': 'Täyte y kentät',
-    'Padding x input': 'Täyte x kentät',
-    // JetFormsEmailInput
-    'Placeholder': 'Placeholder / Vihje',
     // JetFormsRadioGroupInput
-    'Text options': 'Text options',
+    'Text options': 'Teksti vaihtoehdot',
+    'Checked': 'Valinta',
 });

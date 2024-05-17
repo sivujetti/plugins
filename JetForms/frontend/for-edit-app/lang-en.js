@@ -86,18 +86,26 @@ api.registerTranslationStrings({
     // TextInputBlockType.jsx
     'Short text input (JetForms)': 'Short text input (JetForms)',
     // ../../std-styles.md
+    // Base vars
+    'Inputs font size': 'Inputs font size',
+    'Inputs text': 'Inputs text',
+    'Inputs border': 'Inputs border',
+    'Inputs border focus': 'Inputs border focus',
+    'Inputs border width': 'Inputs border width',
+    'Inputs radius': 'Inputs radius',
+    'Inputs background': 'Inputs background',
+    'Inputs checkbox selected': 'Inputs checkbox selected',
+    'Inputs focus shadow': 'Inputs focus shadow',
+    'Inputs placeholder-text': 'Inputs placeholder-text',
+    // ContactForm
+    'Gap ↕': 'Gap ↕',
     // JetForms*Input
     'Background focus': 'Background focus',
     'Border focus': 'Border focus',
     'Outline focus': 'Shadow focus',
     'Placeholder text': 'Placeholder text',
     'Error text': 'Error text',
-    // JetFormsEmailInput
-    'Font size': 'Font size',
-    'Padding y input': 'Padding y input',
-    'Padding x input': 'Padding x input',
-    // JetFormsEmailInput
-    'Placeholder': 'Placeholder',
     // JetFormsRadioGroupInput
     'Text options': 'Text options',
+    'Checked': 'Checked',
 });

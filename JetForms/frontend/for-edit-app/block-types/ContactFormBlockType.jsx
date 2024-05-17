@@ -9,6 +9,7 @@ import ConfigureBehaviourPanel, {
     getBehaviourConfigurerImpl,
     customBehaviourImpls,
 } from '../configuring/ConfigureBehaviourPanel.jsx';
+import ContactFormBlockVisualStylesEditForm from './ContactFormBlockVisualStylesEditForm.jsx';
 
 const createPropsMutators = [];
 
@@ -284,7 +285,7 @@ export default {
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form (JetForms)',
     editForm: ContactFormEditForm,
-    stylesEditForm: ContactFormEditForm,
+    stylesEditForm: ContactFormBlockVisualStylesEditForm,
     icon: 'message-2',
     createOwnProps(_defProps) {
         return createDefaultOwnProps();
