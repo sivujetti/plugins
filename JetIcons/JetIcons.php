@@ -18,10 +18,10 @@ final class JetIcons implements UserPluginInterface {
         //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
             $api->registerBlockType(IconBlockType::NAME, new IconBlockType);
-            $api->registerBlockRenderer(IconBlockType::DEFAULT_RENDERER);
             //
             $api->enqueueEditAppJsFile("plugin-jet-icons-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-icons-edit-app-bundle.js");
+            $api->enqueuePreviewAppJsFile("plugin-jet-icons-webpage-preview-renderer-app-bundle.js");
         });
     }
     /**

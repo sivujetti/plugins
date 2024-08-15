@@ -1,4 +1,15 @@
-import {__, api, env, http, stringUtils, timingUtils, Icon, LoadingSpinner} from '@sivujetti-commons-for-edit-app';
+import {
+    __,
+    api,
+    env,
+    getFromLocalStorage,
+    http,
+    Icon,
+    LoadingSpinner,
+    putToLocalStorage,
+    stringUtils,
+    timingUtils,
+} from '@sivujetti-commons-for-edit-app';
 
 const PAGE_SIZE = 40;
 
@@ -17,8 +28,7 @@ class IconBlockEditForm extends preact.Component {
      */
     constructor(props) {
         super(props);
-        const {getBlockCopy, grabChanges} = this.props;
-        const iconIdInitial = getBlockCopy().iconId;
+        const iconIdInitial = this.props.block.iconId;
         this.gridEl = preact.createRef();
         const createState = (iconId = '', allIcons = null) => ({
             iconId: iconId,
@@ -29,23 +39,19 @@ class IconBlockEditForm extends preact.Component {
         if (!cachedAvailableIcons) {
             this.state = createState(iconIdInitial);
             //
-            const cachedResponse = env.window.localStorage.sivujettiIconBlockCachedTablerIcons;
+            const cachedResponse = getFromLocalStorage('sivujettiIconBlockCachedTablerIcons');
             const promise = cachedResponse ? Promise.resolve({icons: JSON.parse(cachedResponse)}) : http.get('/plugins/jet-icons/icons-pack-icons/default');
             promise.then(resp => {
                 if (!Array.isArray(resp.icons)) throw new Error('');
                 cachedAvailableIcons = resp.icons;
                 cachedIconIndices = cachedAvailableIcons.reduce((map, icon, i) => map.set(icon.iconId, i), new Map);
-                if (!cachedResponse) env.window.localStorage.sivujettiIconBlockCachedTablerIcons = JSON.stringify(cachedAvailableIcons);
+                if (!cachedResponse) putToLocalStorage(JSON.stringify(cachedAvailableIcons), 'sivujettiIconBlockCachedTablerIcons');
                 this.setState(createState(iconIdInitial, cachedAvailableIcons));
             })
             .catch(env.window.console.error);
         } else {
             this.state = this.setState(createState(iconIdInitial, cachedAvailableIcons));
         }
-        grabChanges((block, _origin, _isUndo) => {
-            if (this.state.iconId !== block.iconId)
-                this.setState({iconId: block.iconId});
-        });
         this.throttledReceiveFilterTerm = timingUtils.debounce(e => {
             if (!cachedAvailableIcons) return;
             this.setState({searchTerm: e.target.value});
@@ -63,7 +69,7 @@ class IconBlockEditForm extends preact.Component {
      * @access protected
      */
     componentDidMount() {
-        const scrollEl = api.inspectorPanel.getEl();
+        const scrollEl = api.inspectorPanel.getOuterEl();
         this.scroller = (function (el) {
             const state = {trig: null, currentSlots: []};
             return {
@@ -124,6 +130,19 @@ class IconBlockEditForm extends preact.Component {
         })(scrollEl, this);
     }
     /**
+     * @param {BlockEditFormProps} props
+     * @access protected
+     */
+    componentWillReceiveProps(props) {
+        if (props.block !== this.props.block) {
+            console.log('(JeticonsIcon) block changed',{...this.props.block},{...props.block});
+            if (this.props.block.iconId !== props.block.iconId) {
+                console.log('(JeticonsIcon) got diffference',this.props.block.iconId,props.block.iconId);
+                this.setState({iconId: props.block.iconId});
+            }
+        }
+    }
+    /**
      * @access protected
      */
     componentWillUnmount() {
@@ -170,9 +189,9 @@ class IconBlockEditForm extends preact.Component {
      * @param {IconPackIcon} icon
      * @access private
      */
-    selectIcon({iconId}) {
+    selectIcon({iconId, inlineSvgShapes}) {
         if (iconId === this.state.iconId) return;
-        this.props.emitValueChanged(iconId, 'iconId', false);
+        this.props.emitManyValuesChanged({iconId, cachedInlineSvg: inlineSvgShapes}, false);
         setTimeout(() => { this.gridEl.current.querySelector('.btn').focus(); }, 10);
     }
     /**
@@ -210,23 +229,15 @@ const name = 'JetIconsIcon';
 export default {
     name,
     friendlyName: 'Icon',
-    initialData: () => ({iconId: ''}),
-    defaultRenderer: 'plugins/JetIcons:block-icon-default',
     icon: 'macro',
-    reRender: ({iconId, id, styleClasses}, renderChildren) =>
-        ['<span class="j-', name, styleClasses ? ` ${styleClasses}` : '',
-            '" data-block-type="', name, '" data-block="', id, '">'].concat(iconId
-                ? iconToSvg(cachedAvailableIcons[cachedIconIndices.get(iconId)])
-                : ['<span',
-                   ' title="', __('Waits for configuration ...'), '"',
-                   ' style="border: 1px dashed;display: inline-block;padding: 11px;"></span>']).concat([
-            renderChildren(),
-        '</span>']).join('')
-    ,
-    createSnapshot: from => ({
-        iconId: from.iconId,
-    }),
     editForm: IconBlockEditForm,
+    stylesEditForm: 'default',
+    createOwnProps(/*defProps*/) {
+        return {
+            iconId: '',
+            cachedInlineSvg: '',
+        };
+    }
 };
 
 /**
