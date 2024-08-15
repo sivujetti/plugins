@@ -3,7 +3,7 @@
 namespace SitePlugins\JetForms\Tests;
 
 use Pike\Auth\Crypto;
-use Pike\Db\FluentDb;
+use Pike\Db\FluentDb2;
 use Pike\Interfaces\SessionInterface;
 use SitePlugins\JetForms\{ContactFormBlockType, TextInputBlockType};
 use Sivujetti\StoredObjects\StoredObjectsRepository;
@@ -113,7 +113,7 @@ final class UseCaptchaTest extends PluginTestCase {
         $this->verifyResponseMetaEquals(200, "text/html", $response);
     }
     private function verifySentFormSuccesfully(): void {
-        $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->find("JetForms:submissions")->fetchAll();
+        $all = (new StoredObjectsRepository(new FluentDb2(self::$db)))->find("JetForms:submissions")->fetchAll();
         $this->assertCount(1, $all);
     }
     private static function createCaptchaToken(int $simulatedFormFillTime): string {

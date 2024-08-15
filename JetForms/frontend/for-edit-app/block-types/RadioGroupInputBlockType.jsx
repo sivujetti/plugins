@@ -1,5 +1,6 @@
 import {
     __,
+    CrudList,
     FormGroup,
     FormGroupInline,
     hookForm,
@@ -11,7 +12,6 @@ import {
     unhookForm,
     validationConstraints,
 } from '@sivujetti-commons-for-edit-app';
-import CrudList from '../CrudList.jsx';
 import services from '../services.js';
 import InputEditFormAbstract from './common/InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm, {
@@ -104,15 +104,17 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
         </div>,
         <FormGroup>
             <div class="form-label pt-0 pb-1">{ __('Options') }</div>
-            <CrudList
-                items={ radios }
-                itemTitleKey="text"
-                getTitle={ item => !this.showTechnicalInputs ? item.text : [`${item.text} `, <i class="color-dimmed">({item.value})</i>] }
-                onListMutated={ this.emitRadios.bind(this) }
-                createNewItem={ this.valueCreator.createNewItem.bind(this.valueCreator) }
-                editForm={ SelectOrRadioGroupInputOptionEditForm }
-                editFormProps={ {showValueInput: this.showTechnicalInputs} }
-                itemTypeFriendlyName={ __('option') }/>
+            <div class="form-horizontal text-tinyish styles-list pt-0">
+                <CrudList
+                    items={ radios }
+                    itemTitleKey="text"
+                    getTitle={ item => !this.showTechnicalInputs ? item.text : [`${item.text} `, <i class="color-dimmed">({item.value})</i>] }
+                    onListMutated={ this.emitRadios.bind(this) }
+                    createNewItem={ this.valueCreator.createNewItem.bind(this.valueCreator) }
+                    editForm={ SelectOrRadioGroupInputOptionEditForm }
+                    editFormProps={ {showValueInput: this.showTechnicalInputs} }
+                    itemTypeFriendlyName={ __('option') }/>
+            </div>
         </FormGroup>];
     }
     /**

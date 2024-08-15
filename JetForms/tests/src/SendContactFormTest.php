@@ -4,7 +4,7 @@ namespace SitePlugins\JetForms\Tests;
 
 use Pike\{Injector, PhpMailerMailer};
 use Pike\Auth\Crypto;
-use Pike\Db\FluentDb;
+use Pike\Db\FluentDb2;
 use Pike\TestUtils\MockCrypto;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
     NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
@@ -207,7 +207,7 @@ final class SendContactFormTest extends PluginTestCase {
             postData: ["name" => "Harry Potter", "email" => "e@ministfyofmagic.hm"],
             behaviours: $behaviours
         );
-        $all = (new StoredObjectsRepository(new FluentDb(self::$db)))->find("JetForms:submissions")->fetchAll();
+        $all = (new StoredObjectsRepository(new FluentDb2(self::$db)))->find("JetForms:submissions")->fetchAll();
         $this->assertCount(1, $all);
         $mockEncryptedAnswers = $all[0]->data["answers"];
         $decryptedAnswers = MockCrypto::mockDecrypt($mockEncryptedAnswers, (require TEST_CONFIG_FILE_PATH)["env"]["SITE_SECRET"]);

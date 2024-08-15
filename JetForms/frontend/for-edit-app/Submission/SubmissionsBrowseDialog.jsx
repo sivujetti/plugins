@@ -80,7 +80,7 @@ class SubmissionsBrowseDialog extends preact.Component {
             <div>
                 <button
                     onClick={ () => this.props.floatingDialog.close() }
-                    class="btn mt-2"
+                    class="btn btn-primary mt-2"
                     type="button">Ok</button>
             </div>
         ];

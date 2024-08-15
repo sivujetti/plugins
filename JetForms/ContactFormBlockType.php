@@ -63,6 +63,7 @@ class ContactFormBlockType implements BlockTypeInterface,
             self::$cachedCaptchaToken = "-";
         }
         $block->__captchaChallenge = self::$cachedCaptchaToken;
+    }
     /**
      * @inheritdoc
      */
