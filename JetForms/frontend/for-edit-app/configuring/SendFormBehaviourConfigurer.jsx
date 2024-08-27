@@ -143,7 +143,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
             </FormGroupInline>,
             <FormGroup>
                 <label htmlFor="subjectTemplate" class="form-label">{ __('Subject') }</label>
-                <Textarea vm={ this } prop="subjectTemplate" id="subjectTemplate"/>
+                <Textarea vm={ this } prop="subjectTemplate" id="subjectTemplate" class="form-input code"/>
                 <InputErrors vm={ this } prop="subjectTemplate"/>
             </FormGroup>,
             <FormGroup>

@@ -2,8 +2,10 @@
 
 namespace SitePlugins\JetForms;
 
-use Pike\Auth\Crypto;
-use Pike\{ArrayUtils, Injector, Request};
+use Pike\{ArrayUtils, Injector, PikeException};
+use SitePlugins\JetForms\Captcha\CaptchaImplInterface;
+use SitePlugins\JetForms\Captcha\JetCaptcha;
+use Sivujetti\{AppEnv, SharedAPIContext};
 use Sivujetti\Block\Entities\Block;
 use Sivujetti\BlockType\{BlockTypeInterface, JsxLikeRenderingBlockTypeInterface,
                          PropertiesBuilder, RenderAwareBlockTypeInterface};
@@ -16,8 +18,8 @@ class ContactFormBlockType implements BlockTypeInterface,
                                       JsxLikeRenderingBlockTypeInterface {
     public const NAME = "JetFormsContactForm";
     public const DEFAULT_RENDERER = "plugins/JetForms:block-contact-form";
-    /** @var string */
-    private static string $cachedCaptchaToken = "";
+    /** @var \SitePlugins\JetForms\Captcha\CaptchaImplInterface[] */
+    private static array $captchaClses = [];
     /**
      * @inheritdoc
      */
@@ -29,7 +31,7 @@ class ContactFormBlockType implements BlockTypeInterface,
                     $beh // todo
                 , $in)
             )
-            ->newProperty("useCaptcha")->dataType($builder::DATA_TYPE_UINT)
+            ->newProperty("captchaToUse")->dataType($builder::DATA_TYPE_TEXT, isNullable: true)
             ->getResult();
     }
     /**
@@ -38,31 +40,16 @@ class ContactFormBlockType implements BlockTypeInterface,
     public function onBeforeRender(Block $block,
                                    BlockTypeInterface $blockType,
                                    Injector $di): void {
-        if (!$block->useCaptcha)
+        if (!$block->captchaToUse)
             return;
-        if (self::$cachedCaptchaToken) {
-            $block->__captchaChallenge = self::$cachedCaptchaToken;
-            return;
+        if (!array_key_exists($block->captchaToUse, self::$captchaClses)) {
+            if ($block->captchaToUse !== "jet-captcha")
+                $di->execute($this->doPerformBeforeRender(...), [
+                    ":captchaToUse" => $block->captchaToUse,
+                ]);
+            else
+                self::$captchaClses["jet-captcha"] = new JetCaptcha();
         }
-        $di->execute([$this, "doPerformBeforeRender"], [
-            ":block" => $block,
-        ]);
-    }
-    /**
-     * @param \Sivujetti\Block\Entities\Block $block
-     * @param \Pike\Request $req
-     * @param \Pike\Auth\Crypto $crypto
-     */
-    public function doPerformBeforeRender(Block $block,
-                                          Request $req,
-                                          Crypto $crypto): void {
-        if ($req->queryVar("in-edit") === null) {
-            $key = self::getSecret();
-            self::$cachedCaptchaToken = $crypto->encrypt(strval(time()), $key);
-        } else {
-            self::$cachedCaptchaToken = "-";
-        }
-        $block->__captchaChallenge = self::$cachedCaptchaToken;
     }
     /**
      * @inheritdoc
@@ -75,6 +62,7 @@ class ContactFormBlockType implements BlockTypeInterface,
         $currentPage = $tmpl->getLocal("currentPage");
         $slugPcs = $currentPage->slug !== "/" ? $currentPage->slug : "/-";
         $treeId = $tmpl->findBlockAndTree($currentPage->blocks, fn($b) => $b->id === $block->id)[1]->id;
+        $cImpl = $block->captchaToUse ? self::$captchaClses[$block->captchaToUse] : null;
         return el("form",
             [
                 "action" => $tmpl->url("/plugins/jet-forms/submissions/{$block->id}{$slugPcs}/{$treeId}"),
@@ -93,9 +81,12 @@ class ContactFormBlockType implements BlockTypeInterface,
                         ? $block->returnTo
                         : "{$tmpl->url($currentUrl)}#contact-form-sent={$block->id}"
                 ]),
-                $block->useCaptcha
-                    ? el("input", ["type" => "hidden", "name" => "_cChallenge", "value" => $block->__captchaChallenge ?? ""])
-                    : ""
+                ...($cImpl
+                    ? [
+                        el("input", ["type" => "hidden", "name" => "captchaToUse", "value" => $block->captchaToUse]),
+                        ...$cImpl->render()
+                    ]
+                    : []),
             ]
         );
     }
@@ -105,5 +96,22 @@ class ContactFormBlockType implements BlockTypeInterface,
     public static function getSecret(): ?string {
         $arr = require __DIR__ . "/config.php";
         return $arr["secret"] ?? null;
+    }
+    /**
+     * @param string $captchaToUse
+     * @param \Sivujetti\SharedAPIContext $apiCtx 
+     * @param \Sivujetti\AppEnv $appEnv
+     */
+    private function doPerformBeforeRender(string $captchaToUse,
+                                          SharedAPIContext $apiCtx,
+                                          AppEnv $appEnv): void {
+        /** @var \SitePlugins\JetForms\JetForms */
+        $jetForms = $apiCtx->getPlugin("JetForms");
+        $ClsString = $jetForms->getCaptchaImpl($captchaToUse);
+        $instance = $appEnv->di->make($ClsString);
+        if (!($instance instanceof CaptchaImplInterface))
+            throw new PikeException("Captcha classes must implement CaptchaImplInterface",
+                                    PikeException::DOING_IT_WRONG);
+        self::$captchaClses[$captchaToUse] = $instance;
     }
 }

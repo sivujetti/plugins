@@ -3,6 +3,7 @@
 namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
+use SitePlugins\JetForms\Captcha\CaptchaImplInterface;
 use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
@@ -16,6 +17,8 @@ final class JetForms implements UserPluginInterface {
     public const ON_MAILER_CONFIGURE = "plugins:jetFormsMailerOnConfigure";
     /** @var array<string, class-string> e.g. SendMail, SubsribeToNewsletter, CopyMessageToLocalDb */
     private array $behaviourExecutors = [];
+    /** @var class-string[] */
+    private array $captchaImpls = [];
     /**
      * @inheritdoc
      */
@@ -83,19 +86,43 @@ final class JetForms implements UserPluginInterface {
      * @param class-string $ImplClass
      */
     public function registerBehaviourExecutor(string $name, string $ImplClass): void {
-        if (!class_exists($ImplClass))
-            throw new PikeException("class \"{$ImplClass}\" doesn't exist",
-                                    PikeException::BAD_INPUT);
-        if (!array_key_exists(BehaviourExecutorInterface::class,
-                              class_implements($ImplClass, false)))
-            throw new PikeException("Behaviour executor (\"{$ImplClass}\") must implement " . BehaviourExecutorInterface::class,
-                                    PikeException::BAD_INPUT);
-        $this->behaviourExecutors[$name] = $ImplClass;
+        $this->registerCls("Behaviour executor", $name, $ImplClass);
     }
     /**
      * @return class-string|null
      */
     public function getBehaviourExecutor(string $name): ?string {
         return $this->behaviourExecutors[$name] ?? null;
+    }
+    /**
+     * @param string $name
+     * @param class-string $ImplClass
+     */
+    public function registerCaptchaImpl(string $name, string $ImplClass): void {
+        $this->registerCls("Captcha impl", $name, $ImplClass);
+    }
+    /**
+     * @return class-string|null
+     */
+    public function getCaptchaImpl(string $name): ?string {
+        return $this->captchaImpls[$name] ?? null;
+    }
+    /**
+     * @param string $kind "Behaviour executor" or "Captcha impl"
+     * @param string $name
+     * @param class-string $ImplClass
+     */
+    private function registerCls(string $kind, string $name, string $ImplClass): void {
+        [$interface, $bucket] = $kind === "Behaviour executor"
+            ? [CaptchaImplInterface::class, $this->behaviourExecutors]
+            : [CaptchaImplInterface::class, $this->captchaImpls];
+        if (!class_exists($ImplClass))
+            throw new PikeException("class \"{$ImplClass}\" doesn't exist",
+                                    PikeException::BAD_INPUT);
+        if (!array_key_exists($interface,
+                              class_implements($ImplClass, false)))
+            throw new PikeException("{$kind} (\"{$ImplClass}\") must implement {$interface}",
+                                    PikeException::BAD_INPUT);
+        $bucket[$name] = $ImplClass;
     }
 }
