@@ -98,7 +98,7 @@ class SubmissionsBrowseDialog extends preact.Component {
 /**
  * @param {Submission} submission = null
  * @param {'rtl'|'ltr'} transition = null
- * @returns {{submission: Submission|null; leftClass: String; rightClass: String;}}
+ * @returns {{submission: Submission|null; leftClass: string; rightClass: string;}}
  */
 function createaAnimState(submission = null, transition = null) {
     const pool = {
@@ -111,7 +111,7 @@ function createaAnimState(submission = null, transition = null) {
 
 /**
  * @param {Array<Answer>} answers
- * @returns {String}
+ * @returns {string}
  */
 function answersToLines(answers) {
     return answers.slice(0, 3).map(ans => {
@@ -122,7 +122,7 @@ function answersToLines(answers) {
 
 /**
  * @param {Answer} answer
- * @returns {String}
+ * @returns {string}
  */
 function answerToString(answer) {
     if (typeof answer === 'string')
@@ -136,7 +136,7 @@ function answerToString(answer) {
 
 /**
  * @param {Submission} submission
- * @return {String} Example: '/slug (Maybe some block)'
+ * @return {string} Example: '/slug (Maybe some block)'
  */
 function getDetailedSentFrom({sentFromPage, sentFromTree}) {
     return sentFromPage + (sentFromTree.id === 'main' ? '' : ` (${sentFromTree.name})`);
@@ -145,8 +145,8 @@ function getDetailedSentFrom({sentFromPage, sentFromTree}) {
 let formatter = null;
 
 /**
- * @param {Number} unixTime
- * @returns {String} Example: '5. heinäkuuta klo 14.19.44'
+ * @param {number} unixTime
+ * @returns {string} Example: '5. heinäkuuta klo 14.19.44'
  */
 function timeToLocalFormat(unixTime) {
     if (!formatter)
@@ -162,17 +162,17 @@ function timeToLocalFormat(unixTime) {
 
 /**
  * @typedef Submission
- * @prop {String} sentFromPage
- * @prop {String} sentFromBlock
- * @prop {Number} sentAt Unix time
- * @prop {{id: String; name: String;}} sentFromTree
- * @prop {{label: String; answer: Answer;}} answers
+ * @prop {string} sentFromPage
+ * @prop {string} sentFromBlock
+ * @prop {number} sentAt Unix time
+ * @prop {{id: string; name: string;}} sentFromTree
+ * @prop {{label: string; answer: Answer;}} answers
  *
- * @typedef {String|SelectAnwser} Answer
+ * @typedef {string|SelectAnwser} Answer
  *
  * @typedef SelectAnwser
- * @prop {String} type
- * @prop {Array<{isSelected: Boolean; text: String;}>} entries
+ * @prop {string} type
+ * @prop {Array<{isSelected: boolean; text: string;}>} entries
  */
 
 export default SubmissionsBrowseDialog;

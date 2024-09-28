@@ -136,7 +136,7 @@ class ContactFormEditForm extends preact.Component {
                     rendererProps={ {
                         availableBehaviours: names,
                         oddCls: addBehOddCls,
-                        /** @param {String} name */
+                        /** @param {string} name */
                         confirmAddBehaviour(name) {
                             const data = name === 'StoreSubmissionToLocalDb'
                                 ? {}
@@ -184,7 +184,7 @@ class ContactFormEditForm extends preact.Component {
 
 class AddBehaviourPopup extends preact.Component {
     /**
-     * @param {{availableBehaviours: Array<String>; confirmAddBehaviour: (name: String) => void; oddCls: String;}}
+     * @param {{availableBehaviours: Array<string>; confirmAddBehaviour: (name: string) => void; oddCls: string;}}
      * @access protected
      */
     render({availableBehaviours, confirmAddBehaviour, oddCls}) {
@@ -212,7 +212,7 @@ function addBehaviourTo(newBehaviour, to) {
 }
 
 /**
- * @param {String} nodeName
+ * @param {string} nodeName
  * @param {EventTarget} target
  * @returns {SVGUseElement|null}
  */
@@ -252,9 +252,9 @@ function createDefaultOwnProps() {
 }
 
 /**
- * @param {Array<String>} alreadyAdded
- * @param {Boolean} includeTerminators
- * @returns {Array<String>}
+ * @param {Array<string>} alreadyAdded
+ * @param {boolean} includeTerminators
+ * @returns {Array<string>}
  */
 function getAvailableBehaviours(alreadyAdded, includeTerminators) {
     const customs1 = Array.from(customBehaviourImpls.entries());
@@ -270,7 +270,7 @@ function getAvailableBehaviours(alreadyAdded, includeTerminators) {
 
 export default {
     /**
-     * @param {String} name
+     * @param {string} name
      * @param {BehaviourConfigurerImpl} configurer
      */
     registerBehaviour(name, configurer) {

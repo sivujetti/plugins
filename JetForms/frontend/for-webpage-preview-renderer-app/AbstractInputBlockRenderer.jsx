@@ -1,6 +1,6 @@
 class AbstractInputBlockRenderer extends preact.Component {
     /**
-     * @returns {{inputType: String; inputMode?: String;}}
+     * @returns {{inputType: string; inputMode?: string;}}
      * @access protected
      */
     getSettings() {

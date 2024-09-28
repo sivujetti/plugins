@@ -76,7 +76,7 @@ How to's.
 ```
 interface JetForm {
     getEl(): HTMLFormElement;
-    setIsSubmitting(isSubmitting: Boolean) void;
+    setIsSubmitting(isSubmitting: boolean) void;
     setOnSubmit(fn: (e: Event) => void): void;
 }
 ```

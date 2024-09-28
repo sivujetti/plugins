@@ -127,7 +127,7 @@ class SelectInputBlockEditForm extends InputEditFormAbstract {
         </FormGroup>];
     }
     /**
-     * @param {Array<{text: String; value: String;}>} list
+     * @param {Array<{text: string; value: string;}>} list
      * @access private
      */
     emitOptions(list) {

@@ -9,7 +9,7 @@ let galleriesHooked = false;
 class JetGallery {
     // lang:
     /**
-     * @param {String} lang 'en', 'fi' etc.
+     * @param {string} lang 'en', 'fi' etc.
      */
     constructor(lang) {
         this.lang = lang;

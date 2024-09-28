@@ -33,7 +33,7 @@ class EditAppLeftColumnSection extends preact.Component {
     /**
      * @param {Event} e
      * @param {MailSendSettingsManageDialog|SubmissionsBrowseDialog} Cls
-     * @param {String} title
+     * @param {string} title
      * @access private
      */
     openDialog(e, Cls, title) {

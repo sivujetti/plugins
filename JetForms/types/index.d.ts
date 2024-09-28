@@ -1,39 +1,39 @@
 interface ConfigureBehaviourPanelProps {
     behaviour: Behaviour;
-    cssClass: String;
-    onConfigurationChanged: (vals: {[propName: String]: any;}) => void;
+    cssClass: string;
+    onConfigurationChanged: (vals: {[propName: string]: any;}) => void;
     endEditMode: () => void;
-    panelHeight: Number;
+    panelHeight: number;
     block: Block;
 }
 
 interface Behaviour {
-    name: String; // Example 'SendMail' or 'ShowSentMessage'
-    data: {[key: String]: any;};
+    name: string; // Example 'SendMail' or 'ShowSentMessage'
+    data: {[key: string]: any;};
 }
 
 interface BehaviourConfigurerImpl {
-    configurerLabel: String; // Example: 'näytä käyttäjälle viesti'
-    getButtonLabel: (data: {[key: String]: any;}) => String;
+    configurerLabel: string; // Example: 'näytä käyttäjälle viesti'
+    getButtonLabel: (data: {[key: string]: any;}) => string;
     configurerCls: preact.ComponentConstructor;
     isTerminator?: Boolean;
 }
 
 interface ContactFormBlockProps {
     behaviours: Array<Behaviour>;
-    useCaptcha: Number;
+    useCaptcha: number;
 }
 
 interface ContactFormBlockPropsIr {
     behaviours: Array<Behaviour>;
-    useCaptcha: Number;
+    useCaptcha: number;
 }
 
 interface CreateInputSettings {
-    name: String;
-    friendlyName: String;
-    type?: String;
-    icon?: String;
-    defaultPlaceholder?: String;
-    inputMode?: String;
+    name: string;
+    friendlyName: string;
+    type?: string;
+    icon?: string;
+    defaultPlaceholder?: string;
+    inputMode?: string;
 }

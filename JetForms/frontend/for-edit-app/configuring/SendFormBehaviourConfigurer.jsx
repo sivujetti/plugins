@@ -43,7 +43,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
         })];
     }
     /**
-     * @param {{subjectTemplate: String; toAddress: String; toName: String; fromAddress: String; fromName: String; replyToAddress: String; replyToName: String; bodyTemplate: String;} & ConfigureBehaviourPanelProps} props
+     * @param {{subjectTemplate: string; toAddress: string; toName: string; fromAddress: string; fromName: string; replyToAddress: string; replyToName: string; bodyTemplate: string;} & ConfigureBehaviourPanelProps} props
      * @access protected
      */
     componentWillReceiveProps(props) {
@@ -156,7 +156,7 @@ class SendFormBehaviourConfigurer extends preact.Component {
 }
 
 /**
- * @param {{name: 'replyToAddress'|'replyToName'; val: String; relevantFormInputInfos: Array<RelevantInputInfo>; onValueSelected: todo;}} props
+ * @param {{name: 'replyToAddress'|'replyToName'; val: string; relevantFormInputInfos: Array<RelevantInputInfo>; onValueSelected: todo;}} props
  * @returns {preact.VNode}
  */
 function ReplyToAddrOrDisplayName({name, val, relevantFormInputInfos, onValueSelected}) {
@@ -199,7 +199,7 @@ function getRelevantInputsForReplyTo(block) {
 
 /**
  * @param {Block} itm JetFormsEmailInput|JetFormsTextInput
- * @returns {String}
+ * @returns {string}
  */
 function getDetailedLabel(itm) {
     const labelOrPlaceholder = itm.label || itm.placeholder;
@@ -210,10 +210,10 @@ function getDetailedLabel(itm) {
  * Calls $fn once every $tryEveryMillis until it returns true or $stopTryingAfterNTimes
  * is reached.
  *
- * @param {() => Boolean} fn
- * @param {Number} tryEveryMillis = 200
- * @param {Number} stopTryingAfterNTimes = 5
- * @param {String} messageTmpl = 'fn() did not return true after %sms'
+ * @param {() => boolean} fn
+ * @param {number} tryEveryMillis = 200
+ * @param {number} stopTryingAfterNTimes = 5
+ * @param {string} messageTmpl = 'fn() did not return true after %sms'
  * @returns {fn() => void}
  */
 function createTrier(fn,
@@ -244,8 +244,8 @@ function createTrier(fn,
  * @prop {Array<RelevantInputInfo>} textInputs
  *
  * @typedef RelevantInputInfo
- * @prop {String} name
- * @prop {String} label
+ * @prop {string} name
+ * @prop {string} label
 */
 
 export default () => ({

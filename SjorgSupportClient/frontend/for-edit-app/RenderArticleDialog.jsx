@@ -57,7 +57,7 @@ function renderBlock(block) {
 }
 
 /**
- * @param {String} html
+ * @param {string} html
  * @returns {Array<HTMLAnchorElement>}
  */
 function extractTabLinks(html) {
@@ -67,8 +67,8 @@ function extractTabLinks(html) {
 }
 
 /**
- * @param {Number} toIdx
- * @param {Number} tabGroup
+ * @param {number} toIdx
+ * @param {number} tabGroup
  */
 function handleTabChanged(toIdx, tabGroup) {
     if (tabGroup !== 0) throw new Error('Not implemented');

@@ -5,7 +5,7 @@ let formsHooked = false;
  */
 class JetForms {
     /**
-     * @param {String} lang 'en', 'fi' etc.
+     * @param {string} lang 'en', 'fi' etc.
      */
     constructor(lang) {
         if (lang === 'fi') {
@@ -28,7 +28,7 @@ class JetForms {
     }
     /**
      * @param {HTMLElement} parentElement
-     * @returns {Array<{getEl: () => HTMLFormElement; setIsSubmitting: (isSubmitting: Boolean) => void; setOnSubmit: (fn: (e: Event) => void) => void;}>}
+     * @returns {Array<{getEl: () => HTMLFormElement; setIsSubmitting: (isSubmitting: boolean) => void; setOnSubmit: (fn: (e: Event) => void) => void;}>}
      * @access public
      */
     hookAllForms(parentElement) {
@@ -125,7 +125,7 @@ class JetForms {
 }
 
 /**
- * @param {{[key: String]: Array<HTMLInputElement>;}} radioGroups
+ * @param {{[key: string]: Array<HTMLInputElement>;}} radioGroups
  */
 function addClickHandlersThatRemovesValidationErrors(radioGroups) {
     for (const name in radioGroups) {
@@ -148,7 +148,7 @@ function addClickHandlersThatRemovesValidationErrors(radioGroups) {
 }
 
 /**
- * @param {{[key: String]: Array<HTMLInputElement>;}} radioGroups
+ * @param {{[key: string]: Array<HTMLInputElement>;}} radioGroups
  */
 function removeRadioErrorMessagesExceptTheLastOne(radioGroups) {
     for (const name in radioGroups) {

@@ -126,7 +126,7 @@ class ExportSiteDialog extends preact.Component {
     }
     /**
      * @param {Event} e
-     * @param {Number} i
+     * @param {number} i
      * @access private
      */
     toggleIsSelected(e, i) {
@@ -157,8 +157,8 @@ function getSelectedItems(selectedPages) {
 
 /**
  * @typedef SelectItem
- * @property {Boolean} isSelected
- * @property {String} slug
+ * @property {boolean} isSelected
+ * @property {string} slug
  */
 
 export default ExportSiteDialog;

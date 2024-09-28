@@ -118,7 +118,7 @@ class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
         </FormGroup>];
     }
     /**
-     * @param {Array<{text: String; value: String;}>} list
+     * @param {Array<{text: string; value: string;}>} list
      * @access private
      */
     emitRadios(list) {

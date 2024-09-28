@@ -56,6 +56,7 @@ class EditAppLeftColumnSection extends preact.Component {
         </section>;
     }
     /**
+     * @param {boolean} to
      * @access private
      */
     toggleIsCollapsed() {

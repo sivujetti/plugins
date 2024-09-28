@@ -10,7 +10,7 @@ const services = {
 function createCountingIdGenerator(webPagePreview) {
     return {
         /**
-         * @returns {String} Example: "input_3"
+         * @returns {string} Example: "input_3"
          */
         getNextId() {
             const previousInputs = Array.from(webPagePreview.getEl().contentDocument.querySelectorAll('[name^="input_"]'));

@@ -118,16 +118,16 @@ class InputBlockEditForm extends InputEditFormAbstract {
 }
 
 /**
- * @param {Number} input
- * @returns {Number|String}
+ * @param {number} input
+ * @returns {number|string}
  */
 function getNormalizedNumRows(input) {
     return input !== 0 ? input : '';
 }
 
 /**
- * @param {Number|String} normalized
- * @returns {Number}
+ * @param {number|string} normalized
+ * @returns {number}
  */
 function getUnnormalizedNumRows(normalized) {
     return normalized !== '' ? normalized : 0;
@@ -135,7 +135,7 @@ function getUnnormalizedNumRows(normalized) {
 
 /**
  * @param {Block} block
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function blockIsTextarea(block) {
     return block.numRows !== undefined;

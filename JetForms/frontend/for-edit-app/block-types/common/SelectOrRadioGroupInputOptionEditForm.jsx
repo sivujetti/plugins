@@ -3,7 +3,7 @@ import {__, hookForm, reHookValues, hasErrors, Textarea, InputErrors,
 
 class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
     /**
-     * @param {{showValueInput: Boolean; item: SelectOrRadioGroupSelectItem; onValueChanged: (value: String, key: keyof SelectOrRadioGroupSelectItem) => void; done: () => void;}} props
+     * @param {{showValueInput: boolean; item: SelectOrRadioGroupSelectItem; onValueChanged: (value: string, key: keyof SelectOrRadioGroupSelectItem) => void; done: () => void;}} props
      */
     constructor(props) {
         super(props);
@@ -54,8 +54,8 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
 }
 
 /**
- * @param {Array<String>} currentValues = []
- * @returns {{createNewItem(text: String, value: String = 'auto'): {text: String; value: String};}}
+ * @param {Array<string>} currentValues = []
+ * @returns {{createNewItem(text: string, value: string = 'auto'): {text: string; value: string};}}
  */
 function createSelectOrOptionSelectItemCreator(currentValues = []) {
     let counter = currentValues.reduce((max, val) => {
@@ -75,8 +75,8 @@ function createSelectOrOptionSelectItemCreator(currentValues = []) {
 
 /**
  * @typedef SelectOrRadioGroupSelectItem
- * @prop {String} text
- * @prop {String} value
+ * @prop {string} text
+ * @prop {string} value
  */
 
 export default SelectOrRadioGroupInputOptionEditForm;

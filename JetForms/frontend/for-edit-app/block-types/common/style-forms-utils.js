@@ -22,8 +22,8 @@ function createVisualEditFormAuto(inputNameId) {
         createVarInputToScssCodeFn(cssVarDefs) {
             const stock = super.createVarInputToScssCodeFn(cssVarDefs);
             /**
-             * @param {String} varName
-             * @param {String} val
+             * @param {string} varName
+             * @param {string} val
              * @returns {scssCodeInput}
              */
             return (varName, val) => {

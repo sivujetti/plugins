@@ -15,7 +15,7 @@ const PAGE_SIZE = 40;
 
 /** @type {Array<IconPackIcon>} */
 let cachedAvailableIcons;
-/** @type {Map<String, Number>} */
+/** @type {Map<string, number>} */
 let cachedIconIndices;
 
 class IconBlockEditForm extends preact.Component {
@@ -74,7 +74,7 @@ class IconBlockEditForm extends preact.Component {
             const state = {trig: null, currentSlots: []};
             return {
                 /**
-                 * @returns {Boolean}
+                 * @returns {boolean}
                  */
                 isReady() {
                     if (state.isDisabled) return false;
@@ -82,7 +82,7 @@ class IconBlockEditForm extends preact.Component {
                     return state.currentSlots.length > 0;
                 },
                 /**
-                 * @param {Boolean} isDisabled
+                 * @param {boolean} isDisabled
                  */
                 setIsDisabled(isDisabled) {
                     state.isDisabled = isDisabled;
@@ -95,7 +95,7 @@ class IconBlockEditForm extends preact.Component {
                     state.trig = null;
                 },
                 /**
-                 * @returns {Number}
+                 * @returns {number}
                  */
                 getNextLoadPoint() {
                     if (!state.currentSlots.length) return;
@@ -213,7 +213,7 @@ function getInitialPage(allIcons) {
 
 /**
  * @param {IconPackIcon} icon
- * @returns {Array<String>}
+ * @returns {Array<string>}
  */
 function iconToSvg({iconId, inlineSvgShapes}) {
     return [
@@ -242,6 +242,6 @@ export default {
 
 /**
  * @typedef IconPackIcon
- * @prop {String} iconId
- * @prop {String} inlineSvgShapes
+ * @prop {string} iconId
+ * @prop {string} inlineSvgShapes
  */
