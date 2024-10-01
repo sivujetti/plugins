@@ -11,6 +11,7 @@ use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 /**
  * @psalm-type JetFormsMailSendSettings = array{sendingMethod: string, SMTP_host: ?string, SMTP_port: ?string, SMTP_username: ?string, SMTP_password: ?string, SMTP_secureProtocol: ?string}
+ * @psalm-type JetFormsCaptchaSettings = array{settings: array<int, object{name: string, minFormFillTime: ?int, siteKey: ?string, secretKey: ?string, minScore: ?float}>}
  */
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
@@ -41,6 +42,16 @@ final class JetForms implements UserPluginInterface {
             SettingsController::class, "updateMailSendSettings",
             ["consumes" => "application/json",
              "identifiedBy" => ["update", "mailSendSettings"]]
+        );
+        $api->registerHttpRoute("GET", "/plugins/jet-forms/settings/captchaData",
+            SettingsController::class, "getCaptchaSettings",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["read", "captchaDataSettings"]]
+        );
+        $api->registerHttpRoute("PUT", "/plugins/jet-forms/settings/captchaData",
+            SettingsController::class, "updateCaptchaSettings",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["update", "captchaDataSettings"]]
         );
         //
         $api->on($api::ON_ROUTE_CONTROLLER_BEFORE_EXEC, function () use ($api) {
@@ -76,6 +87,10 @@ final class JetForms implements UserPluginInterface {
             ->defineResource("mailSendSettings", ["read", "update"])
                 ->setPermissions(ACL::ROLE_ADMIN, ["read", "update"])
                 ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["read", "update"])
+            ->defineResource("captchaDataSettings", ["read", "update"])
+                ->setPermissions(ACL::ROLE_ADMIN, ["read", "update"])
+                ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["read", "update"])
+                ->setPermissions(ACL::ROLE_EDITOR, ["read", "update"])
             ->defineResource("submissions", ["list"])
                 ->setPermissions(ACL::ROLE_ADMIN, ["list"])
                 ->setPermissions(ACL::ROLE_ADMIN_EDITOR, ["list"])

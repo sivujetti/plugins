@@ -248,6 +248,7 @@ function createDefaultOwnProps() {
             }}
         ],
         useCaptcha: 1,
+        captchaToUse: 'jet-forms',
     });
 }
 
@@ -285,7 +286,7 @@ export default {
     name: 'JetFormsContactForm',
     friendlyName: 'Contact form (JetForms)',
     editForm: ContactFormEditForm,
-    stylesEditForm: ContactFormBlockVisualStylesEditForm,
+    stylesEditForm: 'default',
     icon: 'message-2',
     createOwnProps(_defProps) {
         return createDefaultOwnProps();

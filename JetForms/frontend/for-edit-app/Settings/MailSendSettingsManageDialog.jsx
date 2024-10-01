@@ -10,7 +10,9 @@ class MailSendSettingsManageDialog extends preact.Component {
         this.state = {settings: null};
         http.get('/plugins/jet-forms/settings/mailSendSettings')
             .then(settings => { this.createState(settings); })
-            .catch(env.window.console.error);
+            .catch(err => {
+                env.window.console.error(err);
+            });
     }
     /**
      * @param {RawSendMailSettings} settings
@@ -42,7 +44,7 @@ class MailSendSettingsManageDialog extends preact.Component {
      * @access protected
      */
     render(_, {sendingMethod, formIsSubmittingClass, showPasswordVisually}) {
-        return <form onSubmit={ e => handleSubmit(this, this.applySaveMailSettings.bind(this), e) }>
+        return <form onSubmit={ e => handleSubmit(this, this.saveSettingsToBacked.bind(this), e) }>
             <div class="mb-1">{ __('jetFormsTodo1') }</div>
             { sendingMethod ? [<div>
                 <div class="form-label">{ __('Send method') }</div>
@@ -123,7 +125,7 @@ class MailSendSettingsManageDialog extends preact.Component {
     /**
      * @access private
      */
-    applySaveMailSettings() {
+    saveSettingsToBacked() {
         const mailSendSettings = Object.assign(
             {
                 sendingMethod: this.state.sendingMethod,
@@ -149,12 +151,12 @@ class MailSendSettingsManageDialog extends preact.Component {
 /**
  * @typedef RawSendMailSettings
  *
- * @prop {String?} sendingMethod
- * @prop {String?} SMTP_host
- * @prop {String?} SMTP_port
- * @prop {String?} SMTP_username
- * @prop {String?} SMTP_password
- * @prop {String?} SMTP_secureProtocol
+ * @prop {string?} sendingMethod
+ * @prop {string?} SMTP_host
+ * @prop {string?} SMTP_port
+ * @prop {string?} SMTP_username
+ * @prop {string?} SMTP_password
+ * @prop {string?} SMTP_secureProtocol
  */
 
 export default MailSendSettingsManageDialog;

@@ -7,7 +7,17 @@ api.registerTranslationStrings({
     'From': 'Osoitteesta',
     'Reply-to': 'Reply-to',
     'Firstname Lastname': 'Firstname Lastname',
-    // MailSendSettings/MailSendSettingsManageDialog.jsx
+    // Settings/CaptchaDataEditDialog.jsx
+    'Invisible CAPTCHA test for the user, based\non the time taken to complete the form': 'Käyttäjälle näkymätön CAPTCHA-testi, joka perustuu\nlomakkeen täyttöön käytettyyn aikaan',
+    'Min. form fill time': 'Min. täyttöaika',
+    'Submission time in seconds; forms submitted faster\nthan this will be interpreted as sent by a bot': 'Aika sekunteina, jota nopeammin lähetetyt\nlomakkeet tulkitaan robotin lähettämiksi',
+    'Invisible CAPTCHA test for the user, using\nGoogle\'s reCAPTCHA v3 service': 'Käyttäjälle näkymätön CAPTCHA-testi, joka\nkäyttää Googlen reCaptcha v3 palvelua',
+    'A string found on the settings page of Google\'s\nadmin panel (google.com/recaptcha/admin)': 'Googlen hallintapaneelin (google.com/recaptcha/admin)\nasetukset-sivulta löytyvä merkkijono',
+    'Failed to fetch settings.': 'Asetusten hakeminen epäonnistui.',
+    'In this view, you can edit the general captcha settings for your site.': 'Tässä näkymässä voit muokata sivustosi yleisiä captcha-asetuksia.',
+    'Clear': 'Tyhjennä',
+    'Save settings': 'Tallenna asetukset',
+    // Settings/MailSendSettingsManageDialog.jsx
     'Host': 'Hosti',
     'Port': 'Portti',
     'Username': 'Käyttäjänimi',
@@ -43,6 +53,7 @@ api.registerTranslationStrings({
     // EditAppLeftColumnSection.jsx
     'Manage forms': 'Sivuston lomakkeet',
     'Browse submissions': 'Selaa lähetyksiä',
+    'Edit captcha settings': 'Muokkaa captcha-asetuksia',
     'Send mail settings': 'Sähköpostin lähetysasetukset',
     // EmailInputBlockType.jsx
     'Email input (JetForms)': 'Sähköpostikenttä (JetForms)',
