@@ -27,13 +27,23 @@ module.exports = ({selectedLang, bundles}) => {
                 },
             };
         if (bundleName === bundleNames[2])
-            return {
+            return [{
                 input: 'backend/plugins/JetForms/frontend/for-webpages/main.js',
                 output: {
                     file: 'public/plugin-jet-forms-bundle.js',
                     name: 'JetForms',
                 }
-            };
+            }, {
+                input: 'backend/plugins/JetForms/frontend/for-webpages/captcha-impls/jet-captcha.js',
+                output: {
+                    file: 'public/plugin-jet-forms-jet-captcha.js',
+                }
+            }, {
+                input: 'backend/plugins/JetForms/frontend/for-webpages/captcha-impls/grecaptcha.js',
+                output: {
+                    file: 'public/plugin-jet-forms-grecaptcha.js',
+                }
+            }];
         if (bundleName === bundleNames[3])
             return {
                 input: `backend/plugins/JetForms/frontend/for-edit-app/lang-${selectedLang}.js`,
@@ -42,5 +52,5 @@ module.exports = ({selectedLang, bundles}) => {
                 },
             };
         throw new Error(`Unknown bundle name "${bundleName}". Known: ${bundleNames.join(', ')}`);
-    });
+    }).flat();
 };

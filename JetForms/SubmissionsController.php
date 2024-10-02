@@ -6,7 +6,7 @@ use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use Pike\Auth\Crypto;
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
                                     StoreSubmissionToLocalDbBehaviour};
-use Sivujetti\{App, AppEnv, JsonUtils, LogUtils, SharedAPIContext};
+use Sivujetti\{AppEnv, JsonUtils, LogUtils, SharedAPIContext};
 use Sivujetti\Auth\ACL;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
@@ -110,6 +110,23 @@ final class SubmissionsController {
     public function listSubmissions(Response $res, StoreSubmissionToLocalDbBehaviour $submissionsRepo): void {
         $subs = $submissionsRepo->getSubmissions();
         $res->json($subs);
+    }
+    /**
+     * POST /plugins/jet-forms/submit-tokens/generate: Creates a token
+     * (<form><input name="captchaClientResponseToken">) that will be validated
+     * in $this->handleSubmission().
+     *
+     * @param \Pike\Request $req
+     * @param \Pike\Response $res
+     * @param \Pike\Auth\Crypto $crypto
+     */
+    public function generateJetCaptchaToken(Request $req,
+                                            Response $res,
+                                            Crypto $crypto): void {
+        $payload = time() . "|" . $req->attr("REMOTE_ADDR");
+        $key = ContactFormBlockType::getSecret();
+        $encrypted = $crypto->encrypt($payload, $key);
+        $res->json(["token" => $encrypted]);
     }
     /**
      * @param ?string $input

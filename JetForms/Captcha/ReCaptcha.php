@@ -2,14 +2,14 @@
 
 namespace SitePlugins\JetForms\Captcha;
 
-use Pike\{Request};
+use Pike\Request;
 
-class JetCaptcha extends AbstractCaptchaImpl {
+class ReCaptcha extends AbstractCaptchaImpl {
     /**
      * @inheritdoc
      */
     public function enqueueableJsFiles(): array {
-        return ["plugin-jet-forms-jet-captcha.js"];
+        return ["plugin-jet-forms-grecaptcha.js?site-key={$this->getSiteKey()}"];
     }
     /**
      * @inheritdoc
@@ -21,5 +21,12 @@ class JetCaptcha extends AbstractCaptchaImpl {
         }
         // todo
         return [true, null];
+    }
+    /**
+     * @return string
+     */
+    private function getSiteKey(): string {
+        $arr = $this->settings->findSettings("grecaptcha") ?? [];
+        return $arr["siteKey"] ?? "site-key-not-found";
     }
 }

@@ -3,10 +3,11 @@
 namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
-use SitePlugins\JetForms\Captcha\CaptchaImplInterface;
+use SitePlugins\JetForms\Captcha\{AbstractCaptchaImpl, CaptchaSettings, JetCaptcha, ReCaptcha};
 use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
+use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 /**
@@ -19,14 +20,25 @@ final class JetForms implements UserPluginInterface {
     /** @var array<string, class-string> e.g. SendMail, SubsribeToNewsletter, CopyMessageToLocalDb */
     private array $behaviourExecutors = [];
     /** @var class-string[] */
-    private array $captchaImpls = [];
+    private array $captchaImplClses = ["jet-captcha" => JetCaptcha::class, "grecaptcha" => ReCaptcha::class];
+    /** @var \SitePlugins\JetForms\Captcha\AbstractCaptchaImpl[] */
+    private array $captchaInstances = [];
+    /** @var \SitePlugins\JetForms\Captcha\CaptchaSettings */
+    private ?CaptchaSettings $captchaSettings = null;
+    /** @var \Sivujetti\UserPlugin\UserPluginAPI */
+    private UserPluginAPI $api;
     /**
      * @inheritdoc
      */
     public function __construct(UserPluginAPI $api) {
+        $this->api = $api;
         $api->registerHttpRoute("POST", "/plugins/jet-forms/submissions/[w:blockId]/[w:pageSlug]/[w:isPartOfTreeId]",
             SubmissionsController::class, "handleSubmission",
             ["allowMissingRequestedWithHeader" => true, "skipAuthButLoadRequestUser" => true]
+        );
+        $api->registerHttpRoute("POST", "/plugins/jet-forms/submit-tokens/generate",
+            SubmissionsController::class, "generateJetCaptchaToken",
+            ["skipAuth" => true, "consumes" => "application/json"]
         );
         $api->registerHttpRoute("GET", "/plugins/jet-forms/submissions",
             SubmissionsController::class, "listSubmissions",
@@ -69,7 +81,8 @@ final class JetForms implements UserPluginInterface {
             $api->enqueuePreviewAppJsFile("plugin-jet-forms-webpage-preview-renderer-app-bundle.js");
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
-            if (!BlockTree::findBlock($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME))
+            $forms = BlockTree::filterBlocks($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME);
+            if (!$forms)
                 return;
             if (!$api->isJsFileEnqueued("sivujetti/vendor/pristine.min.js"))
                 $api->enqueueJsFile("sivujetti/vendor/pristine.min.js");
@@ -77,6 +90,10 @@ final class JetForms implements UserPluginInterface {
                 $api->enqueueJsFile("sivujetti/sivujetti-commons-for-web-pages.js");
             if (!$api->isJsFileEnqueued("plugin-jet-forms-bundle.js"))
                 $api->enqueueJsFile("plugin-jet-forms-bundle.js");
+            foreach ($this->createCaptchaJsFileQueue(self::getUsedCaptchasDistinct($forms)) as $jsFileUrl) {
+                if (!$api->isJsFileEnqueued($jsFileUrl))
+                    $api->enqueueJsFile($jsFileUrl);
+            }
         });
     }
     /**
@@ -117,10 +134,47 @@ final class JetForms implements UserPluginInterface {
         $this->registerCls("Captcha impl", $name, $ImplClass);
     }
     /**
-     * @return class-string|null
+     * @return \SitePlugins\JetForms\Captcha\AbstractCaptchaImpl|null
      */
-    public function getCaptchaImpl(string $name): ?string {
-        return $this->captchaImpls[$name] ?? null;
+    public function getCaptchaImpl(string $name): ?AbstractCaptchaImpl {
+        $ClsString = $this->captchaImplClses[$name] ?? null;
+        if (!$ClsString) return null;
+
+        if (!array_key_exists($name, $this->captchaInstances)) {
+            if (!$this->captchaSettings)
+                $this->captchaSettings = new CaptchaSettings(fn() =>
+                    $this->api->createService(StoredObjectsRepository::class)
+                        ->find("JetForms:captchaData")
+                        ->fetch()?->data ?? []
+                );
+            $this->captchaInstances[$name] = new $ClsString($this->captchaSettings);
+        }
+
+        return $this->captchaInstances[$name];
+    }
+    /**
+     * @param \Sivujetti\Block\Entities\Block[] $forms
+     * @return string[]
+     */
+    private static function getUsedCaptchasDistinct(array $forms): array {
+        $names = [];
+        foreach ($forms as $block) {
+            if ($block->captchaToUse)
+                $names[] = $block->captchaToUse;
+        }
+        return array_unique($names);
+    }
+    /**
+     * @param string[] $names
+     * @return string[]
+     */
+    private function createCaptchaJsFileQueue(array $names): array {
+        $out = [];
+        foreach ($names as $name) {
+            if (($instance = $this->getCaptchaImpl($name)))
+                $out = [...$out, ...$instance->enqueueableJsFiles()];
+        }
+        return $out;
     }
     /**
      * @param string $kind "Behaviour executor" or "Captcha impl"
@@ -129,8 +183,8 @@ final class JetForms implements UserPluginInterface {
      */
     private function registerCls(string $kind, string $name, string $ImplClass): void {
         [$interface, $bucket] = $kind === "Behaviour executor"
-            ? [CaptchaImplInterface::class, $this->behaviourExecutors]
-            : [CaptchaImplInterface::class, $this->captchaImpls];
+            ? [BehaviourExecutorInterface::class, $this->behaviourExecutors]
+            : [AbstractCaptchaImpl::class, $this->captchaImplClses];
         if (!class_exists($ImplClass))
             throw new PikeException("class \"{$ImplClass}\" doesn't exist",
                                     PikeException::BAD_INPUT);

@@ -2,24 +2,17 @@
 
 namespace SitePlugins\JetForms;
 
-use Pike\{ArrayUtils, Injector, PikeException};
-use SitePlugins\JetForms\Captcha\CaptchaImplInterface;
-use SitePlugins\JetForms\Captcha\JetCaptcha;
-use Sivujetti\{AppEnv, SharedAPIContext};
-use Sivujetti\Block\Entities\Block;
+use Pike\{ArrayUtils};
 use Sivujetti\BlockType\{BlockTypeInterface, JsxLikeRenderingBlockTypeInterface,
-                         PropertiesBuilder, RenderAwareBlockTypeInterface};
+                         PropertiesBuilder};
 use Sivujetti\Page\WebPageAwareTemplate;
 
 use function Sivujetti\createElement as el;
 
 class ContactFormBlockType implements BlockTypeInterface,
-                                      RenderAwareBlockTypeInterface,
                                       JsxLikeRenderingBlockTypeInterface {
     public const NAME = "JetFormsContactForm";
     public const DEFAULT_RENDERER = "plugins/JetForms:block-contact-form";
-    /** @var \SitePlugins\JetForms\Captcha\CaptchaImplInterface[] */
-    private static array $captchaClses = [];
     /**
      * @inheritdoc
      */
@@ -37,23 +30,6 @@ class ContactFormBlockType implements BlockTypeInterface,
     /**
      * @inheritdoc
      */
-    public function onBeforeRender(Block $block,
-                                   BlockTypeInterface $blockType,
-                                   Injector $di): void {
-        if (!$block->captchaToUse)
-            return;
-        if (!array_key_exists($block->captchaToUse, self::$captchaClses)) {
-            if ($block->captchaToUse !== "jet-captcha")
-                $di->execute($this->doPerformBeforeRender(...), [
-                    ":captchaToUse" => $block->captchaToUse,
-                ]);
-            else
-                self::$captchaClses["jet-captcha"] = new JetCaptcha();
-        }
-    }
-    /**
-     * @inheritdoc
-     */
     public function render(object $block,
                            \Closure $createDefaultProps,
                            \Closure $renderChildren,
@@ -62,7 +38,6 @@ class ContactFormBlockType implements BlockTypeInterface,
         $currentPage = $tmpl->getLocal("currentPage");
         $slugPcs = $currentPage->slug !== "/" ? $currentPage->slug : "/-";
         $treeId = $tmpl->findBlockAndTree($currentPage->blocks, fn($b) => $b->id === $block->id)[1]->id;
-        $cImpl = $block->captchaToUse ? self::$captchaClses[$block->captchaToUse] : null;
         return el("form",
             [
                 "action" => $tmpl->url("/plugins/jet-forms/submissions/{$block->id}{$slugPcs}/{$treeId}"),
@@ -81,10 +56,9 @@ class ContactFormBlockType implements BlockTypeInterface,
                         ? $block->returnTo
                         : "{$tmpl->url($currentUrl)}#contact-form-sent={$block->id}"
                 ]),
-                ...($cImpl
+                ...($block->captchaToUse
                     ? [
                         el("input", ["type" => "hidden", "name" => "captchaToUse", "value" => $block->captchaToUse]),
-                        ...$cImpl->render()
                     ]
                     : []),
             ]
@@ -96,22 +70,5 @@ class ContactFormBlockType implements BlockTypeInterface,
     public static function getSecret(): ?string {
         $arr = require __DIR__ . "/config.php";
         return $arr["secret"] ?? null;
-    }
-    /**
-     * @param string $captchaToUse
-     * @param \Sivujetti\SharedAPIContext $apiCtx 
-     * @param \Sivujetti\AppEnv $appEnv
-     */
-    private function doPerformBeforeRender(string $captchaToUse,
-                                          SharedAPIContext $apiCtx,
-                                          AppEnv $appEnv): void {
-        /** @var \SitePlugins\JetForms\JetForms */
-        $jetForms = $apiCtx->getPlugin("JetForms");
-        $ClsString = $jetForms->getCaptchaImpl($captchaToUse);
-        $instance = $appEnv->di->make($ClsString);
-        if (!($instance instanceof CaptchaImplInterface))
-            throw new PikeException("Captcha classes must implement CaptchaImplInterface",
-                                    PikeException::DOING_IT_WRONG);
-        self::$captchaClses[$captchaToUse] = $instance;
     }
 }
