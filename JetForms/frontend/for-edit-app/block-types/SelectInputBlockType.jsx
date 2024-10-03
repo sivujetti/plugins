@@ -1,6 +1,5 @@
 import services from '../services.js';
 import {createSelectOrOptionSelectItemCreator} from './common/SelectOrRadioGroupInputOptionEditForm.jsx';
-import {createVisualEditFormAuto} from './common/style-forms-utils.js';
 import EditForm from './SelectInputBlockEditForm.jsx';
 
 export default {
@@ -8,7 +7,7 @@ export default {
     friendlyName: 'Select input (JetForms)',
     icon: 'selector',
     editForm: EditForm,
-    stylesEditForm: createVisualEditFormAuto('SelectInput'),
+    stylesEditForm: 'default',
     createOwnProps(_defProps) {
         return {
             name: services.idGen.getNextId(),

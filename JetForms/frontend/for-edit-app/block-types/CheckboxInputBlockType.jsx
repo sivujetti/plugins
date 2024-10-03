@@ -93,7 +93,7 @@ export default {
     friendlyName: 'Checkbox input (JetForms)',
     icon: 'checkbox',
     editForm: CheckboxInputBlockEditForm,
-    stylesEditForm: null,
+    stylesEditForm: 'default',
     createOwnProps(/*defProps*/) {
         return {
             name: services.idGen.getNextId(),

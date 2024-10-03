@@ -17,7 +17,6 @@ import InputEditFormAbstract from './common/InputEditFormAbstract.jsx';
 import SelectOrRadioGroupInputOptionEditForm, {
     createSelectOrOptionSelectItemCreator
 } from './common/SelectOrRadioGroupInputOptionEditForm.jsx';
-import RadioGroupInputBlockVisualStylesEditForm from './RadioGroupInputBlockVisualStylesEditForm.jsx';
 
 class RadioGroupInputBlockEditForm extends InputEditFormAbstract {
     // valueCreator;
@@ -131,7 +130,7 @@ export default {
     friendlyName: 'Radio group (JetForms)',
     icon: 'circle',
     editForm: RadioGroupInputBlockEditForm,
-    stylesEditForm: RadioGroupInputBlockVisualStylesEditForm,
+    stylesEditForm: 'default',
     createOwnProps(/*defProps*/) {
         return {
             name: services.idGen.getNextId(),

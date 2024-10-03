@@ -9,7 +9,6 @@ import ConfigureBehaviourPanel, {
     getBehaviourConfigurerImpl,
     customBehaviourImpls,
 } from '../configuring/ConfigureBehaviourPanel.jsx';
-import ContactFormBlockVisualStylesEditForm from './ContactFormBlockVisualStylesEditForm.jsx';
 
 const createPropsMutators = [];
 

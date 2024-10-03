@@ -7,7 +7,6 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
      */
     constructor(props) {
         super(props);
-        console.log('on m',this);
         this.state = hookForm(this, [
             {name: 'text', value: props.item.text, validations: [['minLength', 1]], label: __('Option text'),
              onAfterValueChanged: (value, hasErrors, _source) => {
