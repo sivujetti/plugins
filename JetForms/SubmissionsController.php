@@ -6,7 +6,7 @@ use Pike\{ArrayUtils, PikeException, Request, Response, Validation};
 use Pike\Auth\Crypto;
 use SitePlugins\JetForms\Internal\{SendMailBehaviour, ShowSentMessageBehaviour,
                                     StoreSubmissionToLocalDbBehaviour};
-use Sivujetti\{AppEnv, JsonUtils, LogUtils, SharedAPIContext};
+use Sivujetti\{AppEnv, LogUtils, SharedAPIContext};
 use Sivujetti\Auth\ACL;
 use Sivujetti\Block\BlockTree;
 use Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2;
@@ -58,14 +58,25 @@ final class SubmissionsController {
         if (!$form)
             throw new PikeException("Invalid input (no such block)",
                                     PikeException::BAD_INPUT);
-        $reqUserRole = $req->myData->user?->role ?? null;
-        if ($form->useCaptcha &&
-            !is_int($reqUserRole) && // is anon / is not logged in
-            !self::isValidCaptcha($req->body->_cChallenge ?? null)) {
-            throw new PikeException("Captcha challenge failed", PikeException::BAD_INPUT);
-        }
         if (!$form->behaviours)
             throw new PikeException("Nothing to process", PikeException::BAD_INPUT);
+        //
+        if (($form->captchaToUse ?? null)) {
+            /** @var \SitePlugins\JetForms\JetForms */
+            $jetForms = $apiCtx->getPlugin("JetForms");
+            $instance = $jetForms->getCaptchaImpl($form->captchaToUse);
+            $isValid = false;
+            try {
+                [$isValid, $details] = $instance->validateResponseToken($req->body->captchaClientResponseToken ?? null, $req);
+            } catch (\Exception $e) {
+                $error = "Error: uncaught exception in captcha verification: " . LogUtils::formatError($e);
+                ($errorLogFn ?? fn($err) => error_log($err))($error);
+            }
+            if (!$isValid) {
+                $res->status(400)->plain("Captcha ({$form->captchaToUse}) verification failed" . ($details ? ": {$details}" : "") . ".");
+                return;
+            }
+        }
         //
         $meta = self::createInputsMeta($form);
         if (($errors = self::validateAnswers($req->body, $meta))) {
@@ -76,6 +87,7 @@ final class SubmissionsController {
         //
         $clsStrings = self::createValidBehaviourClsStrings($form->behaviours, $apiCtx->getPlugin("JetForms"));
         $results = [];
+        $reqUserRole = $req->myData->user?->role ?? null;
         $pushErrors = is_int($reqUserRole) && $reqUserRole <= ACL::ROLE_AUTHOR;
         for ($i = 0; $i < count($clsStrings); ++$i) {
             try {
@@ -90,8 +102,7 @@ final class SubmissionsController {
                 $results[] = $result;
             } catch (\Exception $e) {
                 $error = "Error: behaviour {$i} failed: " . LogUtils::formatError($e);
-                $fn = $errorLogFn ?? fn($err) => error_log($err);
-                $fn($error);
+                ($errorLogFn ?? fn($err) => error_log($err))($error);
                 if ($pushErrors) $results[] = $error;
             }
         }
@@ -127,34 +138,6 @@ final class SubmissionsController {
         $key = ContactFormBlockType::getSecret();
         $encrypted = $crypto->encrypt($payload, $key);
         $res->json(["token" => $encrypted]);
-    }
-    /**
-     * @param ?string $input
-     * @return bool
-     */
-    private static function isValidCaptcha(?string $input): bool {
-        if (!is_string($input) || strlen($input) < 2)
-            return false;
-        $now = time();
-        $decrypted = "";
-        $key = ContactFormBlockType::getSecret();
-        try {
-            $decrypted = (new Crypto)->decrypt($input, $key);
-        } catch (PikeException $e) {
-            return false;
-        }
-        if (!$decrypted)
-            return false; // empty or falsey
-        $asInt = (int) $decrypted;
-        if (strval($asInt) !== $decrypted)
-            return false; // not an integer
-        $diff = $now - $asInt;
-        $twoDays = 60 * 60 * 24;
-        if ($diff > $twoDays) // User spent more than 2 days filling the form (unlikely > reject it)
-            return false;
-        $minimumFormFillTimeSeconds = 6;
-        $userSpentEnoughTimeFillingTheForm = $diff > $minimumFormFillTimeSeconds;
-        return $userSpentEnoughTimeFillingTheForm;
     }
     /**
      * @param string $blockId
@@ -194,7 +177,7 @@ final class SubmissionsController {
                     "isRequired" => ($block->isRequired ?? null) === 1,
                     "details" => match ($block->type) {
                         RadioGroupInputBlockType::NAME => [
-                            "radios" => JsonUtils::parse($block->radios, asObject: false),
+                            "radios" => (array) $block->radios,
                         ],
                         SelectInputBlockType::NAME => [
                             "options" => (array) $block->options,

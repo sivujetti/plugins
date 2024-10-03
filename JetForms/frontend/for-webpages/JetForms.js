@@ -42,7 +42,8 @@ class JetForms {
         style.innerHTML = `.${errorParentCls} .form-input-hint { display: none; } .${errorParentCls}.blurred .form-input-hint { display: block; }`;
         document.head.appendChild(style);
         //
-        const out = forms.map(formEl => {
+        const captchaImpls = new Map;
+        const formControllers = forms.map(formEl => {
             const state = {
                 isSubmitting: false,
                 onSubmitFn: null,
@@ -66,6 +67,15 @@ class JetForms {
             });
 
             //
+            const out = {
+                getEl() { return formEl; },
+                setIsSubmitting(isSubmitting) {
+                    state.isSubmitting = isSubmitting;
+                    if (isSubmitting) state.submitBtn?.setAttribute('disabled', true);
+                    else state.submitBtn?.removeAttribute('disabled');
+                },
+                setOnSubmit(fn) { state.onSubmitFn = fn; },
+            };
             const validator = new window.Pristine(formEl, {
                 // class of the parent element where the error/success class is added
                 classTo: errorParentCls,
@@ -79,48 +89,66 @@ class JetForms {
                 errorTextClass: 'form-input-hint',
             });
             formEl.addEventListener('submit', e => {
-                if (state.isSubmitting) {
-                    e.preventDefault();
+                e.preventDefault();
+                if (state.isSubmitting)
                     return;
-                }
                 inputEls.forEach(el => {
                     el.parentElement.classList.add('blurred');
                 });
-                if (!validator.validate()) {
-                    e.preventDefault();
+                const isValid = validator.validate();
+                if (!isValid) {
                     removeRadioErrorMessagesExceptTheLastOne(radioGroups);
                     return;
                 }
                 if (state.onSubmitFn)
                     state.onSubmitFn(e);
-                state.isSubmitting = true;
-                if (state.submitBtn)
-                    state.submitBtn.setAttribute('disabled', true);
+                out.setIsSubmitting(true);
+                const captchaToUse = formEl.querySelector('input[name="captchaToUse"]')?.value || null;
+                if (!captchaToUse) {
+                    formEl.submit();
+                    return;
+                }
+                const captcha = captchaImpls.get(captchaToUse);
+                if (captcha) {
+                    captcha.process(token => {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'captchaClientResponseToken';
+                        inp.value = token || 'invalid-token';
+                        formEl.appendChild(inp);
+                        formEl.submit();
+                    });
+                } else {
+                    state.submitBtn.insertAdjacentHTML('beforebegin', '<div>Failed to access the captcha library.</div>');
+                    out.setIsSubmitting(false);
+                }
             });
 
             //
-            return {
-                getEl() { return formEl; },
-                setIsSubmitting(isSubmitting) {
-                    state.isSubmitting = isSubmitting;
-                    if (isSubmitting) state.submitBtn.setAttribute('disabled', true);
-                    else state.submitBtn.removeAttribute('disabled');
-                },
-                setOnSubmit(fn) { state.onSubmitFn = fn; },
-            };
+            return out;
         });
         //
-        const sentFormBlockId = location.hash.startsWith('#contact-form-sent=')
+        const submitdFormBlockId = location.hash.startsWith('#contact-form-sent=')
             ? location.hash.split('=')[1]
             : '';
-        const sent = sentFormBlockId ? out.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === sentFormBlockId) : null;
-        if (sent) {
-            showFormSentMessage(sent.getEl());
-            history.replaceState(null, null, location.href.replace(`#contact-form-sent=${sentFormBlockId}`, ''));
+        const submittedFormCtrl = submitdFormBlockId
+            ? formControllers.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
+            : null;
+        if (submittedFormCtrl) {
+            showFormSentMessage(submittedFormCtrl.getEl());
+            history.replaceState(null, null, location.href.replace(`#contact-form-sent=${submitdFormBlockId}`, ''));
         }
         //
         formsHooked = true;
-        return out;
+        return {
+            /** @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean) void; setOnSubmit(fn: (e: Event) => void): void;}>} */
+            forms: formControllers,
+            /**
+             * @param {string} name
+             * @param {{process(then: (token: string|null) => void): void;}} impl
+             */
+            registerCaptchaImpl(name, impl) { captchaImpls.set(name, impl); },
+        };
     }
 }
 

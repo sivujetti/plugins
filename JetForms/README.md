@@ -74,7 +74,7 @@ How to's.
 `const form = window.JetForms[0]`
 
 ```
-interface JetForm {
+interface JetFormController {
     getEl(): HTMLFormElement;
     setIsSubmitting(isSubmitting: boolean) void;
     setOnSubmit(fn: (e: Event) => void): void;
@@ -101,7 +101,7 @@ Create file `public/my-site-edit-app-extensions-bundle.js`:
     events.on('edit-app-plugins-loaded', () => {
         api.blockTypes.get('JetFormsContactForm').configurePropsWith(props => ({
             ...props,
-            ...{useCaptcha: 0},
+            ...{captchaToUse: null},
         }));
     });
 })(sivujettiCommonsEditApp);
@@ -134,3 +134,9 @@ class Site implements UserSiteInterface {
 # License
 
 GPLv3
+
+# Licenses 3rd party
+
+Library: Pristine
+License: MIT
+Link: https://github.com/sha256/Pristine/blob/master/LICENSE

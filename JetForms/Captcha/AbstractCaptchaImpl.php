@@ -21,9 +21,19 @@ abstract class AbstractCaptchaImpl {
     public abstract function enqueueableJsFiles(): array;
     /**
      * @param string|null $input
-     * @param \Pike\Request $req 
+     * @param \Pike\Request $req
      * @return array [bool, string|null]
      * @psalm-return array{0: bool, 1: string|null}
      */
     public abstract function validateResponseToken(?string $input, Request $req): array;
+    /**
+     * @param string $debugError
+     * @param bool $withStatus
+     * @return array [bool, string|null]
+     * @psalm-return array{0: bool, 1: string|null}
+     */
+    protected function logAndReturnWith(string $debugError, bool $withStatus): array {
+        \error_log($debugError);
+        return [$withStatus, null];
+    }
 }
