@@ -1,7 +1,8 @@
 import {api} from '@sivujetti-commons-for-edit-app';
+import createRunCaptchaPseudoBehaviourConfigurer from './RunCaptchaPseudoBehaviourConfigurer.jsx';
 import createSendFormBehaviourConfigurerImpl from './SendFormBehaviourConfigurer.jsx';
-import createStoreSubmissionToLocalDbBehaviourConfigurerImpl from './StoreSubmissionToLocalDbBehaviourConfigurer.jsx';
 import createShowSentMessageBehaviourConfigurerImpl from './ShowSentMessageBehaviourConfigurer.jsx';
+import createStoreSubmissionToLocalDbBehaviourConfigurerImpl from './StoreSubmissionToLocalDbBehaviourConfigurer.jsx';
 
 const customBehaviourImpls = new Map;
 
@@ -53,6 +54,8 @@ function getBehaviourConfigurerImpl(behaviourName) {
     const custom = customBehaviourImpls.get(behaviourName);
     if (custom) return custom;
 
+    if (behaviourName === 'RunCaptchaTest')
+        return createRunCaptchaPseudoBehaviourConfigurer();
     if (behaviourName === 'SendMail')
         return createSendFormBehaviourConfigurerImpl();
     if (behaviourName === 'StoreSubmissionToLocalDb')

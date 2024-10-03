@@ -29,6 +29,7 @@ class ContactFormEditForm extends preact.Component {
         , false);
         //
         this.setState({behaviours: objectUtils.cloneDeep(block.behaviours),
+                        captchaPseudoBehaviour: createCaptchaPseudoBehaviour(block.captchaToUse),
                         editPanelState: createEditPanelState(), block});
     }
     /**
@@ -37,21 +38,31 @@ class ContactFormEditForm extends preact.Component {
      */
     componentWillReceiveProps(props) {
         const {block} = props;
-        if (block !== this.props.block &&
-            JSON.stringify(block.behaviours) !== JSON.stringify(this.state.behaviours)) {
+        if (block === this.props.block)
+            return;
+        const {captchaPseudoBehaviour} = this.state;
+        if (captchaPseudoBehaviour && block.captchaToUse !== captchaPseudoBehaviour.data.selectedImpl) {
+            const openBehaviourNext = createCaptchaPseudoBehaviour(block.captchaToUse);
+            this.setState({
+                captchaPseudoBehaviour: openBehaviourNext,
+                editPanelState: {...this.state.editPanelState, behaviour: openBehaviourNext}
+            });
+        } else if (JSON.stringify(block.behaviours) !== JSON.stringify(this.state.behaviours)) {
             const behaviours = objectUtils.cloneDeep(block.behaviours);
             const openBehaviourName = this.state.editPanelState.behaviour?.name;
             const openBehaviourNext = behaviours.find(({name}) => name === openBehaviourName);
-            this.setState({behaviours,
+            this.setState({
+                behaviours,
                 editPanelState: createEditPanelState(openBehaviourNext, this.state.editPanelState.leftClass,
-                                                        this.state.editPanelState.rightClass)});
+                                                        this.state.editPanelState.rightClass)
+            });
         }
     }
     /**
      * @param {BlockEditFormProps} props
      * @access protected
      */
-    render({block, emitValueChanged, emitValueChangedThrottled}, {behaviours, editPanelState, curPopupRenderer}) {
+    render({block, emitValueChanged, emitValueChangedThrottled}, {behaviours, captchaPseudoBehaviour, editPanelState, curPopupRenderer}) {
         if (!editPanelState) return;
         const last = behaviours.at(-1);
         const hasTerminator = getBehaviourConfigurerImpl(last.name).isTerminator;
@@ -61,14 +72,15 @@ class ContactFormEditForm extends preact.Component {
             : [behaviours,             []];    // [...all,     btn|null, ...[]]
         const vm = this;
         const isEmpty = (behaviours.length - (hasTerminator ? 1 : 0)) === 0;
-        const addBehOddCls = before.length % 2 > 0 ? ' group-p-odd' : '';
+        const addBehaviourOddCls = createOddCls(before.length);
         return <div class="anim-outer pt-1">
             <div class={ `instructions-list d-flex ${editPanelState.leftClass}` } ref={ this.outerEl }>
-                <span class="mr-1">Kun käyttäjä lähettää tämän lomakkeen niin</span>
+                <span class="mr-1">{ __('Kun käyttäjä lähettää tämän lomakkeen niin') }</span>
                 { [
+                    captchaPseudoBehaviour,
                     ...before,
                     ...(names.length ? [
-                        <span class={ `group-p${addBehOddCls} perhaps ml-1` }>
+                        <span class={ `group-p${addBehaviourOddCls} perhaps ml-1` }>
                             <button
                             onClick={ () => this.setState({curPopupRenderer: AddBehaviourPopup}) }
                             class="poppable d-flex px-1"
@@ -84,8 +96,8 @@ class ContactFormEditForm extends preact.Component {
                     const {configurerLabel, getButtonLabel} = impl;
                     const confBtnText = getButtonLabel(itm.data);
                     const {isTerminator} = impl;
-                    const oddCls = (i % 2) > 0 ? ' group-p-odd' : '';
-                    const hideRemoveBtn = isTerminator && !this.customTerminatorsExist;
+                    const oddCls = createOddCls(i + 1);
+                    const hideRemoveBtn = (isTerminator && !this.customTerminatorsExist) || i === 0;
                     const a = !hideRemoveBtn ? '2.3rem' : '1.3rem';
                     return [
                         i > 0 ? <span class="pl-0 mr-1">{
@@ -116,11 +128,15 @@ class ContactFormEditForm extends preact.Component {
                 behaviour={ editPanelState.behaviour }
                 cssClass={ editPanelState.rightClass }
                 onConfigurationChanged={ vals => {
-                    const behavioursNew = behaviours.map(beh => beh !== editPanelState.behaviour
-                        ? beh
-                        : {...beh, ...{data: {...beh.data, ...vals}}}
-                    );
-                    emitValueChangedThrottled(behavioursNew, 'behaviours');
+                    if (editPanelState.behaviour.name !== 'RunCaptchaTest') {
+                        const behavioursNew = behaviours.map(beh => beh !== editPanelState.behaviour
+                            ? beh
+                            : {...beh, ...{data: {...beh.data, ...vals}}}
+                        );
+                        emitValueChangedThrottled(behavioursNew, 'behaviours');
+                    } else {
+                        emitValueChanged(vals.selectedImpl, 'captchaToUse');
+                    }
                 } }
                 endEditMode={ () => {
                     this.setState({editPanelState: createEditPanelState(null, 'reveal-from-left', 'fade-to-right')});
@@ -135,7 +151,7 @@ class ContactFormEditForm extends preact.Component {
                     Renderer={ curPopupRenderer }
                     rendererProps={ {
                         availableBehaviours: names,
-                        oddCls: addBehOddCls,
+                        oddCls: addBehaviourOddCls,
                         /** @param {string} name */
                         confirmAddBehaviour(name) {
                             const data = name === 'StoreSubmissionToLocalDb'
@@ -261,12 +277,26 @@ function getAvailableBehaviours(alreadyAdded, includeTerminators) {
     const customs1 = Array.from(customBehaviourImpls.entries());
     const customs = includeTerminators ? customs1 : customs1.filter(([_, impl]) => !impl.isTerminator);
     return [
-        ...[
-            'SendMail',
-            'StoreSubmissionToLocalDb',
-        ],
+        'SendMail',
+        'StoreSubmissionToLocalDb',
         ...customs.map(([key, _]) => key)
     ].filter(fromAll => alreadyAdded.indexOf(fromAll) < 0);
+}
+
+/**
+ * @param {number} n
+ * @returns {string}
+ */
+function createOddCls(n) {
+    return n % 2 > 0 ? ' group-p-odd' : '';
+}
+
+/**
+ * @param {string|null} captchaToUse
+ * @returns {Behaviour}
+ */
+function createCaptchaPseudoBehaviour(captchaToUse) {
+    return {name: 'RunCaptchaTest', data: {selectedImpl: captchaToUse}};
 }
 
 export default {

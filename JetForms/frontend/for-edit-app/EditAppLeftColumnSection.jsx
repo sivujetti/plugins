@@ -49,12 +49,11 @@ class EditAppLeftColumnSection extends preact.Component {
  * @param {MailSendSettingsManageDialog|SubmissionsBrowseDialog|CaptchaDataEditDialog} PopupCls
  * @param {string} title
  * @param {string} id
- * @param {string|preact.VNode} icon
- * @returns {preact.VNode}
+ * @param {string|preact.VNode<any>} icon
+ * @returns {preact.VNode<any>}
  */
 function createLink(PopupCls, title, id, icon) {
-    const height = PopupCls !== CaptchaDataEditDialog ? 480 : 600;
-    return <a onClick={ e => openDialog(e, PopupCls, title, height) } class="with-icon" href={ `#${id}`}>
+    return <a onClick={ e => openDialog(e, PopupCls, title) } class="with-icon" href={ `#${id}`}>
         { typeof icon === 'string' ? <Icon iconId={ icon } className="size-sm color-purple color-saturated"/> : icon }
         <span class="color-dimmed">{ __(title) }</span>
     </a>;
@@ -64,16 +63,24 @@ function createLink(PopupCls, title, id, icon) {
  * @param {Event} e
  * @param {MailSendSettingsManageDialog|SubmissionsBrowseDialog|CaptchaDataEditDialog} Cls
  * @param {string} title
- * @param {string} title
+ * @returns {preact.VNode<any>}
  */
-function openDialog(e, Cls, title, height) {
+function openDialog(e, Cls, title) {
     e.preventDefault();
     floatingDialog.open(Cls, {
         title: __(title),
-        height,
+        height: Cls !== CaptchaDataEditDialog ? 480 : 600,
     }, {
         floatingDialog,
     });
 }
 
+/**
+ * @param Event} e
+ */
+function openEditCaptchaSettingsDialog(e) {
+    openDialog(e, CaptchaDataEditDialog, 'Edit captcha settings');
+}
+
 export default EditAppLeftColumnSection;
+export {openEditCaptchaSettingsDialog};

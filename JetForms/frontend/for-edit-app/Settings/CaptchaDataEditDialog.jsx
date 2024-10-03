@@ -126,7 +126,7 @@ class CaptchaDataEditDialog extends preact.Component {
         </form>;
     }
     /**
-     * @param {{settings: Array<{name: string; data: {siteKey: string; secretKey: string; minScore: number;}|{minFormFillTime: number;}|{[prop: string]: any;};}>;}|null} captchaData
+     * @param {CaptchaData|null} captchaData
      * @access private
      */
     createState(captchaData) {
@@ -193,5 +193,14 @@ class CaptchaDataEditDialog extends preact.Component {
             });
     }
 }
+
+/**
+ * @typedef {{
+ *   settings: Array<{
+ *     name: string;
+ *     data: {siteKey: string; secretKey: string; minScore: number;}|{minFormFillTime: number;}|{[prop: string]: any;};
+ *   }>;
+ * }} CaptchaData
+ */
 
 export default CaptchaDataEditDialog;

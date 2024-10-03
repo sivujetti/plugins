@@ -75,6 +75,8 @@ api.registerTranslationStrings({
     'option': 'option',
     // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Done',
+    // RunCaptchaBehaviourConfigurer.jsx
+    'None': 'None',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Subject',
     'To (email)': 'To (email)',

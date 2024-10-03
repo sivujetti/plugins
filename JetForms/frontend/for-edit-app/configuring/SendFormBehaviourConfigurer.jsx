@@ -92,11 +92,11 @@ class SendFormBehaviourConfigurer extends preact.Component {
      * @access protected
      */
     render(_, {replyToAddress, replyToName, replyToInputs}) {
-        return <div class="form-horizontal pt-0">
-            { this.showTechnicalInputs ? null : <div class="with-icon text-tiny py-1">
-                <Icon iconId="info-circle" className="size-xs"/>
+        return [
+            this.showTechnicalInputs ? null : <div class="with-icon text-small py-2">
+                <Icon iconId="info-circle" className="size-xs color-dimmed3"/>
                 <span class="color-dimmed">{ __('useYourOwnEmailHereHint') }</span>
-            </div> }
+            </div>,
             <FormGroupInline className="mt-0">
                 <label htmlFor="toAddress" class="form-label" title={ __('To address') }>
                     { __('To address') }
@@ -112,8 +112,8 @@ class SendFormBehaviourConfigurer extends preact.Component {
                         <InputErrors vm={ this } prop="toName"/>
                     </div>
                 </div>
-            </FormGroupInline>
-            { this.showTechnicalInputs ? [<FormGroupInline>
+            </FormGroupInline>,
+            ...(this.showTechnicalInputs ? [<FormGroupInline>
                 <label htmlFor="fromAddress" class="form-label">{ __('From') }</label>
                 <div>
                     <div>
@@ -150,8 +150,8 @@ class SendFormBehaviourConfigurer extends preact.Component {
                 <label htmlFor="bodyTemplate" class="form-label">{ __('Body') }</label>
                 <Textarea vm={ this } prop="bodyTemplate" id="bodyTemplate" class="form-input code" ref={ this.bodyTemplateInputEl }/>
                 <InputErrors vm={ this } prop="bodyTemplate"/>
-            </FormGroup>] : null }
-        </div>;
+            </FormGroup>] : []),
+        ];
     }
 }
 

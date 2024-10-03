@@ -75,6 +75,8 @@ api.registerTranslationStrings({
     'option': 'vaihtoehto',
     // SelectOrRadioGroupInputOptionEditForm.jsx
     'Done': 'Valmis',
+    // RunCaptchaBehaviourConfigurer.jsx
+    'None': 'Ei mikään',
     // SendFormBehaviourConfigurer.jsx
     'Subject': 'Aihe',
     'To (email)': 'Vastaanottaja (email)',
