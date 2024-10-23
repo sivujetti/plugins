@@ -1,7 +1,6 @@
-import {__} from '@sivujetti-commons-for-edit-app';
-import Tabs from '../../../../../frontend/edit-app/src/commons/Tabs.jsx';
+import {__, Tabs} from '@sivujetti-commons-for-edit-app';
 
-const supportServerBaseUrl = 'https://www.sivujetti.org/early-access/';
+const supportServerBaseUrl = 'https://www.sivujetti.org/';
 const supportServerAssetBaseUrl = supportServerBaseUrl;
 
 class RenderArticleDialog extends preact.Component {
@@ -24,7 +23,7 @@ class RenderArticleDialog extends preact.Component {
 }
 
 /**
- * @param {RawBlock} block
+ * @param {Block} block
  * @returns {preact.Component}
  */
 function renderSection(block) {
@@ -32,7 +31,7 @@ function renderSection(block) {
 }
 
 /**
- * @param {RawBlock} block
+ * @param {Block} block
  * @returns {preact.Component}
  */
 function renderBlock(block) {

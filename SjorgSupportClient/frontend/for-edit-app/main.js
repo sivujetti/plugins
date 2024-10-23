@@ -1,7 +1,7 @@
 import {api} from '@sivujetti-commons-for-edit-app';
 import EditAppLeftColumnSection from './EditAppLeftColumnSection.jsx';
 
-api.mainPanel.registerSection('plugin:sjorgSupportClient', EditAppLeftColumnSection);
+api.menuPanel.registerSection('plugin:sjorgSupportClient', EditAppLeftColumnSection);
 
 setTimeout(() => {
     const el = document.createElement('style');

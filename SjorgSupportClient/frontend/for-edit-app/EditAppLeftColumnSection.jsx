@@ -1,21 +1,30 @@
-import {__, env, http, Icon, LoadingSpinner, floatingDialog, urlUtils} from '@sivujetti-commons-for-edit-app';
+import {
+    __,
+    env,
+    floatingDialog,
+    http,
+    Icon,
+    LoadingSpinner,
+    MenuSection,
+    urlUtils,
+} from '@sivujetti-commons-for-edit-app';
 import RenderArticleDialog, {supportServerBaseUrl} from './RenderArticleDialog.jsx';
 
 /**
  * SjorgSupporClient's main main menu section.
  */
-class EditAppLeftColumnSection extends preact.Component {
+class EditAppLeftColumnSection extends  preact.Component {
     /**
      * @param {Object} props
      */
     constructor(props) {
         super(props);
-        this.state = {isCollapsed: true, featuredArticles: undefined};
+        this.state = {featuredArticles: undefined};
     }
     /**
      * @access protected
      */
-    render(_, {isCollapsed, featuredArticles}) {
+    render(_, {featuredArticles}) {
         let content = null;
         if (featuredArticles === undefined)
             content = null;
@@ -26,64 +35,58 @@ class EditAppLeftColumnSection extends preact.Component {
                 <div class="mt-1">
                     <a
                         href={ `#${art.slug}` }
-                        onClick={ e => this.openArticleToPopup(e, art) }>
+                        onClick={ e => openArticleToPopup(e, art) }>
                         { art.title }
                     </a>
                 </div>
             );
-        return <section class={ `panel-section${isCollapsed ? '' : ' open'}` }>
-            <button
-                class="flex-centered pr-2 pl-1 section-title col-12"
-                onClick={ this.toggleIsCollapsed.bind(this) }
-                type="button">
-                <Icon iconId="lifebuoy" className="p-absolute size-sm mr-2 color-purple"/>
-                <span class="pl-1 d-block col-12 color-default">
-                    { __('Support') }
-                    <span class="text-ellipsis text-tiny col-12">{ __('Instructions') }</span>
-                </span>
-                <Icon iconId="chevron-right" className="p-absolute size-xs"/>
-            </button>
-            <div>
-                { content }
-                <div class="pt-2"><a
-                    href="https://www.sivujetti.org/tuki"
-                    onClick={ e => (e.preventDefault(), alert('This feature is currently disabled.')) }
-                    class="with-icon mt-1">
-                    <Icon iconId="question-mark" className="colored size-sm mr-2"/>
-                    { __('Contact support') }
-                </a></div>
-            </div>
-        </section>;
+        return <MenuSection
+            title={ __('Support') }
+            subtitle={ __('Instructions') }
+            iconId="lifebuoy"
+            colorClass="color-purple"
+            onIsCollapsedChanged={ this.handleIsCollapsedChanged.bind(this)}>
+            { content }
+            <div class="pt-2"><a
+                href="https://www.sivujetti.org/tuki"
+                onClick={ e => (e.preventDefault(), alert('This feature is currently disabled.')) }
+                class="with-icon mt-1">
+                <Icon iconId="question-mark" className="colored size-xs mr-2"/>
+                { __('Contact support') }
+            </a></div>
+        </MenuSection>;
     }
     /**
      * @param {boolean} to
      * @access private
      */
-    toggleIsCollapsed() {
-        const newState = {isCollapsed: !this.state.isCollapsed};
-        if (newState.isCollapsed === false && this.state.featuredArticles === undefined) {
-            newState.featuredArticles = null;
-            const b = `${supportServerBaseUrl.indexOf('?') < 0 ? '?' : '&'}v=${urlUtils.cacheBustStr}`;
-            http.get(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured${b}`, {headers: {}})
-                .then(arts => this.setState({featuredArticles: arts}))
-                .catch(env.window.console.error);
+    async handleIsCollapsedChanged(to) {
+        const doLoad = !to && this.state.featuredArticles === undefined;
+        if (!doLoad) return;
+
+        this.setState({featuredArticles: null});
+        try {
+            const url = urlUtils.withCacheBustStr(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`);
+            const arts = await http.get(url, {headers: {}});
+            this.setState({featuredArticles: arts});
+        } catch (err) {
+            env.window.console.error(err);
         }
-        this.setState(newState);
     }
-    /**
-     * @param {Event} e
-     * @param {Page} article
-     * @access private
-     */
-    openArticleToPopup(e, article) {
-        e.preventDefault();
-        floatingDialog.open(RenderArticleDialog, {
-            title: __(article.title),
-        }, {
-            floatingDialog,
-            article,
-        });
-    }
+}
+
+/**
+ * @param {Event} e
+ * @param {Page} article
+ */
+function openArticleToPopup(e, article) {
+    e.preventDefault();
+    floatingDialog.open(RenderArticleDialog, {
+        title: __(article.title),
+    }, {
+        floatingDialog,
+        article,
+    });
 }
 
 export default EditAppLeftColumnSection;
