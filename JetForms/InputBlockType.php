@@ -30,7 +30,7 @@ abstract class InputBlockType implements BlockTypeInterface, JsxLikeRenderingBlo
         $settings = $this->getSettings();
         [$El, $attrs] = $settings["inputType"] !== "textarea"
             ? ["input",    ["type" => $settings["inputType"]]]
-            : ["textarea", !$block->numRows ? [] : ["rows" => $block->numRows]];
+            : ["textarea", !$block->numRows ? [] : ["rows" => strval($block->numRows)]];
         return el("div", $createDefaultProps("form-group"),
             !$block->label
                 ? ""

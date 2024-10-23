@@ -135,11 +135,8 @@ class IconBlockEditForm extends preact.Component {
      */
     componentWillReceiveProps(props) {
         if (props.block !== this.props.block) {
-            console.log('(JeticonsIcon) block changed',{...this.props.block},{...props.block});
-            if (this.props.block.iconId !== props.block.iconId) {
-                console.log('(JeticonsIcon) got diffference',this.props.block.iconId,props.block.iconId);
+            if (this.props.block.iconId !== props.block.iconId)
                 this.setState({iconId: props.block.iconId});
-            }
         }
     }
     /**
