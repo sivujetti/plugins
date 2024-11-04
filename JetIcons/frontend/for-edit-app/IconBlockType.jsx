@@ -7,9 +7,11 @@ import {
     Icon,
     LoadingSpinner,
     putToLocalStorage,
+    setFocusTo,
     stringUtils,
     timingUtils,
 } from '@sivujetti-commons-for-edit-app';
+import StylesEditForm from './IconBlockVisualStylesEditForm.jsx';
 
 const PAGE_SIZE = 40;
 
@@ -20,6 +22,7 @@ let cachedIconIndices;
 
 class IconBlockEditForm extends preact.Component {
     // gridEl;
+    // searchInputEl;
     // throttledReceiveFilterTerm;
     // scroller;
     // unregisterScroller;
@@ -30,6 +33,7 @@ class IconBlockEditForm extends preact.Component {
         super(props);
         const iconIdInitial = this.props.block.iconId;
         this.gridEl = preact.createRef();
+        this.searchInputEl = preact.createRef();
         const createState = (iconId = '', allIcons = null) => ({
             iconId: iconId,
             visibleIcons: getInitialPage(allIcons),
@@ -128,6 +132,7 @@ class IconBlockEditForm extends preact.Component {
             el.addEventListener('scroll', onScroll);
             return () => { el.removeEventListener('scroll', onScroll); };
         })(scrollEl, this);
+        setFocusTo(this.searchInputEl);
     }
     /**
      * @param {BlockEditFormProps} props
@@ -157,7 +162,8 @@ class IconBlockEditForm extends preact.Component {
             class="form-input mb-2"
             placeholder={ __('Filter') }
             value={ searchTerm }
-            onInput={ this.throttledReceiveFilterTerm }/>;
+            onInput={ this.throttledReceiveFilterTerm }
+            ref={ this.searchInputEl }/>;
         return [
             searchTerm.length ? <div class="has-icon-right">
             { input }
@@ -236,6 +242,26 @@ export default {
         };
     }
 };
+
+// export default {
+//     name,
+//     friendlyName: 'Icon',
+//     initialData: () => ({iconId: ''}),
+//     defaultRenderer: 'plugins/JetIcons:block-icon-default',
+//     icon: 'macro',
+//     reRender: ({iconId, id, styleClasses}, renderChildren) =>
+//         ['<span class="j-', name, styleClasses ? ` ${styleClasses}` : '',
+//             '" data-block-type="', name, '" data-block="', id, '">'].concat(iconId
+//                 ? iconToSvg(cachedAvailableIcons[cachedIconIndices.get(iconId)])
+//                 : []).concat([
+//             renderChildren(),
+//         '</span>']).join('')
+//     ,
+//     createSnapshot: from => ({
+//         iconId: from.iconId,
+//     }),
+//     editForm: IconBlockEditForm,
+// };
 
 /**
  * @typedef IconPackIcon
