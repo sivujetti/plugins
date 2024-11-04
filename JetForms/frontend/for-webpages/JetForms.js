@@ -33,8 +33,20 @@ class JetForms {
      */
     hookAllForms(parentElement) {
         if (formsHooked) return;
-        const forms = Array.from(parentElement.querySelectorAll('.jet-form'));
-        if (!forms.length) return;
+
+        const captchaImpls = new Map;
+        const out = {
+            /** @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean) void; setOnSubmit(fn: (e: Event) => void): void;}>} */
+            forms: [],
+            /**
+             * @param {string} name
+             * @param {{process(then: (token: string|null) => void): void;}} impl
+             */
+            registerCaptchaImpl(name, impl) { captchaImpls.set(name, impl); },
+        };
+
+        const formsEls = Array.from(parentElement.querySelectorAll('.jet-form'));
+        if (!formsEls.length) return out;
         //
         const errorParentCls = 'form-group';
         const style = document.createElement('style');
@@ -42,8 +54,7 @@ class JetForms {
         style.innerHTML = `.${errorParentCls} .form-input-hint { display: none; } .${errorParentCls}.blurred .form-input-hint { display: block; }`;
         document.head.appendChild(style);
         //
-        const captchaImpls = new Map;
-        const formControllers = forms.map(formEl => {
+        out.forms = formsEls.map(formEl => {
             const state = {
                 isSubmitting: false,
                 onSubmitFn: null,
@@ -132,7 +143,7 @@ class JetForms {
             ? location.hash.split('=')[1]
             : '';
         const submittedFormCtrl = submitdFormBlockId
-            ? formControllers.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
+            ? out.forms.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
             : null;
         if (submittedFormCtrl) {
             showFormSentMessage(submittedFormCtrl.getEl());
@@ -140,15 +151,7 @@ class JetForms {
         }
         //
         formsHooked = true;
-        return {
-            /** @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean) void; setOnSubmit(fn: (e: Event) => void): void;}>} */
-            forms: formControllers,
-            /**
-             * @param {string} name
-             * @param {{process(then: (token: string|null) => void): void;}} impl
-             */
-            registerCaptchaImpl(name, impl) { captchaImpls.set(name, impl); },
-        };
+        return out;
     }
 }
 
