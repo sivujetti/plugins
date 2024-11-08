@@ -262,8 +262,7 @@ function createDefaultOwnProps() {
                 message: __('Thank you for your message.')
             }}
         ],
-        useCaptcha: 1,
-        captchaToUse: 'jet-forms',
+        captchaToUse: 'jet-captcha',
     });
 }
 
@@ -307,7 +306,7 @@ export default {
         customBehaviourImpls.set(name, configurer);
     },
     /**
-     * @param {(props: ContactFormBlockPropsIr) => ContactFormBlockPropsIr} fn
+     * @param {(props: ContactFormBlockProps) => ContactFormBlockProps} fn
      */
     configurePropsWith(fn) {
         createPropsMutators.push(fn);

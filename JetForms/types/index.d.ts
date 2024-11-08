@@ -21,12 +21,7 @@ interface BehaviourConfigurerImpl {
 
 interface ContactFormBlockProps {
     behaviours: Array<Behaviour>;
-    useCaptcha: number;
-}
-
-interface ContactFormBlockPropsIr {
-    behaviours: Array<Behaviour>;
-    useCaptcha: number;
+    captcaToUse: string|null;
 }
 
 interface CreateInputSettings {

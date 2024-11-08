@@ -88,7 +88,7 @@ final class UseCaptchaTest extends PluginTestCase {
                         "behaviours" => [
                             ["name" => "StoreSubmissionToLocalDb", "data" => new \stdClass,]
                         ],
-                        "useCaptcha" => 1,
+                        "captchaToUse" => "jet-captcha",
                     ],
                     children: [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
                         renderer: TextInputBlockType::DEFAULT_RENDERER, // Doesn't matter

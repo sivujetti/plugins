@@ -1,6 +1,6 @@
 import {__, api, env, http, Icon} from '@sivujetti-commons-for-edit-app';
 import {openEditCaptchaSettingsDialog} from '../EditAppLeftColumnSection.jsx';
-/** @typedef {import('../Settings/CaptchaDataEditDialog').CaptchaData} CaptchaData */
+/** @typedef {import('../Settings/CaptchaDataEditDialog.jsx').CaptchaData} CaptchaData */
 
 /** @extends {preact.Component<ConfigureBehaviourPanelProps && {selectedImpl: string|null;}, any>} */
 class RunCaptchaBehaviourConfigurer extends preact.Component {

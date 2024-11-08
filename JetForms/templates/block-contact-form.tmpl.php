@@ -19,7 +19,7 @@
         ? $this->e($props->returnTo)
         : "{$this->url($currentUrl)}#contact-form-sent={$props->id}"
     ?>">
-    <?php if ($props->useCaptcha): ?>
-        <input type="hidden" name="_cChallenge" value="<?= $this->escAttr($props->__captchaChallenge ?? "") ?>">
+    <?php if ($props->captchaToUse): ?>
+        <input type="hidden" name="captchaToUse" value="<?= $this->escAttr($props->captchaToUse) ?>">
     <?php endif; ?>
 </form>

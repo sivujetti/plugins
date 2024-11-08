@@ -262,7 +262,7 @@ final class SendContactFormTest extends PluginTestCase {
                         "name" => $name,
                         "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
                     ], $behaviours),
-                    "useCaptcha" => 0
+                    "captchaToUse" => null,
                 ],
                 children: [...$inputs],
                 id: "@auto"

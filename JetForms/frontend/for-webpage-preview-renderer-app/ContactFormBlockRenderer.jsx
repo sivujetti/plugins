@@ -13,12 +13,12 @@ class ContactFormBlockRenderer extends preact.Component {
             data-form-id={ block.id }
             data-form-type="contact"
             { ...createDefaultProps('jet-form') }>
-                { renderChildren() }
-                <input type="hidden" name="_returnTo" value={ `${urlUtils.makeUrl(urlUtils.currentPageSlug)}#contact-form-sent=${block.id}` }/>
-                { block.useCaptcha
-                    ? <input type="hidden" name="_cChallenge" value={ block.__captchaChallenge }/>
-                    : null
-                }
+            { renderChildren() }
+            <input type="hidden" name="_returnTo" value={ block.returnTo || `${urlUtils.makeUrl(urlUtils.currentPageSlug)}#contact-form-sent=${block.id}` }/>
+            { block.captchaToUse
+                ? <input type="hidden" name="captchaToUse" value={ block.captchaToUse }/>
+                : null
+            }
         </form>;
     }
 }

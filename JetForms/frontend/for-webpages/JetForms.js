@@ -1,4 +1,4 @@
-let formsHooked = false;
+let currentApiController = null;
 
 /**
  * Makes form.jet-form elements alive.
@@ -32,10 +32,10 @@ class JetForms {
      * @access public
      */
     hookAllForms(parentElement) {
-        if (formsHooked) return;
+        if (currentApiController) return currentApiController;
 
         const captchaImpls = new Map;
-        const out = {
+        currentApiController = {
             /** @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean) void; setOnSubmit(fn: (e: Event) => void): void;}>} */
             forms: [],
             /**
@@ -46,7 +46,7 @@ class JetForms {
         };
 
         const formsEls = Array.from(parentElement.querySelectorAll('.jet-form'));
-        if (!formsEls.length) return out;
+        if (!formsEls.length) return currentApiController;
         //
         const errorParentCls = 'form-group';
         const style = document.createElement('style');
@@ -54,7 +54,7 @@ class JetForms {
         style.innerHTML = `.${errorParentCls} .form-input-hint { display: none; } .${errorParentCls}.blurred .form-input-hint { display: block; }`;
         document.head.appendChild(style);
         //
-        out.forms = formsEls.map(formEl => {
+        currentApiController.forms = formsEls.map(formEl => {
             const state = {
                 isSubmitting: false,
                 onSubmitFn: null,
@@ -143,15 +143,14 @@ class JetForms {
             ? location.hash.split('=')[1]
             : '';
         const submittedFormCtrl = submitdFormBlockId
-            ? out.forms.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
+            ? currentApiController.forms.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
             : null;
         if (submittedFormCtrl) {
             showFormSentMessage(submittedFormCtrl.getEl());
             history.replaceState(null, null, location.href.replace(`#contact-form-sent=${submitdFormBlockId}`, ''));
         }
         //
-        formsHooked = true;
-        return out;
+        return currentApiController;
     }
 }
 
