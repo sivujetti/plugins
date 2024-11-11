@@ -31,15 +31,13 @@ final class SubmissionsController {
      * @param \Sitejetti\Page\PagesRepository2 $pagesRepo
      * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
      * @param \Sivujetti\AppEnv $appEnv
-     * @param ?\Closure $errorLogFn = null For tests
      */
     public function handleSubmission(Request $req,
                                      Response $res,
                                      SharedAPIContext $apiCtx,
                                      PagesRepository2 $pagesRepo,
                                      GlobalBlockTreesRepository2 $gbtRepo,
-                                     AppEnv $appEnv,
-                                     ?\Closure $errorLogFn = null): void {
+                                     AppEnv $appEnv): void {
         if (($errors = self::validateSubmissionInput($req->body)))
             throw new PikeException(implode("\n", $errors), PikeException::BAD_INPUT);
         //
@@ -70,10 +68,10 @@ final class SubmissionsController {
                 [$isValid, $details] = $instance->validateResponseToken($req->body->captchaClientResponseToken ?? null, $req);
             } catch (\Exception $e) {
                 $error = "Error: uncaught exception in captcha verification: " . LogUtils::formatError($e);
-                ($errorLogFn ?? fn($err) => error_log($err))($error);
+                (JetForms::$logFn ?? fn($err) => error_log($err))($error);
             }
             if (!$isValid) {
-                $res->status(400)->plain("Captcha ({$form->captchaToUse}) verification failed" . ($details ? ": {$details}" : "") . ".");
+                $res->status(400)->plain("Captcha ({$form->captchaToUse}) verification failed" . (isset($details) ? ": {$details}" : "") . ".");
                 return;
             }
         }
@@ -102,7 +100,7 @@ final class SubmissionsController {
                 $results[] = $result;
             } catch (\Exception $e) {
                 $error = "Error: behaviour {$i} failed: " . LogUtils::formatError($e);
-                ($errorLogFn ?? fn($err) => error_log($err))($error);
+                (JetForms::$logFn ?? fn($err) => error_log($err))($error);
                 if ($pushErrors) $results[] = $error;
             }
         }
@@ -177,10 +175,10 @@ final class SubmissionsController {
                     "isRequired" => ($block->isRequired ?? null) === 1,
                     "details" => match ($block->type) {
                         RadioGroupInputBlockType::NAME => [
-                            "radios" => (array) $block->radios,
+                            "radios" => $block->radios,
                         ],
                         SelectInputBlockType::NAME => [
-                            "options" => (array) $block->options,
+                            "options" => $block->options,
                             "multiple" => $block->multiple === 1,
                         ],
                         default =>  [],
@@ -219,7 +217,7 @@ final class SubmissionsController {
         if ($type === RadioGroupInputBlockType::NAME) {
             $selected = $reqBody->{$name} ?? null;
             return ["type" => "singleSelect", "entries" => array_map(fn($opt) =>
-                ["text" => $opt["text"], "isSelected" => $opt["value"] === $selected]
+                ["text" => $opt->text, "isSelected" => $opt->value === $selected]
             , $meta["details"]["radios"])];
         }
 
@@ -229,12 +227,12 @@ final class SubmissionsController {
             //
             if (!$selectInputDetails["multiple"]) {
                 $selected = $reqBody->{$name} ?? "-";
-                return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")["text"] : "-";
+                return $selected !== "-" ? ArrayUtils::findByKey($opts, $selected, "value")->text : "-";
             }
             //
             $selected = $reqBody->{$name} ?? [];
             return ["type" => "multiSelect", "entries" => array_map(fn($opt) =>
-                ["text" => $opt["text"], "isSelected" => in_array($opt["value"], $selected, true)]
+                ["text" => $opt->text, "isSelected" => in_array($opt->value, $selected, true)]
             , $opts)];
         }
 
@@ -277,8 +275,8 @@ final class SubmissionsController {
             }
             $isSelect = $meta["type"] === SelectInputBlockType::NAME;
             if ($isSelect || $meta["type"] === RadioGroupInputBlockType::NAME) {
-                $k = $isSelect ? "options" : "radios";
-                $validValues = array_merge(array_column($meta["details"][$k], "value"), ["-"]);
+                $defs = $meta["details"][$isSelect ? "options" : "radios"]; // array<int, {text: string, value: string}>
+                $validValues = [...array_map(fn($d) => $d->value, $defs), "-"];
                 if (!$isSelect || !$meta["details"]["multiple"]) {
                     $propPath = $meta["name"] . (!$isSelect && !$meta["isRequired"] ? "?" : "");
                     $v->rule($propPath, "in", $validValues);

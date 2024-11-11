@@ -8,7 +8,6 @@ use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInp
     NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
     TextInputBlockType};
 use Sivujetti\Block\Entities\Block;
-use Sivujetti\Template;
 use Sivujetti\Tests\Utils\{PluginTestCase};
 
 final class RenderContactFormTest extends PluginTestCase {
@@ -26,42 +25,34 @@ final class RenderContactFormTest extends PluginTestCase {
             ->useBlockType(TextInputBlockType::NAME, new TextInputBlockType)
             ->withPageData(function (object $testPageData) {
                 $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
-                    renderer: ContactFormBlockType::DEFAULT_RENDERER,
                     propsData: self::createDataForTestContactFormBlock(),
                     children: [
                         $this->blockTestUtils->makeBlockData(EmailInputBlockType::NAME,
-                            renderer: EmailInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("email"),
                         ),
                         $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
-                            renderer: TextInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("name"),
                         ),
                         $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
-                            renderer: TextareaInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("message"),
                         ),
                         $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
-                            renderer: TextareaInputBlockType::DEFAULT_RENDERER,
-                            propsData: (object) array_merge(
-                                (array) self::createDataForTestInputBlock("message"),
-                                ["name" => "messageTaller", "numRows" => 4]
-                            ),
+                            propsData: (object) [
+                                ...(array) self::createDataForTestInputBlock("message"),
+                                "name" => "messageTaller",
+                                "numRows" => 4
+                            ],
                         ),
                         $this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
-                            renderer: SelectInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("wizardLevel"),
                         ),
                         $this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
-                            renderer: NumberInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("age"),
                         ),
                         $this->blockTestUtils->makeBlockData(CheckboxInputBlockType::NAME,
-                            renderer: CheckboxInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("wantsReply"),
                         ),
                         $this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
-                            renderer: RadioGroupInputBlockType::DEFAULT_RENDERER,
                             propsData: self::createDataForTestInputBlock("gender"),
                         ),
                         $this->blockTestUtils->makeBlockData(Block::TYPE_BUTTON,
@@ -78,7 +69,7 @@ final class RenderContactFormTest extends PluginTestCase {
         $dom = new Document(preg_replace("/&([#A-Za-z0-9]+);/", "%\$1;", $response->getActualBody()));
         $formEl = $dom->first(".jet-form");
         $this->assertNotNull($formEl);
-        $tmpl = new Template("dummy");
+        $tmpl = self::createTemplate();
         $this->assertEquals($tmpl->makeUrl("/plugins/jet-forms/submissions/-bbbbbbbbbbbbbbbbbbb/hello/main"),
                             $formEl->getAttribute("action"));
         $this->assertEquals("post", $formEl->getAttribute("method"));
@@ -89,7 +80,7 @@ final class RenderContactFormTest extends PluginTestCase {
         // <div ... class="j-JetFormsEmailInput">
         //     <input name="email" id="email" type="email" class="form-input" placeholder="Email" data-pristine-required>
         // </div>
-        $emailInputOuter = $all[1];
+        $emailInputOuter = $all[0];
         $this->assertEquals("j-JetFormsEmailInput form-group", $emailInputOuter->getAttribute("class"));
         $emailInputEl = $emailInputOuter->firstChild();
         $this->assertEquals("email", $emailInputEl->getAttribute("name"));
@@ -102,7 +93,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-label" for="name">Test escape&lt;</label>
         //     <input name="name" id="name" type="text" class="form-input" data-pristine-required>
         // </div>
-        $textInputOuter = $all[2];
+        $textInputOuter = $all[1];
         $this->assertEquals("j-JetFormsTextInput form-group", $textInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $textInputOuter->children();
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
@@ -116,7 +107,7 @@ final class RenderContactFormTest extends PluginTestCase {
         // <div class="j-JetFormsTextareaInput" ...>
         //    <textarea name="message" id="message" class="form-input" placeholder="Message"></textarea>
         // </div>
-        foreach ([[3, "message"], [4, "messageTaller"]] as [$idx, $name]) {
+        foreach ([[2, "message"], [3, "messageTaller"]] as [$idx, $name]) {
             $textareaOuter = $all[$idx];
             $this->assertEquals("j-JetFormsTextareaInput form-group", $textareaOuter->getAttribute("class"));
             $textareaEl = $textareaOuter->firstChild();
@@ -134,13 +125,13 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <option value="-">-</option>
         //     </select>
         // </div>
-        $selectElOuter = $all[5];
+        $selectElOuter = $all[4];
         $this->assertEquals("j-JetFormsSelectInput form-group", $selectElOuter->getAttribute("class"));
         $selectEl = $selectElOuter->firstChild();
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
         $optionEls = $selectEl->find("option");
         $this->assertCount(4, $optionEls);
-        $optsData = json_decode(self::createDataForTestInputBlock("wizardLevel")->options);
+        $optsData = self::createDataForTestInputBlock("wizardLevel")->options;
         $this->assertEquals($optsData[0]->value, $optionEls[0]->getAttribute("value"));
         $this->assertEquals($optsData[1]->value, $optionEls[1]->getAttribute("value"));
         $this->assertEquals($optsData[2]->value, $optionEls[2]->getAttribute("value"));
@@ -153,7 +144,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-label" for="age">Age</label>
         //     <input name="age" id="age" type="text" class="form-input" inputmode="numeric">
         // </div>
-        $numberInputOuter = $all[6];
+        $numberInputOuter = $all[5];
         $this->assertEquals("j-JetFormsNumberInput form-group", $numberInputOuter->getAttribute("class"));
         [$labelEl, $inputEl] = $numberInputOuter->children();
         $this->assertEquals("form-label", $labelEl->getAttribute("class"));
@@ -170,7 +161,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //         <i class="form-icon"></i> Test escape&gt;
         //    </label>
         // </div>
-        $checkboxInputOuter = $all[7];
+        $checkboxInputOuter = $all[6];
         $this->assertEquals("j-JetFormsCheckboxInput form-group", $checkboxInputOuter->getAttribute("class"));
         $labelEl = $checkboxInputOuter->firstChild();
         $this->assertEquals("form-checkbox", $labelEl->getAttribute("class"));
@@ -185,7 +176,7 @@ final class RenderContactFormTest extends PluginTestCase {
         //     <label class="form-radio"><input name="gender" value="gender-2" type="radio"><i class="form-icon"></i> Gender 2</label>
         //     <label class="form-radio"><input name="gender" value="gender-2" type="radio"><i class="form-icon"></i> Test escape2&gt;</label>
         // </div>
-        $radioGroupOuter = $all[8];
+        $radioGroupOuter = $all[7];
         $this->assertEquals("j-JetFormsRadioGroupInput form-group", $radioGroupOuter->getAttribute("class"));
         [$mainLabelEl, $radioLabelEl1, $radioLabelEl2, $radioLabelEl3] = $radioGroupOuter->children();
         $this->assertEquals("form-label", $mainLabelEl->getAttribute("class"));
@@ -201,12 +192,12 @@ final class RenderContactFormTest extends PluginTestCase {
             $this->assertEquals($expectedLabels[$i], rtrim($textNode->text()));
         }
         // <button class="j-Button btn" type="submit" ...>Send</button>
-        $buttonEl = $all[9];
+        $buttonEl = $all[8];
         $this->assertTrue(str_starts_with($buttonEl->getAttribute("class"), "j-Button"));
         $this->assertEquals("submit", $buttonEl->getAttribute("type"));
         $this->assertEquals("Send", $buttonEl->text());
         // <input type="hidden" name="_returnTo" value="/sivujetti/hello#contact-form-sent=-bbbbbbbbbbbbbbbbbbb">
-        $returnToInput = $all[11];
+        $returnToInput = $all[9];
         $this->assertEquals("hidden", $returnToInput->getAttribute("type"));
         $this->assertEquals("_returnTo", $returnToInput->getAttribute("name"));
         $this->assertEquals($tmpl->makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
@@ -215,7 +206,7 @@ final class RenderContactFormTest extends PluginTestCase {
     public static function createDataForTestContactFormBlock(): object {
         return (object) [
             "behaviours" => [
-                ["name" => "SendMail", "data" => [
+                (object) ["name" => "SendMail", "data" => [
                     "subjectTemplate" => "",
                     "toAddress" => "",
                     "replyToAddress" => "",
@@ -250,11 +241,11 @@ final class RenderContactFormTest extends PluginTestCase {
             "wizardLevel" => (object) [
                 "name" => "wizardLevel",
                 "label" => "",
-                "options" => json_encode([
-                    ["text" => "Squib", "value" => "squib"],
-                    ["text" => "Harry Potter", "value" => "harry-potter"],
-                    ["text" => "Supreme Mugwump", "value" => "mugwump"],
-                ]),
+                "options" => [
+                    (object) ["text" => "Squib", "value" => "squib"],
+                    (object) ["text" => "Harry Potter", "value" => "harry-potter"],
+                    (object) ["text" => "Supreme Mugwump", "value" => "mugwump"],
+                ],
                 "multiple" => 0,
             ],
             "age" => (object) [
@@ -272,11 +263,11 @@ final class RenderContactFormTest extends PluginTestCase {
                 "name" => "gender",
                 "isRequired" => 1,
                 "label" => "Test escape<",
-                "radios" => json_encode([
-                    ["text" => "Gender 1", "value" => "gender-1"],
-                    ["text" => "Gender 2", "value" => "gender-2"],
-                    ["text" => "Test escape2>", "value" => "gender-3"],
-                ]),
+                "radios" => [
+                    (object) ["text" => "Gender 1", "value" => "gender-1"],
+                    (object) ["text" => "Gender 2", "value" => "gender-2"],
+                    (object) ["text" => "Test escape2>", "value" => "gender-3"],
+                ],
             ],
             "default" => ""
         };

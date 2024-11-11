@@ -8,12 +8,26 @@ use Pike\Request;
  * @psalm-import-type VNode from Sivujetti\BlockType\JsxLikeRenderingBlockTypeInterface
  */
 abstract class AbstractCaptchaImpl {
+    /** @var \SitePlugins\JetForms\Captcha\CaptchaSettings */
     protected CaptchaSettings $settings;
+    /**
+     * @var \Closure
+     * @psalm-var \Closure(string):void
+     */
+    protected \Closure $logFn;
     /**
      * @inheritdoc
      */
     public function __construct(CaptchaSettings $settings) {
         $this->settings = $settings;
+        $this->setLogFn(\error_log(...));
+    }
+    /**
+     * @param \Closure $logFn
+     * @psalm-param \Closure(string):void $logFn
+     */
+    public function setLogFn(\Closure $logFn) {
+        $this->logFn = $logFn;
     }
     /**
      * @return string[]
@@ -33,7 +47,7 @@ abstract class AbstractCaptchaImpl {
      * @psalm-return array{0: bool, 1: string|null}
      */
     protected function logAndReturnWith(string $debugError, bool $withStatus): array {
-        \error_log($debugError);
+        $this->logFn->__invoke($debugError);
         return [$withStatus, null];
     }
 }

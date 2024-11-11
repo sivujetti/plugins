@@ -3,7 +3,7 @@
 namespace SitePlugins\JetForms\Captcha;
 
 use Pike\Auth\Crypto;
-use Pike\{PikeException, Request};
+use Pike\{Request};
 use SitePlugins\JetForms\ContactFormBlockType;
 
 class JetCaptcha extends AbstractCaptchaImpl {
@@ -45,7 +45,7 @@ class JetCaptcha extends AbstractCaptchaImpl {
         $oneDay = 60 * 60 * 24;
         if ($fillTime > $oneDay) { // User spent more than a day filling the form (unlikely > reject it)
             return $this->logAndReturnWith("[Debug] User form completion time {$fillTime} was greater than" .
-                        " required {$oneDay}.", false);
+                        " allowed {$oneDay}.", false);
         }
         if ($fillTime <= $minimumFormFillTimeSeconds) {
             return $this->logAndReturnWith("[Debug] User form completion time {$fillTime} was less than" .

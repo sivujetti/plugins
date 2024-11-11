@@ -17,6 +17,11 @@ use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
     public const ON_MAILER_CONFIGURE = "plugins:jetFormsMailerOnConfigure";
+    /**
+     * @var \Closure Mainly for tests
+     * @psalm-var \Closure(string):void
+     */
+    public static ?\Closure $logFn = null;
     /** @var array<string, class-string> e.g. SendMail, SubsribeToNewsletter, CopyMessageToLocalDb */
     private array $behaviourExecutors = [];
     /** @var class-string[] */
@@ -148,6 +153,7 @@ final class JetForms implements UserPluginInterface {
                         ->fetch()?->data ?? []
                 );
             $this->captchaInstances[$name] = new $ClsString($this->captchaSettings);
+            if (self::$logFn) $this->captchaInstances[$name]->setLogFn(self::$logFn);
         }
 
         return $this->captchaInstances[$name];

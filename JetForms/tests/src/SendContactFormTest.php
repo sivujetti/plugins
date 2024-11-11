@@ -17,7 +17,6 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourSendsMailUsingDataFromAContactFormBlock(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: [$this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
-                renderer: TextInputBlockType::DEFAULT_RENDERER, // Doesn't matter
                 propsData: (object) [
                     "name" => "input_1",
                     "isRequired" => 1,
@@ -38,14 +37,13 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourHandlesSingleSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
-                renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
                     "label" => "Choose one",
-                    "options" => json_encode([
-                        ["text" => "Option 1 xss <", "value" => "option-1"],
-                        ["text" => "Option 2", "value" => "option-2"],
-                    ]),
+                    "options" => [
+                        (object) ["text" => "Option 1 xss <", "value" => "option-1"],
+                        (object) ["text" => "Option 2", "value" => "option-2"],
+                    ],
                     "multiple" => 0,
                 ])
             ],
@@ -62,15 +60,14 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourHandlesMultiSelectInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: [$this->blockTestUtils->makeBlockData(SelectInputBlockType::NAME,
-                renderer: TextInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
                     "label" => "Choose many",
-                    "options" => json_encode([
-                        ["text" => "Option 1 xss <", "value" => "option-1"],
-                        ["text" => "Option 2", "value" => "option-2"],
-                        ["text" => "Option 3", "value" => "option-3"],
-                    ]),
+                    "options" => [
+                        (object) ["text" => "Option 1 xss <", "value" => "option-1"],
+                        (object) ["text" => "Option 2", "value" => "option-2"],
+                        (object) ["text" => "Option 3", "value" => "option-3"],
+                    ],
                     "multiple" => 1,
                 ])
             ],
@@ -90,15 +87,14 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourHandlesRadioGroupInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: [$this->blockTestUtils->makeBlockData(RadioGroupInputBlockType::NAME,
-                renderer: RadioGroupInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "input_1",
                     "label" => "Choose single",
-                    "radios" => json_encode([
-                        ["text" => "Option 1 xss <", "value" => "option-1"],
-                        ["text" => "Option 2", "value" => "option-2"],
-                        ["text" => "Option 3", "value" => "option-3"],
-                    ]),
+                    "radios" => [
+                        (object) ["text" => "Option 1 xss <", "value" => "option-1"],
+                        (object) ["text" => "Option 2", "value" => "option-2"],
+                        (object) ["text" => "Option 3", "value" => "option-3"],
+                    ],
                     "isRequired" => 0,
                 ])
             ],
@@ -118,7 +114,6 @@ final class SendContactFormTest extends PluginTestCase {
     public function testProcessSubmissionWithSendMailBehaviourHandlesNumberInput(): void {
         $this->runSendFormWithSendMailBehaviour(
             inputs: [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
-                renderer: NumberInputBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
                     "name" => "phone_number",
                     "label" => "Phone number",
@@ -138,7 +133,6 @@ final class SendContactFormTest extends PluginTestCase {
 
     public function testProcessSubmissionUsesReplyToAddressAndName(): void {
         $inputs = [$this->blockTestUtils->makeBlockData(NumberInputBlockType::NAME,
-            renderer: NumberInputBlockType::DEFAULT_RENDERER,
             propsData: (object) [
                 "name" => "name_input_1",
                 "label" => "Name",
@@ -146,7 +140,6 @@ final class SendContactFormTest extends PluginTestCase {
                 "placeholder" => "",
             ]),
             $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
-            renderer: NumberInputBlockType::DEFAULT_RENDERER,
             propsData: (object) [
                 "name" => "email_input_1",
                 "label" => "Email",
@@ -154,7 +147,6 @@ final class SendContactFormTest extends PluginTestCase {
                 "placeholder" => "",
             ]),
             $this->blockTestUtils->makeBlockData(TextareaInputBlockType::NAME,
-            renderer: NumberInputBlockType::DEFAULT_RENDERER,
             propsData: (object) [
                 "name" => "message",
                 "isRequired" => 0,
@@ -196,11 +188,9 @@ final class SendContactFormTest extends PluginTestCase {
         $this->sendSendFormRequest(
             $this->createSetupPageDataFn($behaviours, [
                 $this->blockTestUtils->makeBlockData(TextInputBlockType::NAME,
-                    renderer: TextInputBlockType::DEFAULT_RENDERER,
                     propsData: RenderContactFormTest::createDataForTestInputBlock("name"),
                 ),
                 $this->blockTestUtils->makeBlockData(EmailInputBlockType::NAME,
-                    renderer: EmailInputBlockType::DEFAULT_RENDERER,
                     propsData: RenderContactFormTest::createDataForTestInputBlock("email"),
                 ),
             ], ""),
@@ -256,9 +246,8 @@ final class SendContactFormTest extends PluginTestCase {
                 "bodyTemplate" => $emailBodyTemplate,
             ];
             $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(ContactFormBlockType::NAME,
-                renderer: ContactFormBlockType::DEFAULT_RENDERER,
                 propsData: (object) [
-                    "behaviours" => array_map(fn($name) => [
+                    "behaviours" => array_map(fn($name) => (object) [
                         "name" => $name,
                         "data" => $name === "SendMail" ? $this->state->testSendFormBehaviourData : new \stdClass,
                     ], $behaviours),
@@ -302,7 +291,7 @@ final class SendContactFormTest extends PluginTestCase {
             ->execute(function () use ($postData) {
                 $this->dbDataHelper->insertData((object) [
                     "objectName" => "JetForms:mailSendSettings",
-                    "data" => json_encode([
+                    "data" => JsonUtils::stringify([
                         "sendingMethod" => "mail",
                         "SMTP_host" => "",
                         "SMTP_port" => "",

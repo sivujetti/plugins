@@ -6,11 +6,11 @@ echo "<div class=\"j-JetFormsSelectInput form-group",
         ? ""
         : "<label class=\"form-label\" for=\"{$this->escAttr($props->name)}\">{$this->e($props->label)}</label>",
     "<select class=\"form-select\" name=\"", $this->escAttr($props->name), !$props->multiple ? "\"" : "[]\" multiple", ">";
-    foreach (array_merge(
-        json_decode($props->options, associative: true, flags: JSON_THROW_ON_ERROR),
-        [["text" => "-", "value" => "-"]]
-    ) as ["value" => $value, "text" => $text]) {
-        echo "<option value=\"", $this->escAttr($value), "\">", $this->__($text), "</option>";
+    foreach ([
+        ...$props->options,
+        (object) ["text" => "-", "value" => "-"]
+    ] as $def) {
+        echo "<option value=\"", $this->escAttr($def->value), "\">", $this->__($def->text), "</option>";
     }
 echo "</select>",
     $this->renderChildren($props),
