@@ -22,7 +22,7 @@ class ReCaptcha extends AbstractCaptchaImpl {
         }
         $arr = $this->settings->findSettings("grecaptcha") ?? [];
         $curl = new cURL;
-        $resp = $curl->post("http://localhost:8888/sivujetti/siteverify.php", [
+        $resp = $curl->post("https://www.google.com/recaptcha/api/siteverify", [
             "secret" => $arr["secretKey"] ?? "-", // Required. The shared key between your site and reCAPTCHA.
             "response" => $input, // Required. The user response token provided by the reCAPTCHA client-side integration on your site.
         ]);

@@ -22,6 +22,7 @@ function loadApiScript() {
     const el = document.createElement('script');
     el.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
     document.body.appendChild(el);
+    return siteKey;
 }
 
 function registerCaptchaImpl(siteKey) {

@@ -1,9 +1,7 @@
-let currentApiController = null;
+const captchaImpls = new Map;
 
-/**
- * Makes form.jet-form elements alive.
- */
 class JetForms {
+    // forms;
     /**
      * @param {string} lang 'en', 'fi' etc.
      */
@@ -25,28 +23,21 @@ class JetForms {
             });
             window.Pristine.setLocale('fi');
         }
+        /**
+         * @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean): void; setOnSubmit(fn: (e: Event) => void): void;}>}
+         * @public
+         */
+        this.forms = [];
     }
     /**
+     * Makes form.jet-form elements alive.
+     *
      * @param {HTMLElement} parentElement
-     * @returns {Array<{getEl: () => HTMLFormElement; setIsSubmitting: (isSubmitting: boolean) => void; setOnSubmit: (fn: (e: Event) => void) => void;}>}
      * @access public
      */
     hookAllForms(parentElement) {
-        if (currentApiController) return currentApiController;
-
-        const captchaImpls = new Map;
-        currentApiController = {
-            /** @type {Array<{getEl(): HTMLFormElement; setIsSubmitting(isSubmitting: boolean) void; setOnSubmit(fn: (e: Event) => void): void;}>} */
-            forms: [],
-            /**
-             * @param {string} name
-             * @param {{process(then: (token: string|null) => void): void;}} impl
-             */
-            registerCaptchaImpl(name, impl) { captchaImpls.set(name, impl); },
-        };
-
         const formsEls = Array.from(parentElement.querySelectorAll('.jet-form'));
-        if (!formsEls.length) return currentApiController;
+        if (!formsEls.length) return;
         //
         const errorParentCls = 'form-group';
         const style = document.createElement('style');
@@ -54,7 +45,7 @@ class JetForms {
         style.innerHTML = `.${errorParentCls} .form-input-hint { display: none; } .${errorParentCls}.blurred .form-input-hint { display: block; }`;
         document.head.appendChild(style);
         //
-        currentApiController.forms = formsEls.map(formEl => {
+        this.forms = formsEls.map(formEl => {
             const state = {
                 isSubmitting: false,
                 onSubmitFn: null,
@@ -134,8 +125,6 @@ class JetForms {
                     out.setIsSubmitting(false);
                 }
             });
-
-            //
             return out;
         });
         //
@@ -143,14 +132,19 @@ class JetForms {
             ? location.hash.split('=')[1]
             : '';
         const submittedFormCtrl = submitdFormBlockId
-            ? currentApiController.forms.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
+            ? this.forms.find(ctrl => ctrl.getEl().getAttribute('data-form-id') === submitdFormBlockId)
             : null;
         if (submittedFormCtrl) {
             showFormSentMessage(submittedFormCtrl.getEl());
             history.replaceState(null, null, location.href.replace(`#contact-form-sent=${submitdFormBlockId}`, ''));
         }
-        //
-        return currentApiController;
+    }
+    /**
+     * @param {string} name
+     * @param {{process(then: (token: string|null) => void): void;}} impl
+     */
+    registerCaptchaImpl(name, impl) {
+        captchaImpls.set(name, impl);
     }
 }
 

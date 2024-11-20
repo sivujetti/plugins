@@ -3,16 +3,15 @@
 namespace SitePlugins\JetForms;
 
 use Pike\PikeException;
-use SitePlugins\JetForms\Captcha\{AbstractCaptchaImpl, CaptchaSettings, JetCaptcha, ReCaptcha};
+use SitePlugins\JetForms\Captcha\{AbstractCaptchaImpl, CaptchaSettings, CaptchaSettingsDataFetcher, JetCaptcha, ReCaptcha};
 use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\Block\BlockTree;
 use Sivujetti\Page\Entities\Page;
-use Sivujetti\StoredObjects\StoredObjectsRepository;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 /**
  * @psalm-type JetFormsMailSendSettings = array{sendingMethod: string, SMTP_host: ?string, SMTP_port: ?string, SMTP_username: ?string, SMTP_password: ?string, SMTP_secureProtocol: ?string}
- * @psalm-type JetFormsCaptchaSettings = array{settings: array<int, object{name: string, minFormFillTime: ?int, siteKey: ?string, secretKey: ?string, minScore: ?float}>}
+ * @psalm-type JetFormsCaptchaSettings = array{settings: array<int, array{name: string, minFormFillTime: ?int, siteKey: ?string, secretKey: ?string, minScore: ?float}>}
  */
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
@@ -148,9 +147,7 @@ final class JetForms implements UserPluginInterface {
         if (!array_key_exists($name, $this->captchaInstances)) {
             if (!$this->captchaSettings)
                 $this->captchaSettings = new CaptchaSettings(fn() =>
-                    $this->api->createService(StoredObjectsRepository::class)
-                        ->find("JetForms:captchaData")
-                        ->fetch()?->data ?? []
+                    $this->api->createService(CaptchaSettingsDataFetcher::class)->getData()
                 );
             $this->captchaInstances[$name] = new $ClsString($this->captchaSettings);
             if (self::$logFn) $this->captchaInstances[$name]->setLogFn(self::$logFn);

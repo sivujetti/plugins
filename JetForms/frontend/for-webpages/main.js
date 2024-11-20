@@ -4,7 +4,8 @@
  */
 import JetForms from './JetForms.js';
 
-const jf = new JetForms(document.documentElement.lang);
-const forms = jf.hookAllForms(document.body);
+const jetForms = new JetForms(document.documentElement.lang);
 
-export default forms;
+jetForms.hookAllForms(document.body);
+
+export default jetForms;

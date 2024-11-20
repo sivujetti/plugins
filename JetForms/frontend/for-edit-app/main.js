@@ -25,13 +25,7 @@ setTimeout(() => {
     const el = document.createElement('style');
     el.setAttribute('data-injected-by', 'jet-forms-plugin');
     el.innerHTML = (
-`.drag-handle {
-    background: transparent;
-    border: none;
-    cursor: grab;
-    color: var(--color-fg-dimmed);
-}
-.table .formatted-answers {
+`.table .formatted-answers {
     height: 2.7rem;
     white-space: pre;
     display: inline-flex;

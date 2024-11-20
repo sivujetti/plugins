@@ -9,21 +9,21 @@ use Pike\ArrayUtils;
  */
 class CaptchaSettings extends \stdClass {
     /**
-     * @var \Closure $fetchData
-     * @psalm-var \Closure():JetFormsCaptchaSettings|null $fetchData
+     * @var \Closure $getDataFn
+     * @psalm-var \Closure():JetFormsCaptchaSettings|null $getDataFn
      */
-    protected \Closure $fetchData;
+    protected \Closure $getDataFn;
     /**
      * @var ?array
      * @psalm-var ?JetFormsCaptchaSettings
      */
     protected ?array $data = null;
     /**
-     * @param \Closure $fetchData
-     * @psalm-param \Closure():JetFormsCaptchaSettings|null $fetchData
+     * @param \Closure $getDataFn
+     * @psalm-param \Closure():JetFormsCaptchaSettings|null $getDataFn
      */
-    public function __construct(\Closure $fetchData) {
-        $this->fetchData = $fetchData;
+    public function __construct(\Closure $getDataFn) {
+        $this->getDataFn = $getDataFn;
     }
     /**
      * @param string $forCaptcha Example "grecaptcha"
@@ -35,11 +35,11 @@ class CaptchaSettings extends \stdClass {
             : null;
     }
     /**
-     * @return array|null
-     * @psalm-return JetFormsCaptchaSettings|null
+     * @return array
+     * @psalm-return JetFormsCaptchaSettings
      */
     private function getData(): array {
-        if ($this->data === null) $this->data = $this->fetchData->__invoke();
+        if ($this->data === null) $this->data = $this->getDataFn->__invoke();
         return $this->data;
     }
 }

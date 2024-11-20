@@ -19,10 +19,14 @@ class SelectOrRadioGroupInputOptionEditForm extends preact.Component {
         ]);
     }
     /**
-     * @param {SelectOrRadioGroupSelectItem} item
+     * @param {SelectOrRadioGroupSelectItem|null} item
      * @access public
      */
     overrideValues(item) {
+        if (!item) {
+            this.props.done();
+            return;
+        }
         reHookValues(this, [
             {name: 'text', value: item.text},
             {name: 'value', value: item.value},
