@@ -66,8 +66,8 @@ class EditAppLeftColumnSection extends  preact.Component {
 
         this.setState({featuredArticles: null});
         try {
-            const url = urlUtils.withCacheBustStr(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`);
-            const arts = await http.get(url, {headers: {}});
+            const url = `${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured?sivujetti-version=0.16.0`;
+            const arts = await http.get(urlUtils.withCacheBustStr(url), {headers: {}});
             this.setState({featuredArticles: arts});
         } catch (err) {
             env.window.console.error(err);
