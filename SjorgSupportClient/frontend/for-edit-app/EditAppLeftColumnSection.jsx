@@ -66,13 +66,26 @@ class EditAppLeftColumnSection extends  preact.Component {
 
         this.setState({featuredArticles: null});
         try {
-            const url = `${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured?sivujetti-version=0.16.0`;
-            const arts = await http.get(urlUtils.withCacheBustStr(url), {headers: {}});
+            const arts = await http.get(
+                urlUtils.withCacheBustStr(`${supportServerBaseUrl}plugins/sjorg-support-server/articles/featured`) +
+                    '&sivujetti-version=0.16.0',
+                {headers: {}, ...createCacheSetting()}
+            );
             this.setState({featuredArticles: arts});
         } catch (err) {
             env.window.console.error(err);
         }
     }
+}
+
+/**
+ * @returns {{cache: RequestCache;}}
+ */
+function createCacheSetting() {
+    if (localStorage.sivujettiSjorgSupportArticleCacheBusted === '1')
+        return {};
+    localStorage.sivujettiSjorgSupportArticleCacheBusted = '1';
+    return {cache: 'no-store'};
 }
 
 /**

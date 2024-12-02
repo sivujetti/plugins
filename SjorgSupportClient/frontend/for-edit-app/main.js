@@ -13,12 +13,11 @@ setTimeout(() => {
   border-radius: 14px;
   color: #fff;
 }
-form.sjorg-support-article {
-    font-size: .8rem;
-    line-height: 1.2rem;
-}
 form.sjorg-support-article section h2 {
     font-size: 1.1rem;
+}
+form.sjorg-support-article ol {
+    list-style: disc inside;
 }
 form.sjorg-support-article > div > section {
     margin: 4rem 0;
@@ -28,6 +27,9 @@ form.sjorg-support-article > div > section:nth-of-type(2) {
 }
 form.sjorg-support-article > div > section:last-of-type {
     margin-bottom: 0;
+}
+form.sjorg-support-article > div section.above-tabs {
+    margin: 1rem 0 -2rem 0;
 }
 form.sjorg-support-article > div > section:first-child {
     display: none;
@@ -70,23 +72,13 @@ form.sjorg-support-article img {
 .message-box p {
     margin: 0;
 }
-.j-Text-unit-1, .j-RichText-unit-1 {
+.code {
     background-color: rgba(0, 10, 71, .03);
-    border-radius: 4px;
     padding: .4rem .6rem;
     font-size: .7rem;
     line-height: 1rem;
     color: #1c1c1c;
-    margin-bottom: 1.2rem;
-
-    font-family: "SF Mono","Segoe UI Mono","Roboto Mono",Menlo,Courier,monospace;
-    white-space: pre;
-}
-.j-Text-unit-1 > p,
-.j-RichText-unit-1 > p {
-    font-family: inherit;
-    line-height: inherit;
-    margin: 0;
+    margin: -.7rem 0 .5rem 0;
 }
 `
     );
