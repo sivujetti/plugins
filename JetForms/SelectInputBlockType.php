@@ -46,10 +46,7 @@ final class SelectInputBlockType implements BlockTypeInterface, JsxLikeRendering
                 ],
                 array_map(fn($itm) =>
                     el("option", ["value" => $itm->value], $tmpl->__($itm->text))
-                , [
-                    ...$block->options,
-                    (object) ["text" => "-", "value" => "-"]
-                ]),
+                , $block->options),
             ),
             ...$renderChildren()
         );

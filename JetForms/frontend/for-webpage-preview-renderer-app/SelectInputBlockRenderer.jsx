@@ -13,7 +13,7 @@ class SelectInputBlockRenderer extends preact.Component {
                 class="form-select"
                 name={ `${block.name}${block.multiple ? '[]' : ''}` }
                 { ...(block.multiple ? {multiple: true} : {}) }>
-                    { [...block.options, {text: '-', value: '-'}].map(({value, text}) =>
+                    { block.options.map(({value, text}) =>
                         <option value={ value }>{ __(text) }</option>
                     ) }
             </select>
