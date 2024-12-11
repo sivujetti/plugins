@@ -1,18 +1,18 @@
 const {PhotoSwipeLightbox, PhotoSwipe} = window;
 import {fi} from './translations.js';
 
-let galleriesHooked = false;
-
 /**
  * Makes div.jet-gallery elements alive.
  */
-class JetGallery {
-    // lang:
+class JetGalleries {
+    lang;
+    galleries;
     /**
      * @param {string} lang 'en', 'fi' etc.
      */
     constructor(lang) {
         this.lang = lang;
+        this.galleries = [];
     }
     /**
      * @param {HTMLElement} parentElement
@@ -20,36 +20,37 @@ class JetGallery {
      * @access public
      */
     hookAllGalleries(parentElement) {
-        if (galleriesHooked) return;
         const els = Array.from(parentElement.querySelectorAll('.jet-gallery'));
         if (!els.length) return;
         //
-        return els.map(galleryEl => {
-            const listItems = galleryEl.querySelectorAll('a');
-            if (!listItems.length) return null;
-            //
-            Array.from(listItems).forEach(listItemEl => {
+        this.galleries = els.map(galleryEl => {
+            const listItems = galleryEl.querySelectorAll(':scope > .j-Image');
+            [...listItems].forEach(listItemEl => {
                 const img = listItemEl.querySelector('img');
-                listItemEl.setAttribute('data-pswp-width', img.naturalWidth);
-                listItemEl.setAttribute('data-pswp-height', img.naturalHeight);
+                const linkEl = document.createElement('a');
+                linkEl.setAttribute('data-pswp-width', img.naturalWidth);
+                linkEl.setAttribute('data-pswp-height', img.naturalHeight);
+                linkEl.href = img.src;
+                linkEl.appendChild(img);
+                listItemEl.replaceWith(linkEl);
             });
-            const lightbox = new PhotoSwipeLightbox({
-                ...{
-                    gallery: listItems[0].parentElement,
+            let lightbox = null;
+            if (listItems.length) {
+                lightbox = new PhotoSwipeLightbox({
+                    gallery: galleryEl.parentElement,
                     children: 'a',
                     pswpModule: PhotoSwipe,
-                },
-                ...(this.lang === 'fi' ? fi : {})
-            });
-            if (galleryEl.getAttribute('data-use-captions') === 'yes')
-                enableCaptions(lightbox);
-            //
-            lightbox.init();
-            //
+                    ...(this.lang === 'fi' ? fi : {})
+                });
+                if (galleryEl.classList.contains('use-captions'))
+                    enableCaptions(lightbox);
+                //
+                lightbox.init();
+            }
             return {
-                getLightbox: lightbox,
+                getLightbox: () => lightbox,
             };
-        }).filter(ctrl => ctrl !== null);
+        });
     }
 }
 
@@ -99,4 +100,4 @@ function enableCaptions(lightbox) {
     });
 }
 
-export default JetGallery;
+export default JetGalleries;
