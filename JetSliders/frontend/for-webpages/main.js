@@ -6,7 +6,7 @@ import JetSliders from './JetSliders.js';
 
 const jetSliders = new JetSliders;
 
-if (!window.sivujettiWebPagePreviewRendererApp)
+if (!window.parent.sivujettiEnvConfig)
     window.addEventListener('load', () => {
         jetSliders.activateAllSliders();
     });

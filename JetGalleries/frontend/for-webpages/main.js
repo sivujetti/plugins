@@ -6,7 +6,7 @@ import JetGalleries from './JetGalleries.js';
 
 const jetGalleries = new JetGalleries(document.documentElement.lang);
 
-if (!window.sivujettiWebPagePreviewRendererApp)
+if (!window.parent.sivujettiEnvConfig)
     jetGalleries.hookAllGalleries(document.body);
 
 export default jetGalleries;
