@@ -8,8 +8,8 @@ Temporary manual steps.
 
 ## Copy slider lib to public directory
 
-Copy `plugins/JetSliders/frontend/keen-slider/keen-slider.js` to `public/sivujetti/vendor/keen-slider.js` and
-Copy `plugins/JetSliders/frontend/keen-slider/keen-slider.min.css` to `public/sivujetti/vendor/keen-slider.min.css`.
+Copy `plugins/JetSliders/frontend/dist/keen-slider.min.js` to `public/sivujetti/vendor/keen-slider.min.js` and
+Copy `plugins/JetSliders/frontend/dist/jet-slider.bundle.css` to `public/sivujetti/vendor/jet-slider.bundle.css`.
 
 ## Bundle frontend
 

@@ -18,7 +18,7 @@ final class JetGalleries implements UserPluginInterface {
             $api->enqueuePreviewAppJsFile("plugin-jet-galleries-webpage-preview-renderer-app-bundle.js");
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page, bool $editModeIsOn) use ($api) {
-            if ($editModeIsOn || !BlockTree::findBlock($page->blocks, fn($b) => $api->hasBehaviour($b, "jet-galleries")))
+            if (!$editModeIsOn && !BlockTree::findBlock($page->blocks, fn($b) => $api->hasBehaviour($b, "jet-gallery")))
                 return;
             if (!$api->isCssFileEnqueued("sivujetti/vendor/photoswipe.css"))
                 $api->enqueueCssFile("sivujetti/vendor/photoswipe.css");

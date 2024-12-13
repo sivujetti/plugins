@@ -1,12 +1,12 @@
-const {PhotoSwipeLightbox, PhotoSwipe} = window;
 import {fi} from './translations.js';
+const {PhotoSwipeLightbox, PhotoSwipe} = window;
 
 /**
  * Makes div.jet-gallery elements alive.
  */
 class JetGalleries {
-    lang;
-    galleries;
+    // lang;
+    // galleries;
     /**
      * @param {string} lang 'en', 'fi' etc.
      */
@@ -16,42 +16,102 @@ class JetGalleries {
     }
     /**
      * @param {HTMLElement} parentElement
-     * @returns {Array<{getLightbox: () => Object;}>}
+     * @returns {Array<{getLightbox: () => PhotoSwipeLightbox;}>}
      * @access public
      */
     hookAllGalleries(parentElement) {
         const els = Array.from(parentElement.querySelectorAll('.jet-gallery'));
         if (!els.length) return;
         //
-        this.galleries = els.map(galleryEl => {
-            const listItems = galleryEl.querySelectorAll(':scope > .j-Image');
-            [...listItems].forEach(listItemEl => {
-                const img = listItemEl.querySelector('img');
-                const linkEl = document.createElement('a');
-                linkEl.setAttribute('data-pswp-width', img.naturalWidth);
-                linkEl.setAttribute('data-pswp-height', img.naturalHeight);
-                linkEl.href = img.src;
-                linkEl.appendChild(img);
-                listItemEl.replaceWith(linkEl);
-            });
-            let lightbox = null;
-            if (listItems.length) {
-                lightbox = new PhotoSwipeLightbox({
-                    gallery: galleryEl.parentElement,
-                    children: 'a',
-                    pswpModule: PhotoSwipe,
-                    ...(this.lang === 'fi' ? fi : {})
-                });
-                if (galleryEl.classList.contains('use-captions'))
-                    enableCaptions(lightbox);
-                //
-                lightbox.init();
-            }
-            return {
-                getLightbox: () => lightbox,
-            };
-        });
+        this.galleries = els.map(this.activateGallery.bind(this));
     }
+    /**
+     * @param {HTMLElement} el
+     * @returns {{getLightbox: () => PhotoSwipeLightbox;}}
+     * @access public
+     */
+    activateGallery(el) {
+        const listItems = el.querySelectorAll(':scope > .j-Image');
+        [...listItems].forEach(listItemEl => {
+            const img = listItemEl.querySelector('img');
+            const linkEl = document.createElement('a');
+            linkEl.setAttribute('data-pswp-width', img.naturalWidth);
+            linkEl.setAttribute('data-pswp-height', img.naturalHeight);
+            linkEl.href = img.src;
+            linkEl.appendChild(img);
+            listItemEl.replaceWith(linkEl);
+        });
+        let lightbox = null;
+        if (listItems.length) {
+            const Cls = createLightboxCls();
+            lightbox = new Cls({
+                gallery: el.parentElement,
+                children: 'a',
+                pswpModule: PhotoSwipe,
+                ...(this.lang === 'fi' ? fi : {})
+            });
+            if (el.classList.contains('use-captions'))
+                enableCaptions(lightbox);
+            //
+            lightbox.init();
+        }
+        return {
+            getLightbox: () => lightbox,
+        };
+    }
+    /**
+     * @param {HTMLElement} el
+     * @returns {boolean}
+     * @access public
+     */
+    isActivated(el) {
+        return !!el.querySelector(':scope > a[data-pswp-width]');
+    }
+    /**
+     * @param {HTMLElement} el
+     * @returns {boolean}
+     * @access public
+     */
+    isGallery(el) {
+        return el.classList.contains('jet-gallery');
+    }
+}
+
+function createLightboxCls() {
+    if (!areWeInEditMode())
+        return PhotoSwipeLightbox;
+    const isMac = platformIsMac();
+    return class extends PhotoSwipeLightbox {
+        /**
+         * https://github.com/dimsemenov/PhotoSwipe/blob/d80c32a62b169e776ad1c983d1fcdc6eea8b48e0/src/js/lightbox/lightbox.js#L77
+         *
+         * @param {PointerEvent} e
+         */
+        onThumbnailsClick(e) {
+            if (window.pswp) return;
+            // if meta key is not pressed, ignore the click
+            if ((isMac && !e.metaKey) || (!isMac && !e.ctrlKey)) return;
+
+            /** @type {Point|null} */
+            let initialPoint = { x: e.clientX, y: e.clientY };
+
+            if (!initialPoint.x && !initialPoint.y) {
+                initialPoint = null;
+            }
+
+            let clickedIndex = this.getClickedIndex(e);
+            clickedIndex = this.applyFilters('clickedIndex', clickedIndex, e, this);
+            /** @type {DataSource} */
+            const dataSource = {
+                gallery: /** @type {HTMLElement} */ (e.currentTarget)
+            };
+
+            if (clickedIndex >= 0) {
+                e.preventDefault();
+                this.loadAndOpen(clickedIndex, dataSource, initialPoint);
+            }
+        }
+    };
 }
 
 /**
@@ -100,4 +160,20 @@ function enableCaptions(lightbox) {
     });
 }
 
+/**
+ * @returns {boolean}
+ */
+function areWeInEditMode() {
+    return typeof window.parent.sivujettiEnvConfig === 'object';
+}
+
+/**
+ * @returns {boolean}
+ */
+function platformIsMac() {
+    return ((navigator.userAgentData && navigator.userAgentData.platform === 'macOS') ||
+            (navigator.platform === 'MacIntel'));
+}
+
 export default JetGalleries;
+export {areWeInEditMode};
