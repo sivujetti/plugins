@@ -4,7 +4,10 @@ import {__} from '@sivujetti-commons-for-edit-app';
 const galleryBlockBehaviourDefinition = {
     friendlyName: __('Gallery'),
     name: 'jet-gallery',
-    createData(serialized) {
+    createData(serialized = null) {
+        if (!serialized) return {
+            showCaptions: false,
+        };
         return {
             showCaptions: serialized.indexOf('show-captions') > -1,
         };
@@ -34,6 +37,9 @@ const galleryBlockBehaviourDefinition = {
                 </div>
             </div>;
         }
+    },
+    canAdd(block) {
+        return block.children.some(b => b.type === 'Image');
     },
 };
 

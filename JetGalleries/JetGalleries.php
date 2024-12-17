@@ -26,6 +26,8 @@ final class JetGalleries implements UserPluginInterface {
                 $api->enqueueJsFile("sivujetti/vendor/photoswipe-lightbox.umd.min.js");
             if (!$api->isJsFileEnqueued("sivujetti/vendor/photoswipe.umd.min.js"))
                 $api->enqueueJsFile("sivujetti/vendor/photoswipe.umd.min.js");
+            if (!$api->isJsFileEnqueued("sivujetti/sivujetti-commons-for-web-pages.js"))
+                $api->enqueueJsFile("sivujetti/sivujetti-commons-for-web-pages.js");
             if (!$api->isJsFileEnqueued("plugin-jet-galleries-bundle.js"))
                 $api->enqueueJsFile("plugin-jet-galleries-bundle.js");
         });

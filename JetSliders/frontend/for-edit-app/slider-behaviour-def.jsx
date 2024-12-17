@@ -4,7 +4,11 @@ import {__} from '@sivujetti-commons-for-edit-app';
 const sliderBlockBehaviourDefinition = {
     friendlyName: __('Slider'),
     name: 'jet-slider',
-    createData(serialized) {
+    createData(serialized = null) {
+        if (!serialized) return {
+            showArrows: true,
+            showBullets: false,
+        };
         return {
             showArrows: serialized.indexOf('show-arrows') > -1,
             showBullets: serialized.indexOf('show-bullets') > -1,
@@ -50,6 +54,9 @@ const sliderBlockBehaviourDefinition = {
                 </div>
             </div>;
         }
+    },
+    canAdd(block) {
+        return block.children.length > 1;
     },
 };
 

@@ -6,7 +6,7 @@ import JetSliders from './JetSliders.js';
 
 const jetSliders = new JetSliders;
 
-if (!window.parent.sivujettiEnvConfig)
+if (window.self === window.top)
     window.addEventListener('load', () => {
         jetSliders.activateAllSliders();
     });

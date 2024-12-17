@@ -1,3 +1,4 @@
+import {api} from '@sivujetti-commons-for-web-pages';
 import {fi} from './translations.js';
 const {PhotoSwipeLightbox, PhotoSwipe} = window;
 
@@ -43,7 +44,7 @@ class JetGalleries {
         });
         let lightbox = null;
         if (listItems.length) {
-            const Cls = createLightboxCls();
+            const Cls = api.import('JetGalleries/Lightbox');
             lightbox = new Cls({
                 gallery: el.parentElement,
                 children: 'a',
@@ -164,7 +165,7 @@ function enableCaptions(lightbox) {
  * @returns {boolean}
  */
 function areWeInEditMode() {
-    return typeof window.parent.sivujettiEnvConfig === 'object';
+    return window.self !== window.top;
 }
 
 /**
@@ -176,4 +177,4 @@ function platformIsMac() {
 }
 
 export default JetGalleries;
-export {areWeInEditMode};
+export {areWeInEditMode, createLightboxCls};
