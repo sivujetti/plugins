@@ -6,9 +6,15 @@ import JetSliders from './JetSliders.js';
 
 const jetSliders = new JetSliders;
 
-if (window.self === window.top)
+if (window.self === window.top) {
+    const jetGalleriesLoadedBefore = !!window.JetGalleries;
     window.addEventListener('load', () => {
-        jetSliders.activateAllSliders();
+        const jetGalleriesIsInstalledButLoadedAfter = window.JetGalleries && !jetGalleriesLoadedBefore;
+        if (jetGalleriesIsInstalledButLoadedAfter)
+            document.addEventListener('JetGalleries:after-activate', () => jetSliders.activateAllSliders());
+        else
+            jetSliders.activateAllSliders();
     });
+}
 
 export default jetSliders;

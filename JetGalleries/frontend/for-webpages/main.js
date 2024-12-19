@@ -11,11 +11,12 @@ api.export('JetGalleries/Lightbox', createLightboxCls());
 const jetGalleries = new JetGalleries(document.documentElement.lang);
 
 window.addEventListener('load', () => {
-    const event = new Event('JetGalleries:load');
-    document.dispatchEvent(event);
+    document.dispatchEvent(new Event('JetGalleries:before-activate'));
 
     if (!areWeInEditMode())
         jetGalleries.hookAllGalleries(document.body);
+
+    document.dispatchEvent(new Event('JetGalleries:after-activate'));
 });
 
 export default jetGalleries;
