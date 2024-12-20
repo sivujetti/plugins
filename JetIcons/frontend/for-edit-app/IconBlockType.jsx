@@ -158,22 +158,21 @@ class IconBlockEditForm extends preact.Component {
         if (visibleIcons !== null) {
             iconsArr = iconId ? [cachedAvailableIcons[cachedIconIndices.get(iconId)]].concat(visibleIcons.filter(i => i.iconId !== iconId)) : visibleIcons;
         }
-        const input = <input
-            class="form-input mb-2"
-            placeholder={ __('Filter') }
-            value={ searchTerm }
-            onInput={ this.throttledReceiveFilterTerm }
-            ref={ this.searchInputEl }/>;
         return [
-            searchTerm.length ? <div class="has-icon-right">
-            { input }
-            <button
-                onClick={ this.clearSearchTerm.bind(this) }
-                class="sivujetti-form-icon btn no-color"
-                type="button">
-                <Icon iconId="x" className="size-xs"/>
-            </button>
-        </div> : input,
+            <div class="has-icon-right">
+                <input
+                    class="form-input mb-2"
+                    placeholder={ __('Filter') }
+                    value={ searchTerm }
+                    onInput={ this.throttledReceiveFilterTerm }
+                    ref={ this.searchInputEl }/>
+                <button
+                    onClick={ this.clearSearchTerm.bind(this) }
+                    class={ `sivujetti-form-icon btn no-color${searchTerm.length ? '' : ' d-none'}` }
+                    type="button">
+                    <Icon iconId="x" className="size-xs"/>
+                </button>
+            </div>,
             iconsArr ? <div
                 class={ `item-grid large-buttons medium-buttons selectable-items${!iconId ? '' : ' has-first-item-selected'}` }
                 ref={ this.gridEl }>{ iconsArr.length ? iconsArr.map(icon =>
