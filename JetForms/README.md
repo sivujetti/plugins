@@ -15,11 +15,17 @@ INSERT INTO `storedObjects` (`objectName`,`data`) VALUES ('JetForms:mailSendSett
 
 ## Copy validation lib to public directory
 
-Copy `plugins/JetForms/frontend/pristine/pristine.min.js` to `public/sivujetti/vendor/pristine.min.js`.
+Copy `plugins/JetForms/frontend/dist/pristine/pristine.min.js` to `public/sivujetti/vendor/pristine.min.js`.
 
 ## Bundle frontend
 
 See `frontend/rollup.config.js`.
+
+
+## Setup content templates
+
+1. Execute in db ``INSERT INTO `contentTemplates` (`id`,`blockBlueprints`,`title`,`previewImgSrc`,`category`) VALUES '-OAqOZXjtJXRgb-Fdi4a', '[{"blockType":"JetFormsContactForm","initialOwnData":{"behaviours":[{"name":"SendMail","data":{"subjectTemplate":"Uusi yhteydenotto sivustolla [siteName]","toAddress":"sivuston-omistaja@mail.com","toName":"","fromAddress":"no-reply@sivuston-nimi.com","fromName":"","bodyTemplate":"Uusi yhteydenotto sivustolla [siteName].\n\n[resultsAll]\n\n------------\n(Lähetetty JetFormsilla)\n"}},{"name":"ShowSentMessage","data":{"at":"beforeFirstInput","message":"Kiitos viestistäsi."}}],"captchaToUse":"jet-captcha"},"initialDefaultsData":{"title":"Contact form","renderer":"jsx","styleClasses":"@customClass[0]"},"initialChildren":[{"blockType":"Columns","initialOwnData":{"numColumns":null,"takeFullWidth":null},"initialDefaultsData":{"title":"","renderer":"jsx","styleClasses":""},"initialChildren":[{"blockType":"JetFormsTextInput","initialOwnData":{"name":"input_1","label":"","isRequired":0,"placeholder":"Name"},"initialDefaultsData":{"title":"","renderer":"jsx","styleClasses":""},"initialChildren":[],"initialStyles":[]},{"blockType":"JetFormsEmailInput","initialOwnData":{"name":"input_2","label":"","isRequired":0,"placeholder":"Email"},"initialDefaultsData":{"title":"","renderer":"jsx","styleClasses":""},"initialChildren":[],"initialStyles":[]}],"initialStyles":[]},{"blockType":"JetFormsTextareaInput","initialOwnData":{"name":"input_3","label":"","isRequired":1,"placeholder":"Message","numRows":"4"},"initialDefaultsData":{"title":"","renderer":"jsx","styleClasses":""},"initialChildren":[],"initialStyles":[]},{"blockType":"Button","initialOwnData":{"html":"Send","linkTo":"\/","tagType":"submit"},"initialDefaultsData":{"title":"","renderer":"jsx","styleClasses":"btn-primary"},"initialChildren":[],"initialStyles":[]}],"initialStyles":[{"scss":".@customClass[0] {\n  > .j-Columns {\n    grid-auto-flow: column;\n    row-gap: 0;\n  }\n  @media (max-width: 480px) {\n    > .j-Columns {\n      grid-auto-flow: initial;\n    }\n  }\n}","data":{"title":".contact-form","customizationSettings":{"varDefs":[{"varName":"@customClass[0]_1","cssProp":"max-width","cssSubSelector":null,"widgetSettings":{"label":"Max width","valueType":"length","initialUnit":"px"}},{"varName":"@customClass[0]_2","cssProp":"margin-inline","cssSubSelector":null,"widgetSettings":{"label":"Align ↔","valueType":"option","defaultThemeValue":"0 0","options":[{"label":"Default","value":"0 0"},{"label":"Center","value":"auto auto"},{"label":"Right","value":"auto 0"}]}}]},"associatedBlockTypes":["JetFormsContactForm"]},"scope":{"kind":"custom-class","layer":"dev-styles"}}]}]', 'Contact form', '/public/sivujetti/content-template-previews/preview-jet-forms-contact-form.webp', 'other');``
+1. Copy `plugins/JetForms/frontend/dist/preview-jet-forms-contact-form.webp` to `public/sivujetti/content-template-previews/preview-jet-forms-contact-form.webp`
 
 ## Fine-tune mailer configuration (optional)
 
