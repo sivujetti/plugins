@@ -1,7 +1,7 @@
 import {__, api, floatingDialog, MenuSection, Icon} from '@sivujetti-commons-for-edit-app';
 import ExportSiteDialog from './ExportSiteDialog.jsx';
 
-class EditAppLeftColumnSection extends MenuSection {
+class EditAppLeftColumnSection extends preact.Component {
     /**
      * @access protected
      */
@@ -14,7 +14,7 @@ class EditAppLeftColumnSection extends MenuSection {
             <nav>
                 { api.user.getRole() <= api.user.ROLE_EDITOR
                     ? <a onClick={ this.openDialog.bind(this) } class="with-icon" href="#export-site">
-                        <Icon iconId="device-floppy" className="size-xs color-pink color-saturated"/>
+                        <Icon iconId="device-floppy" className="size-sm color-pink color-saturated"/>
                         <span class="color-dimmed">{ __('Export site') }</span>
                     </a>
                     : null

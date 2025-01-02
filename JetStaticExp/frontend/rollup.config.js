@@ -1,4 +1,4 @@
-// cd SIVUJETTI_BACKEND_PATH . "plugins/JetStaticExp/frontend
+// cd SIVUJETTI_BACKEND_PATH . "plugins/JetStaticExp/frontend"
 // npm --prefix ../../../../ start -- --configInput backend/plugins/JetStaticExp/frontend/rollup.config.js
 
 /**

@@ -72,18 +72,16 @@ final class ExportsController {
     private static function renderPages(Request $req,
                                         AppConfig $appConfig,
                                         AppEnv $appEnv): array {
-        require SIVUJETTI_BACKEND_PATH . "cli/src/PageRenderer.php";
+        require_once SIVUJETTI_BACKEND_PATH . "cli/src/PageRenderer.php";
         $pageRenderer = (new PageRenderer())->create(
             $appEnv->di->make(Db::class),
             [
                 "app" => (array) $appConfig->getVals(),
-                "env" => array_merge(
-                    $appEnv->constants,
-                    [
-                        "BASE_URL" => $req->body->targetBaseUrl,
-                        "QUERY_VAR" => $req->body->targetQueryVar,
-                    ]
-                )
+                "env" => [
+                    ...$appEnv->constants,
+                    "BASE_URL" => $req->body->targetBaseUrl,
+                    "QUERY_VAR" => $req->body->targetQueryVar,
+                ]
             ]
         );
         $createRenderPageRequest = fn(string $slug) => new Request($slug, serverVars: [

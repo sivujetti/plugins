@@ -1,6 +1,19 @@
-import {__, http, env, LoadingSpinner, hookForm, unhookForm, hasErrors, FormGroupInline,
-        Input, InputErrors, handleSubmit, validationConstraints, urlUtils} from '@sivujetti-commons-for-edit-app';
-import {urlValidatorImpl} from '../../../../../frontend/edit-app/src/validation.js';
+import {
+    __,
+    env,
+    FormGroupInline,
+    handleSubmit,
+    hasErrors,
+    hookForm,
+    http,
+    Input,
+    InputErrors,
+    LoadingSpinner,
+    unhookForm,
+    urlUtils,
+    validationConstraints,
+} from '@sivujetti-commons-for-edit-app';
+import {urlValidatorImpl} from '../../../../../frontend/commons-for-edit-app/validation.js';
 
 class ExportSiteDialog extends preact.Component {
     /**
@@ -12,6 +25,8 @@ class ExportSiteDialog extends preact.Component {
                 [urlValidatorImpl, {allowEmpty: false, allowLocal: false, allowLongLocal: false}],
                 ['maxLength', validationConstraints.HARD_SHORT_TEXT_MAX_LEN]
             ], label: 'Domain'},
+            {name: 'targetSiteBaseurl', value: '/', validations: [['required']], label: __('Directory')},
+            {name: 'targetSiteQueryVar', value: '', validations: [['required']], label: __('Query variable')},
         ], {
             selectedPages: null,
             selectedFiles: ['all'],
@@ -34,13 +49,13 @@ class ExportSiteDialog extends preact.Component {
     render(_, {selectedPages, allPagesSelected, selectedFiles, formIsSubmittingClass, exportResult}) {
         const submitBtnIsDisabled = !selectedPages ? false : formIsSubmittingClass || !getSelectedItems(selectedPages).length || hasErrors(this);
         const allFilesIsSelected = selectedFiles[0] === 'all';
-        return <form onSubmit={ e => handleSubmit(this, this.doExportSite.bind(this), e) }>
+        return <form onSubmit={ e => handleSubmit(this, this.doExportSite.bind(this), e) } class="static-exp-form">
             { !formIsSubmittingClass
                 ? !exportResult
                     ? [
-                        selectedPages ? <div class="fieldset" style="margin-bottom: 1.5rem">
+                        selectedPages ? <div class="fieldset">
                             <div class="form-label legend text-bold">{ __('Pages') }</div>
-                            <div class="py-1">
+                            <div>
                                 <div><label class="form-checkbox d-inline-block c-hand my-0">
                                     <input
                                         onClick={ e => this.toggleSetAllSelected(e) }
@@ -58,9 +73,9 @@ class ExportSiteDialog extends preact.Component {
                                 <div>{ exportResult }</div>
                             </div>
                         </div>: <LoadingSpinner/>,
-                        <div class="fieldset" style="margin-bottom: 1.5rem">
+                        <div class="fieldset">
                             <div class="form-label legend text-bold">{ __('Files') }</div>
-                            <div class="py-1">
+                            <div>
                                 <div><label class="form-checkbox d-inline-block c-hand my-0">
                                     <input
                                         onClick={ () => this.setState({selectedFiles: allFilesIsSelected ? [] : ['all']}) }
@@ -70,21 +85,21 @@ class ExportSiteDialog extends preact.Component {
                                 </label></div>
                             </div>
                         </div>,
-                        <div class="fieldset">
+                        <div class="fieldset mb-2">
                             <div class="form-label legend text-bold">{ __('Target site info') }</div>
                             <div class="form-horizontal">
-                                <FormGroupInline className="mt-0">
+                                <FormGroupInline className="mt-1">
                                     <label htmlFor="targetSiteDomain" class="form-label">Domain</label>
-                                    <Input vm={ this } prop="targetSiteDomain" id=""/>
+                                    <Input vm={ this } prop="targetSiteDomain" id="targetSiteDomain"/>
                                     <InputErrors vm={ this } prop="targetSiteDomain"/>
                                 </FormGroupInline>
                                 <FormGroupInline>
                                     <label htmlFor="targetSiteBaseurl" class="form-label">{ __('Directory') }</label>
-                                    <input name="targetSiteBaseurl" id="targetSiteBaseurl" type="text" class="form-input" value="/" disabled/>
+                                    <Input vm={ this } prop="targetSiteBaseurl" id="targetSiteBaseurl" disabled/>
                                 </FormGroupInline>
-                                <FormGroupInline className="d-none">
+                                <FormGroupInline className="mb-1">
                                     <label htmlFor="targetSiteQueryVar" class="form-label">{ __('Query variable') }</label>
-                                    <input name="targetSiteQueryVar" id="targetSiteQueryVar" type="text" class="form-input" value="" disabled/>
+                                    <Input vm={ this } prop="targetSiteQueryVar" id="targetSiteQueryVar" disabled/>
                                 </FormGroupInline>
                             </div>
                         </div>
@@ -95,7 +110,7 @@ class ExportSiteDialog extends preact.Component {
                     </div>
                 : <div class="pb-1"><LoadingSpinner/></div>
             }
-            <div class="mt-8">
+            <div class="mt-8 pt-2">
                 <button
                     class={ `btn btn-primary mr-2${formIsSubmittingClass}` }
                     disabled={ submitBtnIsDisabled }
@@ -119,8 +134,8 @@ class ExportSiteDialog extends preact.Component {
             targetBaseUrl: this.state.values.targetSiteBaseurl,
             targetQueryVar: this.state.values.targetSiteQueryVar,
         })
-        .then(res => { // error handling??
-            if (res.ok === "ok")
+        .then(res => {
+            if (res.ok === 'ok')
                 this.setState({exportResult: res.resultFileUrl});
         });
     }
