@@ -12,9 +12,8 @@ use Sivujetti\TheWebsite\Entities\TheWebsite;
 /**
  * Runs a {type: "SendMail" ...} behaviour.
  *
- * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
- * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
- * @psalm-import-type SubmissionInfo from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @phpstan-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
+ * @phpstan-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\PhpMailerMailer */
@@ -28,7 +27,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     /** @var \Pike\Auth\Crypto */
     private Crypto $crypto;
     /**
-     * @param \Pike\PhpMailerMailer $mailer 
+     * @param \Pike\PhpMailerMailer $mailer ? 
      * @param \Sivujetti\SharedAPIContext $apiCtx
      * @param \Sivujetti\TheWebsite\Entities\TheWebsite $theWebsite
      * @param \Sivujetti\StoredObjects\StoredObjectsRepository $storedObjectsRepo
@@ -49,14 +48,18 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
      * @inheritdoc
      */
     public function run(object $behaviour, object $reqBody, Response $res, array $submissionInfo, array $runResultsArr): mixed {
+        // $hasErrorBefore = ArrayUtils::find($runResultsArr, fn($res) => $res["isError"]);
+        // if ($hasErrorBefore) return "skipped";
+        //
         $inputName1 = $behaviour->replyToAddress ?? null;
         $inputName2 = $behaviour->replyToName ?? null;
         $replyToAddress = $inputName1 ? ($reqBody->{$inputName1} ?? null) : null;
         $replyToName = $inputName2 ? ($reqBody->{$inputName2} ?? null) : null;
         $vars = $this->makeTemplateVars();
-        $mailSettings = $this->getSendMailSettingsOrThrow();
+        $mailSettings = ["sendingMethod" => "mail"];// $this->getSendMailSettingsOrThrow();
         // @allow \Pike\PikeException, \PHPMailer\PHPMailer\Exception
-        $this->mailer->sendMail((object) [
+        //$this->mailer->sendMail((object) [
+         file_put_contents(__DIR__."/all.json",json_encode((object) [
             "fromAddress" => $behaviour->fromAddress,
             "fromName" => strlen($behaviour->fromName ?? "") ? Template::e($behaviour->fromName) : "",
             "toAddress" => $behaviour->toAddress,
@@ -82,11 +85,12 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
                 // Allow each on(JetForms::ON_MAILER_CONFIGURE, fn) subscriber to modify $mailer
                 $this->apiCtx->triggerEvent(JetForms::ON_MAILER_CONFIGURE, $mailer, $mailSettings);
             },
-        ]);
+        //]);
+         ]));
         return "ok";
     }
     /**
-     * @psalm-return JetFormsMailSendSettings
+     * @return JetFormsMailSendSettings
      */
     private function getSendMailSettingsOrThrow(): array {
         $dataBag = $this->storedObjectsRepo->find("JetForms:mailSendSettings")->fetch() ?? null;
@@ -112,7 +116,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param string $tmpl The template defined by the site developer
-     * @psalm-param array<int, FormInputAnswer> $answers
+     * @param array<int, FormInputAnswer> $answers
      * @return string
      */
     private static function renderDynamicTags(string $tmpl, array $answers): string {
@@ -121,7 +125,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
         return $tmpl;
     }
     /**
-     * @psalm-param array<int, FormInputAnswer> $answers
+     * @param array<int, FormInputAnswer> $answers
      * @return string
      */
     private static function renderResultsAll(array $answers): string {

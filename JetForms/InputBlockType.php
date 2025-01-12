@@ -10,8 +10,7 @@ use function Sivujetti\createElement as el;
 
 abstract class InputBlockType implements BlockTypeInterface, JsxLikeRenderingBlockTypeInterface {
     /**
-     * @return array
-     * @psalma-return array{inputType: string, inputMode?: string}
+     * @return array{inputType: string, inputMode?: string}
      */
     protected abstract function getSettings(): array;
     /**

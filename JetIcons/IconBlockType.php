@@ -10,9 +10,6 @@ use Sivujetti\Page\WebPageAwareTemplate;
 
 use function Sivujetti\createElement as el;
 
-/**
- * @psalm-import-type RawStorableBlock from \Sivujetti\BlockType\SaveAwareBlockTypeInterface
- */
 final class IconBlockType implements BlockTypeInterface,
                                      SaveAwareBlockTypeInterface,
                                      JsxLikeRenderingBlockTypeInterface {

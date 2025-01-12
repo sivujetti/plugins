@@ -10,16 +10,13 @@ use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 /**
- * @psalm-type JetFormsMailSendSettings = array{sendingMethod: string, SMTP_host: ?string, SMTP_port: ?string, SMTP_username: ?string, SMTP_password: ?string, SMTP_secureProtocol: ?string}
- * @psalm-type JetFormsCaptchaSettings = array{settings: array<int, array{name: string, minFormFillTime: ?int, siteKey: ?string, secretKey: ?string, minScore: ?float}>}
+ * @phpstan-type JetFormsMailSendSettings array{sendingMethod: string, SMTP_host?: string, SMTP_port?: string, SMTP_username?: string, SMTP_password?: string, SMTP_secureProtocol?: string}
+ * @phpstan-type JetFormsCaptchaSettings array{settings: array<int, array{name: string, minFormFillTime?: int, siteKey?: string, secretKey?: string, minScore?: float}>}
  */
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
     public const ON_MAILER_CONFIGURE = "plugins:jetFormsMailerOnConfigure";
-    /**
-     * @var \Closure Mainly for tests
-     * @psalm-var \Closure(string):void
-     */
+    /** @var \Closure(string): void Mainly for tests */
     public static ?\Closure $logFn = null;
     /** @var array<string, class-string> e.g. SendMail, SubsribeToNewsletter, CopyMessageToLocalDb */
     private array $behaviourExecutors = [];

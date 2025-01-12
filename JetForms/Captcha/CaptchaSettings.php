@@ -5,22 +5,19 @@ namespace SitePlugins\JetForms\Captcha;
 use Pike\ArrayUtils;
 
 /**
- * @psalm-import-type JetFormsCaptchaSettings from \SitePlugins\JetForms\JetForms
+ * @phpstan-import-type JetFormsCaptchaSettings from \SitePlugins\JetForms\JetForms
  */
 class CaptchaSettings extends \stdClass {
     /**
-     * @var \Closure $getDataFn
-     * @psalm-var \Closure():JetFormsCaptchaSettings|null $getDataFn
+     * @var \Closure():JetFormsCaptchaSettings $getDataFn
      */
     protected \Closure $getDataFn;
     /**
-     * @var ?array
-     * @psalm-var ?JetFormsCaptchaSettings
+     * @var ?JetFormsCaptchaSettings
      */
     protected ?array $data = null;
     /**
-     * @param \Closure $getDataFn
-     * @psalm-param \Closure():JetFormsCaptchaSettings|null $getDataFn
+     * @param \Closure():JetFormsCaptchaSettings $getDataFn
      */
     public function __construct(\Closure $getDataFn) {
         $this->getDataFn = $getDataFn;
@@ -35,8 +32,7 @@ class CaptchaSettings extends \stdClass {
             : null;
     }
     /**
-     * @return array
-     * @psalm-return JetFormsCaptchaSettings
+     * @return JetFormsCaptchaSettings
      */
     private function getData(): array {
         if ($this->data === null) $this->data = $this->getDataFn->__invoke();

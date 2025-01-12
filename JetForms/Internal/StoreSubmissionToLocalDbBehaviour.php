@@ -11,8 +11,7 @@ use Sivujetti\StoredObjects\StoredObjectsRepository;
 /**
  * Runs a {type: "StoreSubmissionToLocalDb" ...} behaviour.
  *
- * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
- * @psalm-import-type SubmissionInfo from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @phpstan-import-type SubmissionInfo from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterface {
     /** @var \Sivujetti\StoredObjects\StoredObjectsRepository */
@@ -55,7 +54,7 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
     }
     /**
      * @param bool $decrypt = true
-     * @psalm-return array<int, SubmissionInfo>
+     * @return array<int, SubmissionInfo>
      */
     public function getSubmissions(bool $decrypt = true): array {
         $subs = $this->storage->find("JetForms:submissions")->fetchAll();

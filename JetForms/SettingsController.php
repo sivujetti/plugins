@@ -10,8 +10,8 @@ use Sivujetti\StoredObjects\StoredObjectsRepository;
 /**
  * Contains handlers for "/plugins/jet-forms/settings/*".
  *
- * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
- * @psalm-import-type JetFormsCaptchaSettings from \SitePlugins\JetForms\JetForms
+ * @phpstan-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
+ * @phpstan-import-type JetFormsCaptchaSettings from \SitePlugins\JetForms\JetForms
  */
 final class SettingsController {
     /**
@@ -135,10 +135,10 @@ final class SettingsController {
         $res->json((object) ["ok" => $numRows === 1 ? "ok" : "err"]);
     }
     /**
-     * @psalm-param JetFormsMailSendSettings|JetFormsCaptchaSettings|object $settings
+     * @param JetFormsMailSendSettings|JetFormsCaptchaSettings|object $settings
      * @param \Pike\Auth\Crypto $crypto
      * @param ?string $secret = null
-     * @psalm-return JetFormsMailSendSettings|JetFormsCaptchaSettings|object
+     * @return JetFormsMailSendSettings|JetFormsCaptchaSettings|object
      */
     public static function withDecryptedValues(array $settings,
                                                Crypto $crypto,

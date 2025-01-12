@@ -15,8 +15,8 @@ use Sivujetti\Page\PagesRepository2;
 /**
  * Contains handlers for "/plugins/jet-forms/submissions/*".
  *
- * @psalm-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
- * @psalm-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @phpstan-import-type InputMeta from \SitePlugins\JetForms\BehaviourExecutorInterface
+ * @phpstan-import-type FormInputAnswer from \SitePlugins\JetForms\BehaviourExecutorInterface
  */
 final class SubmissionsController {
     private const NO_ANSWER = "- None provided";
@@ -152,7 +152,7 @@ final class SubmissionsController {
             : [null, null];
     }
     /**
-     * @psalm-return array<int, InputMeta>
+     * @return array<int, InputMeta>
      */
     private static function createInputsMeta(object $form): array {
         $out = [];
@@ -188,9 +188,9 @@ final class SubmissionsController {
         return $out;
     }
     /**
-     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @param array<int, InputMeta> $inputsMeta
      * @param object $reqBody
-     * @psalm-return array<int, FormInputAnswer>
+     * @return array<int, FormInputAnswer>
      */
     private static function createAnswers(array $inputsMeta, object $reqBody): array {
         $out = [];
@@ -204,7 +204,7 @@ final class SubmissionsController {
         return array_values($out);
     }
     /**
-     * @psalm-param InputMeta $meta
+     * @param InputMeta $meta
      * @param object $reqBody
      * @return string|array
      */
@@ -263,7 +263,7 @@ final class SubmissionsController {
     }
     /**
      * @param object $reqBody
-     * @psalm-param array<int, InputMeta> $inputsMeta
+     * @param array<int, InputMeta> $inputsMeta
      * @return string[] A list of error messages or []
      */
     private static function validateAnswers(object $reqBody, array $inputsMeta): array {
