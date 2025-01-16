@@ -5,7 +5,7 @@ namespace SitePlugins\JetStaticExp\Tests;
 use Pike\Auth\Crypto;
 use Pike\{FileSystem, Injector};
 use Pike\TestUtils\{MockCrypto};
-use Sivujetti\Template;
+use Sivujetti\{JsonUtils, Template};
 use Sivujetti\Tests\Utils\{PluginTestCase, TestEnvBootstrapper};
 use Sivujetti\Update\ZipPackageStream;
 
@@ -16,18 +16,17 @@ final class ExportSiteTest extends PluginTestCase {
     }
     protected function tearDown(): void {
         parent::tearDown();
-        $testZipPath = SIVUJETTI_INDEX_PATH . "public/" . (new MockCrypto)->genRandomToken(16) . ".zip";
-        if (is_file($testZipPath))
-            unlink($testZipPath);
+        if ($this->state->actuallyWrittenZipFilePath)
+            unlink($this->state->actuallyWrittenZipFilePath);
     }
     public function testExportSiteGeneratesZipIncludingPages(): void {
         $state = $this->setupTest();
         $this->insertTestPageDataToDb($state);
         $this->sendExportSiteRequest($state);
         $this->verifyRequestFinishedSuccesfully($state);
-        $expectedRelZipPath = "public/" . (new MockCrypto)->genRandomToken(16) . ".zip";
-        $this->verifyReturnedZipDetails($state, $expectedRelZipPath);
-        $this->verifyWroteRenderedPagesToZip($state, $expectedRelZipPath);
+        $expectedZipUrlRegexp = "/^\\/public\\/.+\\.zip\$/";
+        $this->verifyReturnedZipDetails($state, $expectedZipUrlRegexp);
+        $this->verifyWroteRenderedPagesToZip($state, $state->returnedZipUrl);
     }
     private function setupTest(): \TestState {
         $stateRef = $this->state;
@@ -37,8 +36,10 @@ final class ExportSiteTest extends PluginTestCase {
             "files" => [],
             "targetHost" => "https://foo.com",
             "targetBaseUrl" => "/",
-            "targetQueryVar" => "",
+            "addDicoveredPublicAssets" => false,
         ];
+        $stateRef->returnedZipUrl = null;
+        $stateRef->actuallyWrittenZipFilePath = null;
         return $stateRef;
     }
     private function sendExportSiteRequest(\TestState $state): void {
@@ -47,15 +48,16 @@ final class ExportSiteTest extends PluginTestCase {
             $this->createApiRequest("/plugins/jet-static-exp/exports/export", "POST",
                 $state->testInput));
     }
-    private function verifyReturnedZipDetails(\TestState $state, string $expectedRelZipPath): void {
-        $this->verifyResponseBodyEquals([
-            "ok" => "ok",
-            "resultFileUrl" => "/{$expectedRelZipPath}",
-        ], $state->spyingResponse);
+    private function verifyReturnedZipDetails(\TestState $state, string $expectedZipUrlRegexp): void {
+        $actual = JsonUtils::parse($state->spyingResponse->getActualBody());
+        $this->assertEquals("ok", $actual->ok);
+        $this->assertMatchesRegularExpression($expectedZipUrlRegexp, $actual->resultFileUrl);
+        $state->returnedZipUrl = $actual->resultFileUrl;
     }
-    private function verifyWroteRenderedPagesToZip(\TestState $state, string $testZipPath): void {
-        $actuallyWrittenZipFilePath = SIVUJETTI_INDEX_PATH . $testZipPath;
+    private function verifyWroteRenderedPagesToZip(\TestState $state, string $testZipUrl): void {
+        $actuallyWrittenZipFilePath = SIVUJETTI_INDEX_PATH . $testZipUrl;
         $this->assertFileExists($actuallyWrittenZipFilePath);
+        $state->actuallyWrittenZipFilePath = $actuallyWrittenZipFilePath;
         $zip = new ZipPackageStream(new FileSystem);
         $zip->open($actuallyWrittenZipFilePath);
         $slug1NoSlash = ltrim($state->testInput->pages[0], "/");

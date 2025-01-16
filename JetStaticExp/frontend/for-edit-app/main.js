@@ -12,7 +12,10 @@ setTimeout(() => {
     margin-bottom: 2rem;
 }
 form.static-exp-form .fieldset > .legend + div {
-    padding: .0rem .4rem .3rem .4rem !important;
+    padding: .0rem .4rem .3rem .4rem;
+    max-height: 12.9rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }`
     );
     document.head.appendChild(el);

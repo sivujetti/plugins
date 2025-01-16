@@ -5,11 +5,21 @@ namespace SitePlugins\JetStaticExp;
 use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
+/**
+ * @phpstan-import-type UserDefinedAssets from \Sivujetti\SharedAPIContext
+ *
+ * @phpstan-type ExportedItem array{html: string, relFilePath: string, enqueuedFiles: UserDefinedAssets}
+ */
 final class JetStaticExp implements UserPluginInterface {
     /**
      * @inheritdoc
      */
     public function __construct(UserPluginAPI $api) {
+        $api->registerHttpRoute("GET", "/plugins/jet-static-exp/exports/exportable-public-files",
+            ExportsController::class, "listExportablePublicFiles",
+            ["consumes" => "application/json",
+             "identifiedBy" => ["exportAsStatic", "sites"]]
+        );
         $api->registerHttpRoute("POST", "/plugins/jet-static-exp/exports/export",
             ExportsController::class, "exportSite",
             ["consumes" => "application/json",
