@@ -164,7 +164,7 @@ final class SettingsController {
     }
     /**
      * @param object $input
-     * @return string[] Error messages or []
+     * @return list<string> Error messages or []
      */
     private static function validateUpdateMailSendSettingsInput(object $input): array {
         return Validation::makeObjectValidator()
@@ -178,7 +178,7 @@ final class SettingsController {
     }
     /**
      * @param object $input
-     * @return string[] Error messages or []
+     * @return list<string> Error messages or []
      */
     private static function validateCaptchaSettingsInput(object $input): array {
         return Validation::makeObjectValidator()

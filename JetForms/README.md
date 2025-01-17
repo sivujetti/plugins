@@ -40,7 +40,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use SitePlugins\JetForms\JetForms;
 
 /**
- * @psalm-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
+ * @phpstan-import-type JetFormsMailSendSettings from \SitePlugins\JetForms\JetForms
  */
 class Site implements UserSiteInterface {
 ...
@@ -54,7 +54,7 @@ class Site implements UserSiteInterface {
             $api->on($jetForms::ON_MAILER_CONFIGURE,
             /**
              * @param \PHPMailer\PHPMailer\PHPMailer $mailer
-             * @psalm-param JetFormsMailSendSettings $alreadyAppliedSettings
+             * @param JetFormsMailSendSettings $alreadyAppliedSettings
              */
             function (PHPMailer $mailer, array $alreadyAppliedSettings) {
                 // You can mutate $mailer here with some custom stuff.

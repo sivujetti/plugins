@@ -54,7 +54,7 @@ final class StoreSubmissionToLocalDbBehaviour implements BehaviourExecutorInterf
     }
     /**
      * @param bool $decrypt = true
-     * @return array<int, SubmissionInfo>
+     * @return list<SubmissionInfo>
      */
     public function getSubmissions(bool $decrypt = true): array {
         $subs = $this->storage->find("JetForms:submissions")->fetchAll();

@@ -10,8 +10,10 @@ use Sivujetti\Page\Entities\Page;
 use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 
 /**
+ * @phpstan-import-type ExportedItem from \SitePlugins\JetStaticExp\JetStaticExp
+ *
  * @phpstan-type JetFormsMailSendSettings array{sendingMethod: string, SMTP_host?: string, SMTP_port?: string, SMTP_username?: string, SMTP_password?: string, SMTP_secureProtocol?: string}
- * @phpstan-type JetFormsCaptchaSettings array{settings: array<int, array{name: string, minFormFillTime?: int, siteKey?: string, secretKey?: string, minScore?: float}>}
+ * @phpstan-type JetFormsCaptchaSettings array{settings: list<array{name: string, minFormFillTime?: int, siteKey?: string, secretKey?: string, minScore?: float}>}
  */
 final class JetForms implements UserPluginInterface {
     /* fn(\PhpMailer\PhpMailer\PhpMailer $mailer): void */
@@ -20,9 +22,9 @@ final class JetForms implements UserPluginInterface {
     public static ?\Closure $logFn = null;
     /** @var array<string, class-string> e.g. SendMail, SubsribeToNewsletter, CopyMessageToLocalDb */
     private array $behaviourExecutors = [];
-    /** @var class-string[] */
+    /** @var list<<class-string> */
     private array $captchaImplClses = ["jet-captcha" => JetCaptcha::class, "grecaptcha" => ReCaptcha::class];
-    /** @var \SitePlugins\JetForms\Captcha\AbstractCaptchaImpl[] */
+    /** @var list<\SitePlugins\JetForms\Captcha\AbstractCaptchaImpl> */
     private array $captchaInstances = [];
     /** @var \SitePlugins\JetForms\Captcha\CaptchaSettings */
     private ?CaptchaSettings $captchaSettings = null;
@@ -153,8 +155,8 @@ final class JetForms implements UserPluginInterface {
         return $this->captchaInstances[$name];
     }
     /**
-     * @param \Sivujetti\Block\Entities\Block[] $forms
-     * @return string[]
+     * @param list<\Sivujetti\Block\Entities\Block> $forms
+     * @return list<string>
      */
     private static function getUsedCaptchasDistinct(array $forms): array {
         $names = [];
@@ -165,8 +167,8 @@ final class JetForms implements UserPluginInterface {
         return array_unique($names);
     }
     /**
-     * @param string[] $names
-     * @return string[]
+     * @param list<string> $names
+     * @return list<string>
      */
     private function createCaptchaJsFileQueue(array $names): array {
         $out = [];

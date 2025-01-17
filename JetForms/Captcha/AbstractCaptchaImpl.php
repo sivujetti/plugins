@@ -25,7 +25,7 @@ abstract class AbstractCaptchaImpl {
         $this->logFn = $logFn;
     }
     /**
-     * @return string[]
+     * @return list<string>
      */
     public abstract function enqueueableJsFiles(): array;
     /**

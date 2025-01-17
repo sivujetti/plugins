@@ -116,7 +116,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
     }
     /**
      * @param string $tmpl The template defined by the site developer
-     * @param array<int, FormInputAnswer> $answers
+     * @param list<FormInputAnswer> $answers
      * @return string
      */
     private static function renderDynamicTags(string $tmpl, array $answers): string {
@@ -125,7 +125,7 @@ final class SendMailBehaviour implements BehaviourExecutorInterface {
         return $tmpl;
     }
     /**
-     * @param array<int, FormInputAnswer> $answers
+     * @param list<FormInputAnswer> $answers
      * @return string
      */
     private static function renderResultsAll(array $answers): string {

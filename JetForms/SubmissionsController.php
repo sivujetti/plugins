@@ -141,7 +141,7 @@ final class SubmissionsController {
      * @param string $blockId
      * @param string $globalBlockTreeId
      * @param \Sivujetti\GlobalBlockTree\GlobalBlockTreesRepository2 $gbtRepo
-     * @return array{0: \Sivujetti\Block\Entities\Block|null, 1: array<int, \Sivujetti\Block\Entities\Block>|null}
+     * @return array{0: \Sivujetti\Block\Entities\Block|null, 1: list<\Sivujetti\Block\Entities\Block>|null}
      */
     private static function findFormFromGbt(string $blockId,
                                             string $globalBlockTreeId,
@@ -152,7 +152,7 @@ final class SubmissionsController {
             : [null, null];
     }
     /**
-     * @return array<int, InputMeta>
+     * @return list<InputMeta>
      */
     private static function createInputsMeta(object $form): array {
         $out = [];
@@ -188,9 +188,9 @@ final class SubmissionsController {
         return $out;
     }
     /**
-     * @param array<int, InputMeta> $inputsMeta
+     * @param list<InputMeta> $inputsMeta
      * @param object $reqBody
-     * @return array<int, FormInputAnswer>
+     * @return list<FormInputAnswer>
      */
     private static function createAnswers(array $inputsMeta, object $reqBody): array {
         $out = [];
@@ -241,7 +241,7 @@ final class SubmissionsController {
     /**
      * @param array $behaviours $block->behaviours
      * @param \SitePlugins\JetForms\JetForms $plugin
-     * @return class-string[]
+     * @return list<class-string>
      * @throws \Pike\PikeException
      */
     private static function createValidBehaviourClsStrings(array $behaviours, JetForms $plugin): array {
@@ -263,8 +263,8 @@ final class SubmissionsController {
     }
     /**
      * @param object $reqBody
-     * @param array<int, InputMeta> $inputsMeta
-     * @return string[] A list of error messages or []
+     * @param list<InputMeta> $inputsMeta
+     * @return list<string> A list of error messages or []
      */
     private static function validateAnswers(object $reqBody, array $inputsMeta): array {
         $v = Validation::makeObjectValidator();
@@ -275,7 +275,7 @@ final class SubmissionsController {
             }
             $isSelect = $meta["type"] === SelectInputBlockType::NAME;
             if ($isSelect || $meta["type"] === RadioGroupInputBlockType::NAME) {
-                $defs = $meta["details"][$isSelect ? "options" : "radios"]; // array<int, {text: string, value: string}>
+                $defs = $meta["details"][$isSelect ? "options" : "radios"]; // list<{text: string, value: string}>
                 $validValues = [...array_map(fn($d) => $d->value, $defs), "-"];
                 if (!$isSelect || !$meta["details"]["multiple"]) {
                     $propPath = $meta["name"] . (!$isSelect && !$meta["isRequired"] ? "?" : "");
@@ -294,7 +294,7 @@ final class SubmissionsController {
     }
     /**
      * @param object $input
-     * @return string[] Error messages or []
+     * @return list<string> Error messages or []
      */
     private static function validateSubmissionInput(object $input): array {
         return Validation::makeObjectValidator()
