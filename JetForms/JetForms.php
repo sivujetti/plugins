@@ -2,7 +2,7 @@
 
 namespace SitePlugins\JetForms;
 
-use Pike\PikeException;
+use Pike\{ArrayUtils, PikeException};
 use SitePlugins\JetForms\Captcha\{AbstractCaptchaImpl, CaptchaSettings, CaptchaSettingsDataFetcher, JetCaptcha, ReCaptcha};
 use Sivujetti\Auth\{ACL, ACLRulesBuilder};
 use Sivujetti\Block\BlockTree;
@@ -82,6 +82,9 @@ final class JetForms implements UserPluginInterface {
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-lang-{$api->getCurrentLang()}.js");
             $api->enqueueEditAppJsFile("plugin-jet-forms-edit-app-bundle.js");
             $api->enqueuePreviewAppJsFile("plugin-jet-forms-webpage-preview-renderer-app-bundle.js");
+            //
+            if ($api->getPlugin("JetStaticExp"))
+                $api->filter("JetStaticExp:renderedPage", self::patchStaticExportItem(...));
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
             $forms = BlockTree::filterBlocks($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME);
@@ -195,5 +198,38 @@ final class JetForms implements UserPluginInterface {
             throw new PikeException("{$kind} (\"{$ImplClass}\") must implement {$interface}",
                                     PikeException::BAD_INPUT);
         $bucket[$name] = $ImplClass;
+    }
+    /**
+     * @param ExportedItem $page
+     * @return ExportedItem
+     */
+    private static function patchStaticExportItem(array $page): array {
+        $pageContainsContactForm = ArrayUtils::findIndexByKey($page["enqueuedFiles"]->js, "plugin-jet-forms-bundle.js", "url") > -1;
+        if (!$pageContainsContactForm) return $page;
+        return [
+            ...$page,
+            "html" => preg_replace(
+                "/" .
+                    // `<script src="[^"]+public/sivujetti/vendor/pristine\.[^"]+"></script>`
+                    "<script src=\"[^\"]+".preg_quote("public/sivujetti/vendor/pristine.","/")."[^\"]+\"><\\/script>" .
+                    "|" .
+                    // `<script src="[^"]+public/plugin-jet-forms-[^"]+"></script>`
+                    "<script src=\"[^\"]+".preg_quote("public/plugin-jet-forms-","/")."[^\"]+\"><\\/script>" .
+                "/",
+                "",
+                preg_replace(
+                    "/action=\"[^\"]+".preg_quote("plugins/jet-forms/submissions/","/")."[^\"]+\"/",
+                    "action=\"#\" onsubmit=\"event.preventDefault()\"",
+                    $page["html"]
+                )
+            ),
+            "enqueuedFiles" => (object) [
+                "css" => $page["enqueuedFiles"]->css,
+                "js" => array_values(array_filter($page["enqueuedFiles"]->js, fn(object $file) =>
+                    !($file->url === "sivujetti/vendor/pristine.min.js" ||
+                    str_starts_with($file->url, "plugin-jet-forms-"))
+                )),
+            ],
+        ];
     }
 }
