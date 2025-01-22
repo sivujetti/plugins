@@ -1,4 +1,4 @@
-import {__, api, floatingDialog, MenuSection, Icon} from '@sivujetti-commons-for-edit-app';
+import {__, api, floatingDialog, MenuSection, Icon, PathIcon} from '@sivujetti-commons-for-edit-app';
 import CaptchaDataEditDialog from './Settings/CaptchaDataEditDialog.jsx';
 import MailSendSettingsManageDialog from './Settings/MailSendSettingsManageDialog.jsx';
 import SubmissionsBrowseDialog from './Submission/SubmissionsBrowseDialog.jsx';
@@ -17,22 +17,13 @@ class EditAppLeftColumnSection extends preact.Component {
                 { api.user.getRole() <= api.user.ROLE_EDITOR
                     ? [
                         createLink(SubmissionsBrowseDialog, 'Browse submissions', 'browse-submissions', 'message-2'),
-                        createLink(CaptchaDataEditDialog, 'Edit captcha settings', 'edit-captcha-settings', <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="icon-tabler size-sm color-purple color-saturated"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            style="stroke-width: 2">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M9 12l2 2l4 -4"></path>
-                                <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"></path>
-                        </svg>)
+                        createLink(CaptchaDataEditDialog, 'Edit captcha settings', 'edit-captcha-settings',
+                            <PathIcon className="size-sm color-purple color-saturated">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M9 12l2 2l4 -4"/>
+                                <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/>
+                            </PathIcon>
+                        )
                     ]
                     : null
                 }

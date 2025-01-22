@@ -14,11 +14,11 @@ class IconBlockRenderer extends preact.Component {
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
-                    strokeWidth="2"
+                    stroke-width="2"
                     stroke="currentColor"
                     fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                     dangerouslySetInnerHTML={ {__html: block.cachedInlineSvg} }></svg>
                 : <span
                     title={ __('Waits for configuration ...') }
