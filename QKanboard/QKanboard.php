@@ -9,6 +9,7 @@ use Sivujetti\UserPlugin\{UserPluginAPI, UserPluginInterface};
 final class QKanboard implements UserPluginInterface {
     public const TASK_STATUS_ACTIVE = 1;
     public const TASK_STATUS_INACTIVE = 0;
+    public const TASK_COLUMN_BACKLOG = 1;
     public const TASK_COLUMN_IN_PROGRESS = 3;
     public const TASK_COLUMN_DONE = 4;
     /**

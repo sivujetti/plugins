@@ -52,7 +52,7 @@ final class TasksListingBlockType implements BlockTypeInterface,
                 el("li", [], [
                     el("a", ["href" => $tmpl->url("/kehitysidea?taskId={$task->id}")], $task->title),
                     self::createTagVNodes($task->tags),
-                    el("div", null, "#{$task->id} luotu " . self::secondsToRelative($task->createdAt)),
+                    el("div", null, "#{$task->id} luotu " . self::secondsToRelative($task->createdAt, lang: "fi")),
                 ])
             , $this->tasks),
             ...$renderChildren()
@@ -89,12 +89,13 @@ final class TasksListingBlockType implements BlockTypeInterface,
                 "query" => "column:{$phase}",
             ]);
         else
-            $data = $dataFetcher->callApi("getAllTasks", (object) [
+            $data = $dataFetcher->callApi("searchTasks", (object) [
                 "project_id" => $params->projectId,
-                "status_id" => (int) $req->queryVar("closed") ?? QKanboard::TASK_STATUS_ACTIVE,
+                "query" => "status:" . ($req->queryVar("closed") !== "0" ? "open" : "closed"),
             ]);
 
         $tasks = $dataFetcher->createTasksFrom($data->result);
+        usort($tasks, fn(object $a, object $b) => $b->createdAt <=> $a->createdAt);
         foreach ($tasks as $i => $task)
             $tasks[$i]->tags = $dataFetcher->fetchAndCreateTags($task->id);
         $this->tasks = $tasks;

@@ -75,6 +75,7 @@ final class TaskPageProcessorBlockType implements BlockTypeInterface,
         $statusTextBlock = $textBlocks[4];
         $str = $statusTextBlock->html;
         $str = nl2br($doRep("status", $task->status === 0 ? "Suljettu" : match ($task->columnId) {
+            QKanboard::TASK_COLUMN_BACKLOG => "Avoin",
             QKanboard::TASK_COLUMN_IN_PROGRESS => "Työn alla",
             QKanboard::TASK_COLUMN_DONE => "Valmis",
             default => "-",
@@ -84,7 +85,7 @@ final class TaskPageProcessorBlockType implements BlockTypeInterface,
         // Created at
         $createAtTextBlock = $textBlocks[6];
         $str = $createAtTextBlock->html;
-        $str = nl2br($doRep("createdAt", date("M d Y", $task->createdAt), $str));
+        $str = nl2br($doRep("createdAt", TasksListingBlockType::secondsToRelative($task->createdAt, lang: "fi"), $str));
         $createAtTextBlock->html = $str;
 
         // Tags

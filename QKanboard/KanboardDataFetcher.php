@@ -58,6 +58,7 @@ class KanboardDataFetcher {
             "createdAt" => $from->date_creation,
             "tags" => $from->tags ?? [],
             "description" => $from->description,
+            "columnId" => $from->column_id,
             "status" => $from->is_active ? 1 : 0,
         ];
     }
