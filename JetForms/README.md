@@ -8,9 +8,10 @@ Temporary manual steps.
 
 ## Setup the database
 
-```
-
-INSERT INTO `storedObjects` (`objectName`,`data`) VALUES ('JetForms:mailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}');
+```sql
+INSERT INTO `storedObjects` (`objectName`,`data`) VALUES
+('JetForms:mailSendSettings','{"sendingMethod":"mail","SMTP_host":null,"SMTP_port":null,"SMTP_username":null,"SMTP_password":null,"SMTP_secureProtocol":null}'),
+('JetForms:captchaData', '{"settings":[{"name":"jet-captcha","minFormFillTime":2},{"name":"grecaptcha","siteKey":"","secretKey":"","minScore":0.5}]}')
 ```
 
 ## Copy validation lib to public directory

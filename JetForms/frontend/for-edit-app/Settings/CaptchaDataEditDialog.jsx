@@ -1,5 +1,6 @@
 import {
     __,
+    api,
     env,
     FormGroupInline,
     handleSubmit,
@@ -117,7 +118,7 @@ class CaptchaDataEditDialog extends preact.Component {
                 <button
                     class={ `btn btn-primary mr-2${formIsSubmittingClass}` }
                     type="submit"
-                    disabled={ hasErrors(this) }>{ __('Save settings') }</button>
+                    disabled={ hasErrors(this) }>{ __('Save %s', __('settings')) }</button>
                 <button
                     onClick={ () => this.props.floatingDialog.close() }
                     class="btn btn-link"
@@ -188,8 +189,13 @@ class CaptchaDataEditDialog extends preact.Component {
         };
         return http.put('/plugins/jet-forms/settings/captchaData', data)
             .then(resp => {
-                if (resp.ok !== 'ok') throw new Error;
-                this.props.floatingDialog.close();
+                if (resp.ok === 'ok') {
+                    api.toasters.editAppMain(__('%s updated', __('Captcha settings')), 'success');
+                    this.props.floatingDialog.close();
+                } else {
+                    env.window.console.error(resp);
+                    api.toasters.editAppMain(__('Failed to update %s', __('Captcha settings#genetive').toLowerCase()), 'error');
+                }
             });
     }
 }

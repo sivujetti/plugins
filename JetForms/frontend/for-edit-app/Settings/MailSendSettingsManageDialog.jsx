@@ -1,5 +1,18 @@
-import {__, http, env, LoadingSpinner, hookForm, unhookForm, FormGroupInline, Input,
-        InputErrors, handleSubmit, Icon, validationConstraints} from '@sivujetti-commons-for-edit-app';
+import {
+    __,
+    api,
+    env,
+    FormGroupInline,
+    handleSubmit,
+    hookForm,
+    http,
+    Icon,
+    Input,
+    InputErrors,
+    LoadingSpinner,
+    unhookForm,
+    validationConstraints,
+} from '@sivujetti-commons-for-edit-app';
 
 class MailSendSettingsManageDialog extends preact.Component {
     /**
@@ -106,7 +119,7 @@ class MailSendSettingsManageDialog extends preact.Component {
             <div class="mt-8">
                 <button
                     class={ `btn btn-primary mr-2${formIsSubmittingClass}` }
-                    type="submit">{ __('Save send mail settings') }</button>
+                    type="submit">{ __('Save %s', __('Send mail settings').toLowerCase()) }</button>
                 <button
                     onClick={ () => this.props.floatingDialog.close() }
                     class="btn btn-link"
@@ -126,24 +139,27 @@ class MailSendSettingsManageDialog extends preact.Component {
      * @access private
      */
     saveSettingsToBacked() {
-        const mailSendSettings = Object.assign(
-            {
-                sendingMethod: this.state.sendingMethod,
-                SMTP_secureProtocol: this.state.SMTP_secureProtocol,
-            },
-            this.state.sendingMethod === 'mail'
+        const mailSendSettings = {
+            sendingMethod: this.state.sendingMethod,
+            SMTP_secureProtocol: this.state.SMTP_secureProtocol,
+            ...(this.state.sendingMethod === 'mail'
                 ? {
                     SMTP_host: '',
                     SMTP_port: '',
                     SMTP_username: '',
                     SMTP_password: '',
                 }
-                : this.state.values
-        );
+                : this.state.values)
+        };
         return http.put('/plugins/jet-forms/settings/mailSendSettings', mailSendSettings)
             .then(resp => {
-                if (resp.ok !== 'ok') throw new Error;
-                this.props.floatingDialog.close();
+                if (resp.ok === 'ok') {
+                    api.toasters.editAppMain(__('%s updated', __('Send mail settings')), 'success');
+                    this.props.floatingDialog.close();
+                } else {
+                    env.window.console.error(resp);
+                    api.toasters.editAppMain(__('Failed to update %s', __('Send mail settings#genetive').toLowerCase()), 'error');
+                }
             });
     }
 }

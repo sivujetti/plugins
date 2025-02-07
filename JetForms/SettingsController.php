@@ -67,7 +67,7 @@ final class SettingsController {
             "SMTP_secureProtocol" => $req->body->SMTP_secureProtocol ?? null,
         ])->execute();
         //
-        $res->json((object) ["ok" => $numRows === 1 ? "ok" : "err"]);
+        $res->json((object) ["ok" => "ok", "numAffectedRows" => $numRows]);
     }
     /**
      * GET /plugins/jet-forms/settings/captchaData: Returns captcha settings
@@ -132,7 +132,7 @@ final class SettingsController {
             ],
         ]])->execute();
         //
-        $res->json((object) ["ok" => $numRows === 1 ? "ok" : "err"]);
+        $res->json((object) ["ok" => "ok", "numAffectedRows" => $numRows]);
     }
     /**
      * @param JetFormsMailSendSettings|JetFormsCaptchaSettings|object $settings

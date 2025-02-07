@@ -16,7 +16,11 @@ api.registerTranslationStrings({
     'Failed to fetch settings.': 'Asetusten hakeminen epäonnistui.',
     'In this view, you can edit the general captcha settings for your site.': 'Tässä näkymässä voit muokata sivustosi yleisiä captcha-asetuksia.',
     'Clear': 'Tyhjennä',
-    'Save settings': 'Tallenna asetukset',
+    'Save %s': 'Tallenna %s',
+    'settings': 'asetukset',
+    'Captcha settings': 'Captcha-asetukset',
+    'Failed to update %s': '%s päivitys epäonnistui',
+    'Captcha settings#genetive': 'Captcha-asetusten',
     // Settings/MailSendSettingsManageDialog.jsx
     'Host': 'Hosti',
     'Port': 'Portti',
@@ -27,7 +31,8 @@ api.registerTranslationStrings({
     'jetFormsTodo2': 'Käytä webhotellisi oletussähköpostiserveriasetuksia.',
     'jetFormsTodo3': 'Käytä SMTP-palveluntarjoajaa (esim. Office 365, Gmail, tai webhotellisi oma järjestelmä).',
     'Encryption': 'Salaus',
-    'Save send mail settings': 'Tallenna sähköpostin lähetysasetukset',
+    'Send mail settings': 'Sähköpostin lähetysasetukset',
+    'Send mail settings#genetive': 'Sähköpostin lähetysasetusten',
     // Submission/SubmissionsBrowseDialog.jsx
     'Sent from': 'Lähetetty sivulta',
     'Sent at': 'Ajankohta',
