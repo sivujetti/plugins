@@ -87,7 +87,7 @@ final class JetForms implements UserPluginInterface {
                 $api->filter("JetStaticExp:renderedPage", self::patchStaticExportItem(...));
         });
         $api->on($api::ON_PAGE_BEFORE_RENDER, function (Page $page) use ($api) {
-            ["blocks" => $forms] = self::filterBlocks2($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME);
+            $forms = BlockTree::filterBlocks($page->blocks, fn($b) => $b->type === ContactFormBlockType::NAME);
             if (!$forms)
                 return;
             if (!$api->isJsFileEnqueued("sivujetti/vendor/pristine.min.js"))
@@ -231,28 +231,5 @@ final class JetForms implements UserPluginInterface {
                 )),
             ],
         ];
-    }
-    private static function filterBlocks2(array $branch, callable $predicate, ?object $tree = null): array {
-        $out = [
-            "blocks" => [],
-            "trees" => [],
-        ];
-        $treeNorm = $tree ?? (object) ["id" => "main", "blocks" => $branch];
-        foreach ($branch as $block) {
-            if (call_user_func($predicate, $block)) {
-                $out["blocks"][] = $block;
-                $out["trees"][] = $treeNorm;
-            }
-            $sub = $block->type !== "GlobalBlockReference" ? $block->children : $block->__globalBlockTree?->blocks ?? [];
-            if ($sub) {
-                $tree2 = $block->type !== "GlobalBlockReference" ? $treeNorm : $block->__globalBlockTree;
-                $subArr = self::filterBlocks2($sub, $predicate, $tree2);
-                if ($subArr["blocks"]) {
-                    $out["blocks"] = [...$out["blocks"], ...$subArr["blocks"]];
-                    $out["trees"] = [...$out["trees"], ...$subArr["trees"]];
-                }
-            }
-        }
-        return $out;
     }
 }

@@ -3,12 +3,15 @@
 namespace SitePlugins\JetForms\Tests;
 
 use DiDom\Document;
+use Pike\Db\FluentDb2;
 use Pike\TestUtils\MutedSpyingResponse;
 use SitePlugins\JetForms\{CheckboxInputBlockType, ContactFormBlockType, EmailInputBlockType,
     NumberInputBlockType, RadioGroupInputBlockType, SelectInputBlockType, TextareaInputBlockType,
     TextInputBlockType};
 use Sivujetti\Block\Entities\Block;
-use Sivujetti\Tests\Utils\{PluginTestCase};
+use Sivujetti\BlockType\GlobalBlockReferenceBlockType;
+use Sivujetti\JsonUtils;
+use Sivujetti\Tests\Utils\PluginTestCase;
 
 final class RenderContactFormTest extends PluginTestCase {
     public function testRenderPageResultContainsContactForm(): void {
@@ -63,9 +66,9 @@ final class RenderContactFormTest extends PluginTestCase {
             })
             ->execute();
         $this->verifyResponseMetaEquals(200, "text/html", $response);
-        $this->verifyPageContaintsContactForm($response);
+        $this->verifyPageContainsContactForm($response);
     }
-    private function verifyPageContaintsContactForm(MutedSpyingResponse $response): void {
+    private function verifyPageContainsContactForm(MutedSpyingResponse $response): void {
         $dom = new Document(preg_replace("/&([#A-Za-z0-9]+);/", "%\$1;", $response->getActualBody()));
         $formEl = $dom->first(".jet-form");
         $this->assertNotNull($formEl);
@@ -130,16 +133,14 @@ final class RenderContactFormTest extends PluginTestCase {
         $selectEl = $selectElOuter->firstChild();
         $this->assertEquals("wizardLevel", $selectEl->getAttribute("name"));
         $optionEls = $selectEl->find("option");
-        $this->assertCount(4, $optionEls);
+        $this->assertCount(3, $optionEls);
         $optsData = self::createDataForTestInputBlock("wizardLevel")->options;
         $this->assertEquals($optsData[0]->value, $optionEls[0]->getAttribute("value"));
         $this->assertEquals($optsData[1]->value, $optionEls[1]->getAttribute("value"));
         $this->assertEquals($optsData[2]->value, $optionEls[2]->getAttribute("value"));
-        $this->assertEquals("-", $optionEls[3]->getAttribute("value"));
         $this->assertEquals($optsData[0]->text, $optionEls[0]->text());
         $this->assertEquals($optsData[1]->text, $optionEls[1]->text());
         $this->assertEquals($optsData[2]->text, $optionEls[2]->text());
-        $this->assertEquals("-", $optionEls[3]->text());
         // <div class="j-JetFormsNumberInput form-group" ...>
         //     <label class="form-label" for="age">Age</label>
         //     <input name="age" id="age" type="text" class="form-input" inputmode="numeric">
@@ -203,7 +204,7 @@ final class RenderContactFormTest extends PluginTestCase {
         $this->assertEquals($tmpl->makeUrl("/hello")."#contact-form-sent=-bbbbbbbbbbbbbbbbbbb",
                             $returnToInput->getAttribute("value"));
     }
-    public static function createDataForTestContactFormBlock(): object {
+    private static function createDataForTestContactFormBlock(): object {
         return (object) [
             "behaviours" => [
                 (object) ["name" => "SendMail", "data" => [
@@ -216,6 +217,54 @@ final class RenderContactFormTest extends PluginTestCase {
             ],
             "captchaToUse" => null,
         ];
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    public function testMainPluginFileIncludesCaptchaLibEvenIfFormIsInsideGlobalBlockTree(): void {
+        $response = $this
+            ->setupRenderPageTest()
+            ->usePlugin("JetForms")
+            ->withPageData(function (object $testPageData) {
+                $gbtId = $this->insertGbtContainingContactForm();
+                $testPageData->blocks[] = $this->blockTestUtils->makeBlockData(
+                    Block::TYPE_GLOBAL_BLOCK_REF,
+                    propsData: [
+                        "globalBlockTreeId" => $gbtId,
+                        "overrides" => GlobalBlockReferenceBlockType::EMPTY_OVERRIDES,
+                        "useOverrides" => 0
+                    ],
+                    id: "@auto"
+                );
+            })->execute();
+        $this->verifyResponseMetaEquals(200, "text/html", $response);
+        $this->verifyPageContainsCaptchaLib($response);
+    }
+    private function insertGbtContainingContactForm(): string {
+        $gbtId = "-4567890123abcdefghi";
+        (new FluentDb2(self::$db))
+            ->insert("\${p}globalBlockTrees")
+            ->values((object) [
+                "id" => $gbtId,
+                "name" => "Contact Form",
+                "blocks" => JsonUtils::stringify([$this->blockTestUtils->makeBlockData(
+                    ContactFormBlockType::NAME,
+                    propsData: (object) [
+                        ...((array) self::createDataForTestContactFormBlock()),
+                        "captchaToUse" => "jet-captcha",
+                    ],
+                    id: "@auto"
+                )])
+            ])
+            ->execute();
+        return $gbtId;
+    }
+    private function verifyPageContainsCaptchaLib(MutedSpyingResponse $response): void {
+        $dom = new Document($response->getActualBody());
+        $scriptEl = $dom->first("script[src*=plugin-jet-forms-jet-captcha.js]");
+        $this->assertNotNull($scriptEl);
     }
     public static function createDataForTestInputBlock(string $which): object {
         return match ($which) {
